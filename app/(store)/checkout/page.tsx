@@ -119,20 +119,20 @@ function CheckoutForm() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <Reveal className="mb-8">
-        <h1 className="font-serif text-2xl tracking-wide text-foreground md:text-3xl">
+    <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
+      <Reveal className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-xl tracking-wide text-foreground sm:text-2xl md:text-3xl">
           {t.yourOrder}
         </h1>
       </Reveal>
 
-      <div className="grid gap-8 lg:grid-cols-5">
-        <div className="lg:col-span-3 space-y-4">
+      <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
+        <div className="lg:col-span-3 space-y-3 sm:space-y-4">
           <p className={storeSectionCls}>{t.cart}</p>
           {items.map((item) => (
             <div
               key={`${item.productId}-${item.size}`}
-              className="flex gap-4 rounded-2xl border border-border bg-card p-4"
+              className="flex gap-3 rounded-2xl border border-border bg-card p-3 sm:gap-4 sm:p-4"
             >
               {item.imageUrl && (
                 <img
@@ -141,35 +141,37 @@ function CheckoutForm() {
                   className="h-20 w-16 shrink-0 object-cover"
                 />
               )}
-              <div className="flex flex-1 flex-col justify-between">
-                <div>
-                  <p className="text-[10px] tracking-widest text-primary">
+              <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-[10px] tracking-widest text-primary">
                     {item.productBrand.toUpperCase()}
                   </p>
-                  <p className="text-sm font-light text-foreground">{item.productName}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{item.productName}</p>
                   <p className="text-[11px] text-muted-foreground">{item.size}</p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 border border-border">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center border border-border">
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)}
-                      className="px-3 py-1 text-muted-foreground transition-colors hover:text-primary"
+                      aria-label="−"
+                      className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground transition-colors hover:text-primary"
                     >
                       &minus;
                     </button>
-                    <span className="min-w-5 text-center text-sm font-light text-foreground">
+                    <span className="min-w-6 text-center text-sm font-medium text-foreground">
                       {item.quantity}
                     </span>
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)}
-                      className="px-3 py-1 text-muted-foreground transition-colors hover:text-primary"
+                      aria-label="+"
+                      className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground transition-colors hover:text-primary"
                     >
                       +
                     </button>
                   </div>
-                  <p className="text-sm font-light text-foreground">
+                  <p className="shrink-0 text-sm font-medium tabular-nums text-foreground">
                     {formatPriceTnd(item.price * item.quantity, locale)} {currency}
                   </p>
                 </div>
@@ -177,7 +179,8 @@ function CheckoutForm() {
               <button
                 type="button"
                 onClick={() => removeItem(item.productId, item.size)}
-                className="self-start text-border transition-colors hover:text-destructive"
+                aria-label="Remove"
+                className="flex min-h-11 min-w-9 shrink-0 items-start justify-center self-start pt-1 text-border transition-colors hover:text-destructive"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -186,7 +189,7 @@ function CheckoutForm() {
             </div>
           ))}
 
-          <div className="mt-6 rounded-2xl border-2 border-primary/20 bg-card p-6">
+          <div className="mt-4 rounded-2xl border-2 border-primary/20 bg-card p-4 sm:mt-6 sm:p-6">
             <p className={storeSectionCls}>{t.receptionMode}</p>
             <div className="rounded-xl border-2 border-primary bg-primary/15 p-4 ring-2 ring-primary/25">
               <span className="text-sm font-semibold text-foreground">{t.delivery}</span>
@@ -200,10 +203,10 @@ function CheckoutForm() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="lg:col-span-2 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="lg:col-span-2 space-y-5 sm:space-y-6">
           <input type="hidden" {...register('orderType')} value="delivery" />
 
-          <div className="rounded-2xl border-2 border-primary/20 bg-card p-6">
+          <div className="rounded-2xl border-2 border-primary/20 bg-card p-4 sm:p-6">
             <p className={storeSectionCls}>{t.details}</p>
             <div className="space-y-5">
               <div>
@@ -213,6 +216,7 @@ function CheckoutForm() {
                 <input
                   type="text"
                   placeholder={t.namePlaceholder}
+                  autoComplete="name"
                   className={errors.customerName ? storeInputErrorCls : storeInputCls}
                   {...register('customerName')}
                 />
@@ -224,6 +228,8 @@ function CheckoutForm() {
                 </label>
                 <input
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   placeholder={t.phonePlaceholder}
                   className={errors.customerPhone ? storeInputErrorCls : storeInputCls}
                   {...register('customerPhone')}
@@ -256,6 +262,7 @@ function CheckoutForm() {
                 <textarea
                   rows={3}
                   placeholder={t.addressPlaceholder}
+                  autoComplete="street-address"
                   className={`${errors.customerAddress ? storeInputErrorCls : storeInputCls} resize-none`}
                   {...register('customerAddress')}
                 />
@@ -274,7 +281,7 @@ function CheckoutForm() {
             </div>
           </div>
 
-          <div className="space-y-3 rounded-2xl border-2 border-primary/20 bg-secondary/40 p-6">
+          <div className="space-y-3 rounded-2xl border-2 border-primary/20 bg-secondary/40 p-4 sm:p-6">
             <p className={storeSectionCls}>{t.summary}</p>
             <div className="flex justify-between text-base text-foreground">
               <span>{t.subtotal}</span>
@@ -289,7 +296,7 @@ function CheckoutForm() {
             <div className="h-px bg-primary/20" />
             <div className="flex justify-between items-center text-foreground">
               <span className="text-base font-semibold">{t.total}</span>
-              <span className="text-2xl font-semibold tabular-nums text-primary">
+              <span className="text-xl font-semibold tabular-nums text-primary sm:text-2xl">
                 {formatPriceTnd(grandTotal, locale)} {currency}
               </span>
             </div>
@@ -298,7 +305,8 @@ function CheckoutForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-full bg-primary py-4 text-sm font-semibold tracking-wide text-primary-foreground shadow-md shadow-primary/30 transition-all hover:opacity-95 disabled:opacity-60"
+            className="sticky bottom-3 z-20 w-full rounded-full bg-primary py-4 text-sm font-semibold tracking-wide text-primary-foreground shadow-md shadow-primary/30 transition-all hover:opacity-95 disabled:opacity-60 sm:static"
+            style={{ marginBottom: 'max(0px, env(safe-area-inset-bottom, 0px))' }}
           >
             {isSubmitting ? t.submitting : t.confirmDelivery}
           </button>
