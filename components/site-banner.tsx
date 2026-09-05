@@ -92,7 +92,7 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
             type="button"
             onClick={dismiss}
             aria-label={dictionary.banner.close}
-            className="shrink-0 opacity-60 transition-opacity hover:opacity-100"
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center opacity-60 transition-opacity hover:opacity-100"
           >
             <svg
               width="14"

@@ -17,7 +17,7 @@ const TILES = [
 function HeroTitle({ title, arabic }: { title: string; arabic: boolean }) {
   if (arabic) {
     return (
-      <h1 className="hero-title hero-title-ar mt-3 font-arabic text-4xl font-bold leading-normal tracking-normal text-foreground md:text-5xl lg:text-[3.35rem]">
+      <h1 className="hero-title hero-title-ar mt-3 font-arabic text-[2rem] font-bold leading-normal tracking-normal text-foreground sm:text-4xl md:text-5xl lg:text-[3.35rem]">
         <span className="hero-title-ar-in" style={{ animationDelay: '0.26s' }}>
           {title}
         </span>
@@ -26,7 +26,7 @@ function HeroTitle({ title, arabic }: { title: string; arabic: boolean }) {
   }
 
   return (
-    <h1 className="hero-title mt-3 font-serif text-4xl font-normal tracking-[0.08em] text-foreground md:text-5xl lg:text-[3.25rem]">
+    <h1 className="hero-title mt-3 font-serif text-[2rem] font-normal tracking-[0.06em] text-foreground sm:text-4xl sm:tracking-[0.08em] md:text-5xl lg:text-[3.25rem]">
       {title.split('').map((char, index) => (
         <span key={`${char}-${index}`} className="hero-char-mask">
           <span
@@ -103,7 +103,7 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
         <div className="hero-glow hero-glow-late absolute -end-20 bottom-0 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:gap-12 md:py-14 lg:gap-16">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-4 py-7 sm:gap-8 sm:py-10 md:grid-cols-2 md:gap-12 md:py-14 lg:gap-16">
         <div className="flex flex-col items-center text-center md:items-start md:text-start">
           <div className="hero-logo">
             <Logo size="sm" className="md:h-11 md:w-11" priority />
@@ -112,8 +112,8 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
           <p
             className={
               arabic
-                ? 'hero-eyebrow mt-5 font-arabic text-xs font-semibold tracking-normal text-primary md:text-sm'
-                : 'hero-eyebrow mt-5 text-[10px] font-light tracking-[0.45em] text-primary'
+                ? 'hero-eyebrow mt-4 font-arabic text-xs font-semibold tracking-normal text-primary sm:mt-5 md:text-sm'
+                : 'hero-eyebrow mt-4 text-[10px] font-light tracking-[0.35em] text-primary sm:mt-5 sm:tracking-[0.45em]'
             }
           >
             {dictionary.hero.eyebrow}
@@ -121,61 +121,63 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
 
           <HeroTitle title={dictionary.hero.title} arabic={arabic} />
 
-          <div className="hero-rule mt-5 h-px w-16 bg-primary/70 md:w-20" />
+          <div className="hero-rule mt-4 h-px w-14 bg-primary/70 sm:mt-5 sm:w-16 md:w-20" />
 
           <p
             className={
               arabic
-                ? 'hero-copy mt-5 max-w-md font-arabic text-base font-medium leading-8 text-foreground/85'
-                : 'hero-copy mt-5 max-w-sm text-sm font-light leading-relaxed text-muted-foreground'
+                ? 'hero-copy mt-4 max-w-md font-arabic text-[15px] font-medium leading-7 text-foreground/85 sm:mt-5 sm:text-base sm:leading-8'
+                : 'hero-copy mt-4 max-w-sm text-sm font-light leading-relaxed text-muted-foreground sm:mt-5'
             }
           >
             {dictionary.hero.copy}
           </p>
 
-          <div className="hero-cta mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 md:justify-start">
+          <div className="hero-cta mt-6 flex w-full max-w-sm flex-col items-stretch gap-3 sm:mt-7 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-5 md:justify-start">
             <Link
               href="/products"
               prefetch
               className={
                 arabic
-                  ? 'rounded-full bg-primary px-7 py-2.5 font-arabic text-sm font-semibold tracking-normal text-primary-foreground transition-transform duration-500 hover:scale-[1.03] hover:bg-primary/90'
-                  : 'rounded-full bg-primary px-7 py-2.5 text-[10px] font-light tracking-[0.32em] text-primary-foreground transition-transform duration-500 hover:scale-[1.03] hover:bg-primary/90'
+                  ? 'inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-7 font-arabic text-sm font-semibold tracking-normal text-primary-foreground transition-transform duration-500 hover:scale-[1.03] hover:bg-primary/90'
+                  : 'inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-7 text-xs font-medium tracking-[0.28em] text-primary-foreground transition-transform duration-500 hover:scale-[1.03] hover:bg-primary/90 sm:text-[10px] sm:tracking-[0.32em]'
               }
             >
               {dictionary.hero.discover}
             </Link>
-            <Link
-              href="/products?category=femme"
-              prefetch
-              className={
-                arabic
-                  ? 'font-arabic text-sm font-semibold tracking-normal text-foreground/80 transition-colors hover:text-primary'
-                  : 'text-[10px] font-light tracking-[0.32em] text-muted-foreground transition-colors hover:text-primary'
-              }
-            >
-              {dictionary.hero.women}
-            </Link>
-            <span className="text-primary/40" aria-hidden>
-              ·
-            </span>
-            <Link
-              href="/products?category=homme"
-              prefetch
-              className={
-                arabic
-                  ? 'font-arabic text-sm font-semibold tracking-normal text-foreground/80 transition-colors hover:text-primary'
-                  : 'text-[10px] font-light tracking-[0.32em] text-muted-foreground transition-colors hover:text-primary'
-              }
-            >
-              {dictionary.hero.men}
-            </Link>
+            <div className="flex items-center justify-center gap-x-5">
+              <Link
+                href="/products?category=femme"
+                prefetch
+                className={
+                  arabic
+                    ? 'inline-flex min-h-11 items-center font-arabic text-sm font-semibold tracking-normal text-foreground/80 transition-colors hover:text-primary'
+                    : 'inline-flex min-h-11 items-center text-xs font-medium tracking-[0.24em] text-muted-foreground transition-colors hover:text-primary sm:text-[10px] sm:tracking-[0.32em]'
+                }
+              >
+                {dictionary.hero.women}
+              </Link>
+              <span className="text-primary/40" aria-hidden>
+                ·
+              </span>
+              <Link
+                href="/products?category=homme"
+                prefetch
+                className={
+                  arabic
+                    ? 'inline-flex min-h-11 items-center font-arabic text-sm font-semibold tracking-normal text-foreground/80 transition-colors hover:text-primary'
+                    : 'inline-flex min-h-11 items-center text-xs font-medium tracking-[0.24em] text-muted-foreground transition-colors hover:text-primary sm:text-[10px] sm:tracking-[0.32em]'
+                }
+              >
+                {dictionary.hero.men}
+              </Link>
+            </div>
           </div>
         </div>
 
         <div
           ref={frameRef}
-          className="hero-frame relative px-2 py-2 md:px-3 md:py-3"
+          className="hero-frame relative px-1 py-1 sm:px-2 sm:py-2 md:px-3 md:py-3"
           onPointerMove={onPointerMove}
           onPointerLeave={onPointerLeave}
         >

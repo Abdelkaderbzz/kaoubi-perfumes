@@ -20,9 +20,9 @@ export function CategoriesSection({ categories }: { categories: StoreCategory[] 
           </SectionTitle>
         </Reveal>
 
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-4 sm:gap-x-8">
+        <div className="-mx-4 flex gap-x-5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {categories.map((category, index) => (
-            <Reveal key={category.slug} variant="zoom" delay={index * 60}>
+            <Reveal key={category.slug} variant="zoom" delay={index * 60} className="shrink-0">
               <CategoryCard category={category} />
             </Reveal>
           ))}

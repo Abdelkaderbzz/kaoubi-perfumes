@@ -28,9 +28,9 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
   ]
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
-        <Link href="/" className="flex items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
+    <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 backdrop-blur-md supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-1.5 sm:px-4 sm:py-2">
+        <Link href="/" className="flex shrink-0 items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
           <Logo size="sm" priority />
         </Link>
 
@@ -67,7 +67,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
           </div>
         </nav>
 
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-1.5">
           <LanguageSwitcher />
           <ThemeToggle />
           <Link
@@ -83,7 +83,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
             </svg>
             <span className="sr-only">{dictionary.nav.cart}</span>
             {count > 0 && (
-              <span className="absolute end-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+              <span className="absolute end-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
                 {count}
               </span>
             )}
@@ -104,20 +104,20 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
       </div>
 
       {menuOpen && (
-        <div className="border-t border-border bg-card px-4 py-6 lg:hidden">
-          <nav className="flex flex-col gap-5">
+        <div className="border-t border-border bg-card px-3 py-3 sm:px-4 sm:py-5 lg:hidden">
+          <nav className="flex flex-col">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 prefetch
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-medium tracking-wide text-foreground hover:text-primary"
+                className="flex min-h-12 items-center border-b border-border/50 text-sm font-medium tracking-wide text-foreground last:border-b-0 hover:text-primary"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3 pt-4">
               <a
                 href={INSTAGRAM_URL}
                 target="_blank"

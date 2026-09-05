@@ -92,10 +92,10 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
         aria-expanded={open}
         aria-controls={listId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-1.5 text-foreground transition-colors hover:text-primary disabled:opacity-60"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md px-1 text-foreground transition-colors hover:text-primary disabled:opacity-60 sm:gap-1.5 sm:px-1.5"
       >
         <ActiveFlag className="h-3.5 w-5 shrink-0 overflow-hidden rounded-[2px] shadow-sm ring-1 ring-border/60" />
-        <span className="text-[11px] font-medium tracking-[0.14em]">{active.code}</span>
+        <span className="hidden text-[11px] font-medium tracking-[0.14em] sm:inline">{active.code}</span>
         <svg
           width="10"
           height="10"
@@ -104,7 +104,7 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
           stroke="currentColor"
           strokeWidth="1.5"
           aria-hidden
-          className={`opacity-60 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`hidden opacity-60 transition-transform sm:block ${open ? 'rotate-180' : ''}`}
         >
           <path d="m2.5 4.5 3.5 3.5 3.5-3.5" />
         </svg>
