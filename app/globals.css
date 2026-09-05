@@ -124,6 +124,8 @@
   }
   html.storefront {
     font-size: 100%;
+    /* Stop rare horizontal swipe from nudging the whole storefront. */
+    overflow-x: clip;
   }
   @media (min-width: 768px) {
     html.storefront {
@@ -136,6 +138,16 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-weight: 400;
+  }
+  html.storefront body {
+    overflow-x: clip;
+  }
+
+  /* Lift WhatsApp when a mobile sticky buy bar is on screen. */
+  @media (max-width: 767px) {
+    body:has([data-mobile-buybar]) .whatsapp-fab {
+      bottom: calc(7.25rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
   }
 
   /* Prefer readable weights over ultra-light UI text on the storefront. */

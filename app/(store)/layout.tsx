@@ -25,7 +25,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       {banner && <SiteBanner banner={banner} />}
       <Navbar storeCategories={storeCategories} />
       <main className="min-h-screen">{children}</main>
-      <footer className="border-t border-border bg-card py-8">
+      <footer className="border-t border-border bg-card py-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:pb-8">
         <Reveal className="mx-auto max-w-6xl px-4 text-center">
           <Logo size="lg" className="mx-auto mb-4" />
           <p className="text-xs font-light tracking-widest text-primary">
