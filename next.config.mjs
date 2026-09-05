@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  compress: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [384, 640, 750, 828, 1080, 1200],
     imageSizes: [64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,12 +18,17 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '6mb',
     },
+    optimizePackageImports: ['lucide-react'],
   },
   async headers() {
     return [
       {
-        source: '/:path*',
-        headers: [{ key: 'Content-Language', value: 'fr' }],
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
       },
     ]
   },
