@@ -108,7 +108,7 @@ export default async function ProductDetailPage({
   const images = parseProductImages(product)
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
       <JsonLd
         data={[
           productJsonLd(product),
@@ -120,24 +120,24 @@ export default async function ProductDetailPage({
         ]}
       />
 
-      <Reveal className="mb-8">
+      <Reveal className="mb-5 sm:mb-8">
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-[11px] font-light tracking-widest text-muted-foreground"
+          className="flex items-center gap-2 overflow-hidden text-[10px] font-medium tracking-wider text-muted-foreground sm:text-[11px] sm:tracking-widest"
         >
-          <Link href="/" prefetch className="hover:text-primary transition-colors">
+          <Link href="/" prefetch className="shrink-0 hover:text-primary transition-colors">
             {dictionary.product.home}
           </Link>
-          <span>/</span>
-          <Link href="/products" prefetch className="hover:text-primary transition-colors">
+          <span className="shrink-0">/</span>
+          <Link href="/products" prefetch className="shrink-0 hover:text-primary transition-colors">
             {dictionary.product.boutique}
           </Link>
-          <span>/</span>
-          <span className="text-foreground">{product.name.toUpperCase()}</span>
+          <span className="shrink-0">/</span>
+          <span className="truncate text-foreground">{product.name.toUpperCase()}</span>
         </nav>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
         <Reveal variant="left">
           <ProductGallery
             images={images}
@@ -145,7 +145,7 @@ export default async function ProductDetailPage({
           />
         </Reveal>
 
-        <Reveal variant="right" className="flex flex-col gap-5">
+        <Reveal variant="right" className="flex flex-col gap-4 sm:gap-5">
           <div>
             <div className="mb-2">
               <ProductPromoTag
@@ -155,10 +155,10 @@ export default async function ProductDetailPage({
                 textColor={product.promoTagTextColor}
               />
             </div>
-            <p className="text-xs font-medium tracking-[0.28em] text-primary">
+            <p className="text-[11px] font-medium tracking-[0.22em] text-primary sm:text-xs sm:tracking-[0.28em]">
               {product.brand.toUpperCase()}
             </p>
-            <h1 className="mt-2 font-serif text-2xl tracking-wide text-foreground leading-tight md:text-3xl">
+            <h1 className="mt-2 font-serif text-xl tracking-wide text-foreground leading-tight sm:text-2xl md:text-3xl">
               {product.name}
             </h1>
             <p className="mt-1.5 text-xs font-medium tracking-widest text-foreground/65">
@@ -199,12 +199,12 @@ export default async function ProductDetailPage({
       </div>
 
       {relatedProducts.length > 0 && (
-        <section className="mt-12 border-t border-border pt-8">
-          <Reveal className="mb-6 text-center">
+        <section className="mt-10 border-t border-border pt-7 sm:mt-12 sm:pt-8">
+          <Reveal className="mb-5 text-center sm:mb-6">
             <SectionEyebrow>{dictionary.product.relatedEyebrow}</SectionEyebrow>
             <SectionTitle>{dictionary.product.relatedTitle}</SectionTitle>
           </Reveal>
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4 lg:gap-6">
             {relatedProducts.map((related, index) => (
               <Reveal key={related.id} delay={(index % 4) * 80}>
                 <ProductCard product={related} categories={categories} />
