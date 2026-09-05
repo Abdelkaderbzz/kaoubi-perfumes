@@ -2,7 +2,7 @@
 
 import { requireAdminId } from '@/lib/admin-auth'
 import { db } from '@/lib/db'
-import { products } from '@/lib/db/schema'
+import { orderItems, orders, products } from '@/lib/db/schema'
 import {
   ADMIN_PAGE_SIZE,
   buildPaginatedResult,
@@ -17,7 +17,14 @@ import {
   parseRelatedProductIds,
   serializeRelatedProductIds,
 } from '@/lib/product-relations'
-import { and, asc, desc, eq, ilike, inArray, ne, notInArray, or, sql } from 'drizzle-orm'
+import { getListingPrice, serializeProductSizeVariants } from '@/lib/product-sizes'
+import { serializeFragranceNotes } from '@/lib/fragrance-notes'
+import {
+  serializePerfumeComposition,
+  type PerfumeComposition,
+} from '@/lib/perfume-composition'
+import { serializeWearMoments } from '@/lib/product-wear'
+import { and, asc, desc, eq, ilike, inArray, isNotNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 
 function normalizeProductImages(images: string[]) {
@@ -43,6 +50,9 @@ type ProductListOptions = {
   pageSize?: number
   search?: string
   category?: string
+  wear?: string[]
+  intensity?: string
+  inStock?: 'all' | 'in' | 'out'
   publishedOnly?: boolean
 }
 
@@ -67,6 +77,22 @@ function buildProductConditions(options: ProductListOptions) {
   const category = options.category?.trim()
   if (category && category !== 'all') {
     conditions.push(eq(products.category, category))
+  }
+
+  const wear = options.wear?.filter(Boolean) ?? []
+  if (wear.length > 0) {
+    conditions.push(or(...wear.map((tag) => ilike(products.wearMoments, `%"${tag}"%`)))!)
+  }
+
+  const intensity = options.intensity?.trim()
+  if (intensity) {
+    conditions.push(eq(products.intensity, intensity))
+  }
+
+  if (options.inStock === 'in') {
+    conditions.push(eq(products.inStock, true))
+  } else if (options.inStock === 'out') {
+    conditions.push(eq(products.inStock, false))
   }
 
   return conditions
@@ -101,6 +127,8 @@ export async function getAdminProductsPaginated(options: {
   page?: number
   pageSize?: number
   search?: string
+  category?: string
+  inStock?: 'all' | 'in' | 'out'
 } = {}) {
   await requireAdminId()
   return queryProductsPaginated({ ...options, publishedOnly: false })
@@ -111,6 +139,8 @@ export async function getStoreProductsPaginated(options: {
   pageSize?: number
   search?: string
   category?: string
+  wear?: string[]
+  intensity?: string
 } = {}) {
   return queryProductsPaginated({ ...options, publishedOnly: true })
 }
@@ -139,13 +169,83 @@ const getFeaturedProductsCached = unstable_cache(
       .from(products)
       .where(and(eq(products.featured, true), eq(products.published, true)))
       .orderBy(desc(products.createdAt))
-      .limit(6),
+      .limit(4),
   ['featured-products'],
   { revalidate: 120, tags: ['products'] },
 )
 
 export async function getFeaturedProducts() {
   return getFeaturedProductsCached()
+}
+
+const getNewProductsCached = unstable_cache(
+  async () =>
+    db
+      .select()
+      .from(products)
+      .where(eq(products.published, true))
+      .orderBy(desc(products.createdAt))
+      .limit(8),
+  ['new-products'],
+  { revalidate: 120, tags: ['products'] },
+)
+
+/** Most recently added products, for the "Nouveautes" storefront section. */
+export async function getNewProducts() {
+  return getNewProductsCached()
+}
+
+const getPromotionProductsCached = unstable_cache(
+  async () =>
+    db
+      .select()
+      .from(products)
+      .where(
+        and(
+          eq(products.published, true),
+          or(eq(products.promoTagEnabled, true), isNotNull(products.compareAtPrice)),
+        ),
+      )
+      .orderBy(desc(products.createdAt))
+      .limit(8),
+  ['promotion-products'],
+  { revalidate: 120, tags: ['products'] },
+)
+
+/** Products currently discounted or flagged with a promo tag. */
+export async function getPromotionProducts() {
+  return getPromotionProductsCached()
+}
+
+const getBestSellingProductsCached = unstable_cache(
+  async () => {
+    const rows = await db
+      .select({ productId: orderItems.productId, sold: sql<number>`sum(${orderItems.quantity})::int` })
+      .from(orderItems)
+      .innerJoin(orders, eq(orders.id, orderItems.orderId))
+      .where(ne(orders.status, 'cancelled'))
+      .groupBy(orderItems.productId)
+      .orderBy(desc(sql`sum(${orderItems.quantity})`))
+      .limit(8)
+
+    if (rows.length === 0) return []
+
+    const ids = rows.map((row) => row.productId)
+    const rowsById = new Map(rows.map((row) => [row.productId, row.sold]))
+    const items = await db
+      .select()
+      .from(products)
+      .where(and(inArray(products.id, ids), eq(products.published, true)))
+
+    return items.sort((a, b) => (rowsById.get(b.id) ?? 0) - (rowsById.get(a.id) ?? 0))
+  },
+  ['best-selling-products'],
+  { revalidate: 300, tags: ['products', 'orders'] },
+)
+
+/** Products ranked by total quantity sold across non-cancelled orders. */
+export async function getBestSellingProducts() {
+  return getBestSellingProductsCached()
 }
 
 export async function getProductById(id: number) {
@@ -161,6 +261,25 @@ export async function getProductById(id: number) {
     ['product-by-id', String(id)],
     { revalidate: 120, tags: ['products', `product-${id}`] },
   )()
+}
+
+const getPublishedProductEntriesCached = unstable_cache(
+  async () =>
+    db
+      .select({
+        id: products.id,
+        updatedAt: products.updatedAt,
+      })
+      .from(products)
+      .where(eq(products.published, true))
+      .orderBy(desc(products.updatedAt)),
+  ['published-product-entries'],
+  { revalidate: 300, tags: ['products'] },
+)
+
+/** Published product ids for sitemap + static params. */
+export async function getPublishedProductEntries() {
+  return getPublishedProductEntriesCached()
 }
 
 /** Lightweight catalogue used by the related-products picker in the admin. */
@@ -236,30 +355,52 @@ export async function addProduct(data: {
   compareAtPrice?: string | null
   category: string
   images: string[]
-  sizes: string[]
+  sizes: { size: string; price: string }[]
   relatedProductIds?: number[]
+  fragranceNotes?: string[]
+  composition?: PerfumeComposition
+  wearMoments?: string[]
+  intensity?: string | null
   inStock: boolean
   featured: boolean
   published: boolean
+  promoTagEnabled?: boolean
+  promoTagLabel?: string
+  promoTagBgColor?: string
+  promoTagTextColor?: string
 }) {
   await requireAdminId()
   const imageData = normalizeProductImages(data.images)
   const compareAtPrice = data.compareAtPrice?.trim() || null
+  const sizeVariants = data.sizes
+    .map((variant) => ({ size: variant.size.trim(), price: variant.price.trim() }))
+    .filter((variant) => variant.size && variant.price)
+  const price = sizeVariants.length > 0 ? getListingPrice(sizeVariants, data.price) : data.price
 
   await db.insert(products).values({
     name: data.name,
     brand: data.brand,
     description: data.description,
-    price: data.price,
+    price,
     compareAtPrice,
     category: data.category,
     imageUrl: imageData.imageUrl,
     images: imageData.images,
-    sizes: JSON.stringify(data.sizes),
+    sizes: serializeProductSizeVariants(sizeVariants),
     relatedProductIds: serializeRelatedProductIds(data.relatedProductIds ?? []),
+    fragranceNotes: serializeFragranceNotes(data.fragranceNotes ?? []),
+    composition: serializePerfumeComposition(
+      data.composition ?? { tete: [], coeur: [], fond: [] },
+    ),
+    wearMoments: serializeWearMoments(data.wearMoments ?? []),
+    intensity: data.intensity?.trim() || null,
     inStock: data.inStock,
     featured: data.featured,
     published: data.published,
+    promoTagEnabled: data.promoTagEnabled ?? false,
+    promoTagLabel: data.promoTagLabel?.trim() || 'Promotion',
+    promoTagBgColor: data.promoTagBgColor || '#c81e1e',
+    promoTagTextColor: data.promoTagTextColor || '#ffffff',
   })
   revalidatePath('/admin')
   revalidatePath('/admin/products')
@@ -278,19 +419,52 @@ export async function updateProduct(
     compareAtPrice?: string | null
     category?: string
     images?: string[]
-    sizes?: string[]
+    sizes?: { size: string; price: string }[]
     relatedProductIds?: number[]
+    fragranceNotes?: string[]
+    composition?: PerfumeComposition
+    wearMoments?: string[]
+    intensity?: string | null
     inStock?: boolean
     featured?: boolean
     published?: boolean
+    promoTagEnabled?: boolean
+    promoTagLabel?: string
+    promoTagBgColor?: string
+    promoTagTextColor?: string
   },
 ) {
   await requireAdminId()
-  const updateData: Record<string, unknown> = { ...data, updatedAt: new Date() }
+  const updateData: Record<string, unknown> = { updatedAt: new Date() }
 
-  if (data.sizes) updateData.sizes = JSON.stringify(data.sizes)
+  if (data.name !== undefined) updateData.name = data.name
+  if (data.brand !== undefined) updateData.brand = data.brand
+  if (data.description !== undefined) updateData.description = data.description
+  if (data.category !== undefined) updateData.category = data.category
+  if (data.inStock !== undefined) updateData.inStock = data.inStock
+  if (data.featured !== undefined) updateData.featured = data.featured
+  if (data.published !== undefined) updateData.published = data.published
+  if (data.promoTagEnabled !== undefined) updateData.promoTagEnabled = data.promoTagEnabled
+  if (data.promoTagLabel !== undefined) {
+    updateData.promoTagLabel = data.promoTagLabel.trim() || 'Promotion'
+  }
+  if (data.promoTagBgColor !== undefined) updateData.promoTagBgColor = data.promoTagBgColor
+  if (data.promoTagTextColor !== undefined) updateData.promoTagTextColor = data.promoTagTextColor
+
   if (data.relatedProductIds) {
     updateData.relatedProductIds = serializeRelatedProductIds(data.relatedProductIds)
+  }
+  if (data.fragranceNotes) {
+    updateData.fragranceNotes = serializeFragranceNotes(data.fragranceNotes)
+  }
+  if (data.composition) {
+    updateData.composition = serializePerfumeComposition(data.composition)
+  }
+  if (data.wearMoments) {
+    updateData.wearMoments = serializeWearMoments(data.wearMoments)
+  }
+  if ('intensity' in data) {
+    updateData.intensity = data.intensity?.trim() || null
   }
   if (data.images) {
     const imageData = normalizeProductImages(data.images)
@@ -299,6 +473,19 @@ export async function updateProduct(
   }
   if ('compareAtPrice' in data) {
     updateData.compareAtPrice = data.compareAtPrice?.trim() || null
+  }
+
+  if (data.sizes) {
+    const sizeVariants = data.sizes
+      .map((variant) => ({ size: variant.size.trim(), price: variant.price.trim() }))
+      .filter((variant) => variant.size && variant.price)
+    updateData.sizes = serializeProductSizeVariants(sizeVariants)
+    updateData.price =
+      sizeVariants.length > 0
+        ? getListingPrice(sizeVariants, data.price ?? '0')
+        : data.price
+  } else if (data.price !== undefined) {
+    updateData.price = data.price
   }
 
   await db.update(products).set(updateData).where(eq(products.id, id))

@@ -50,7 +50,7 @@ function revalidateCategoryPaths() {
 export async function getCategories() {
   return unstable_cache(
     async () => db.select().from(categories).orderBy(asc(categories.name)),
-    ['categories-list'],
+    ['categories-list-v2'],
     { revalidate: 300, tags: ['categories'] },
   )()
 }

@@ -3,6 +3,7 @@
 import { adminCreateOrder, type CartItem } from '@/app/actions/orders'
 import { useToast } from '@/components/toast-provider'
 import { boutiqueLabel, type PickupBoutique } from '@/lib/boutiques'
+import { parseProductSizeVariants, getVariantPrice, DEFAULT_SIZE } from '@/lib/product-sizes'
 import { GOVERNORATE_SELECT_OPTIONS } from '@/lib/tunisia-governorates'
 import { orderCreateSchema, type OrderCreateFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -40,15 +41,16 @@ const STATUS_SELECT_OPTIONS = ORDER_STATUS_OPTIONS.map((status) => ({
   label: status.label,
 }))
 
-function parseProductSizes(sizesJson: string): string[] {
-  try {
-    const parsed = JSON.parse(sizesJson || '[]') as unknown
-    if (!Array.isArray(parsed)) return ['Standard']
-    const sizes = parsed.map(String).filter(Boolean)
-    return sizes.length > 0 ? sizes : ['Standard']
-  } catch {
-    return ['Standard']
+function getProductSizeOptions(product: CreateOrderProduct) {
+  const variants = parseProductSizeVariants(product.sizes, product.price)
+  if (variants.length === 0) {
+    return [{ value: DEFAULT_SIZE, label: DEFAULT_SIZE, price: parseFloat(product.price) }]
   }
+  return variants.map((variant) => ({
+    value: variant.size,
+    label: `${variant.size} — ${parseFloat(variant.price).toFixed(3)} TND`,
+    price: parseFloat(variant.price),
+  }))
 }
 
 type DraftLine = CartItem & { key: string }
@@ -110,7 +112,7 @@ export function AdminOrderCreateModal({
   const selectedProduct = products.find((product) => String(product.id) === productId) ?? null
   const sizeOptions = useMemo(() => {
     if (!selectedProduct) return []
-    return parseProductSizes(selectedProduct.sizes).map((value) => ({ value, label: value }))
+    return getProductSizeOptions(selectedProduct).map(({ value, label }) => ({ value, label }))
   }, [selectedProduct])
 
   const subtotal = lines.reduce((acc, line) => acc + line.price * line.quantity, 0)
@@ -137,8 +139,8 @@ export function AdminOrderCreateModal({
     setProductId(nextId)
     setItemError(null)
     const product = products.find((item) => String(item.id) === nextId)
-    const sizes = product ? parseProductSizes(product.sizes) : []
-    setSize(sizes[0] ?? '')
+    const sizes = product ? getProductSizeOptions(product) : []
+    setSize(sizes[0]?.value ?? '')
   }
 
   function addLine() {
@@ -155,6 +157,12 @@ export function AdminOrderCreateModal({
       setItemError('Quantite invalide.')
       return
     }
+
+    const unitPrice = getVariantPrice(
+      parseProductSizeVariants(selectedProduct.sizes, selectedProduct.price),
+      size,
+      selectedProduct.price,
+    )
 
     const existingIndex = lines.findIndex(
       (line) => line.productId === selectedProduct.id && line.size === size,
@@ -176,7 +184,7 @@ export function AdminOrderCreateModal({
           productBrand: selectedProduct.brand,
           size,
           quantity: qty,
-          price: parseFloat(selectedProduct.price),
+          price: unitPrice,
         },
       ])
     }

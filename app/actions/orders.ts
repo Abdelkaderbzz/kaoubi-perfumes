@@ -4,7 +4,7 @@ import { requireAdminId } from '@/lib/admin-auth'
 import { db } from '@/lib/db'
 import { boutiques, orderItems, orders, products } from '@/lib/db/schema'
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { getDeliveryFee } from './settings'
 import {
   ADMIN_PAGE_SIZE,
@@ -32,6 +32,7 @@ function mapOrderError(error: unknown, fallback: string) {
 async function revalidateOrderPaths() {
   revalidatePath('/admin')
   revalidatePath('/admin/orders')
+  revalidateTag('orders', 'max')
 }
 
 export type CartItem = {

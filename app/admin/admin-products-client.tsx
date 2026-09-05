@@ -7,12 +7,20 @@ import { getErrorMessage } from '@/lib/get-error-message'
 import { getPrimaryImage, parseProductImages } from '@/lib/product-images'
 import { parseRelatedProductIds } from '@/lib/product-relations'
 import { formatPriceTnd, getDiscountPercent, parsePrice } from '@/lib/product-price'
+import { parseProductSizeVariants } from '@/lib/product-sizes'
+import { FRAGRANCE_NOTE_OPTIONS, parseFragranceNotes } from '@/lib/fragrance-notes'
+import {
+  EMPTY_COMPOSITION,
+  parsePerfumeComposition,
+} from '@/lib/perfume-composition'
+import { WEAR_MOMENT_OPTIONS, parseWearMoments } from '@/lib/product-wear'
+import { INTENSITY_LEVELS } from '@/lib/product-intensity'
 import { productSchema, type ProductFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouteTransition } from '@/lib/use-route-transition'
-import { ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import {
   AdminBadge,
   AdminButton,
@@ -29,6 +37,7 @@ import {
   adminTableMutedCls,
 } from './admin-ui'
 import { AdminSelect } from './admin-select'
+import { ProductCompositionField } from './product-composition-field'
 import { ProductImagesField } from './product-images-field'
 import { RelatedProductsField, type ProductOption } from './related-products-field'
 import { ADMIN_PAGE_SIZE, AdminPagination } from './admin-pagination'
@@ -45,9 +54,17 @@ type Product = {
   images: string | null
   sizes: string
   relatedProductIds: string
+  fragranceNotes: string
+  composition?: string | null
+  wearMoments: string
+  intensity: string | null
   inStock: boolean
   featured: boolean
   published: boolean
+  promoTagEnabled?: boolean
+  promoTagLabel?: string
+  promoTagBgColor?: string
+  promoTagTextColor?: string
 }
 
 type Category = {
@@ -55,6 +72,9 @@ type Category = {
   name: string
   slug: string
 }
+
+const colorInputCls =
+  'size-10 shrink-0 cursor-pointer rounded-md border border-slate-300 bg-white p-1'
 
 const EMPTY_FORM: ProductFormValues = {
   name: '',
@@ -64,11 +84,19 @@ const EMPTY_FORM: ProductFormValues = {
   compareAtPrice: '',
   category: 'femme',
   images: [],
-  sizes: '',
+  sizeVariants: [],
   relatedProductIds: [],
+  fragranceNotes: [],
+  composition: { ...EMPTY_COMPOSITION, tete: [], coeur: [], fond: [] },
+  wearMoments: [],
+  intensity: '',
   inStock: true,
   featured: false,
   published: true,
+  promoTagEnabled: false,
+  promoTagLabel: 'Promotion',
+  promoTagBgColor: '#c81e1e',
+  promoTagTextColor: '#ffffff',
 }
 
 export function AdminProductsClient({
@@ -76,6 +104,8 @@ export function AdminProductsClient({
   total,
   page,
   search: initialSearch,
+  category: initialCategory,
+  stock: initialStock,
   categories,
   productOptions,
 }: {
@@ -83,6 +113,8 @@ export function AdminProductsClient({
   total: number
   page: number
   search: string
+  category: string
+  stock: 'all' | 'in' | 'out'
   categories: Category[]
   productOptions: ProductOption[]
 }) {
@@ -101,9 +133,16 @@ export function AdminProductsClient({
     setSearchInput(initialSearch)
   }, [initialSearch])
 
-  function navigate(nextSearch: string, nextPage: number) {
+  function navigate(
+    nextSearch: string,
+    nextCategory: string,
+    nextStock: 'all' | 'in' | 'out',
+    nextPage: number,
+  ) {
     const params = new URLSearchParams()
     if (nextSearch.trim()) params.set('search', nextSearch.trim())
+    if (nextCategory && nextCategory !== 'all') params.set('category', nextCategory)
+    if (nextStock !== 'all') params.set('stock', nextStock)
     if (nextPage > 1) params.set('page', String(nextPage))
     const query = params.toString()
     push(query ? `/admin/products?${query}` : '/admin/products')
@@ -122,10 +161,22 @@ export function AdminProductsClient({
     defaultValues: { ...EMPTY_FORM, category: defaultCategory },
   })
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'sizeVariants',
+  })
+
   const images = watch('images')
   const relatedProductIds = watch('relatedProductIds')
+  const fragranceNotes = watch('fragranceNotes')
+  const composition = watch('composition')
+  const wearMoments = watch('wearMoments')
   const watchedPrice = watch('price')
   const watchedCompareAt = watch('compareAtPrice')
+  const promoTagEnabled = watch('promoTagEnabled')
+  const promoTagBgColor = watch('promoTagBgColor')
+  const promoTagTextColor = watch('promoTagTextColor')
+  const promoTagLabel = watch('promoTagLabel')
   const previewDiscount = getDiscountPercent(watchedPrice, watchedCompareAt)
 
   function openAdd() {
@@ -136,6 +187,7 @@ export function AdminProductsClient({
 
   function openEdit(product: Product) {
     setEditingProduct(product)
+    const variants = parseProductSizeVariants(product.sizes, product.price)
     reset({
       name: product.name,
       brand: product.brand,
@@ -144,55 +196,62 @@ export function AdminProductsClient({
       compareAtPrice: product.compareAtPrice ?? '',
       category: product.category,
       images: parseProductImages(product),
-      sizes: JSON.parse(product.sizes || '[]').join(', '),
+      sizeVariants: variants.map((variant) => ({
+        size: variant.size,
+        price: variant.price,
+      })),
       relatedProductIds: parseRelatedProductIds(product),
+      fragranceNotes: parseFragranceNotes(product.fragranceNotes),
+      composition: parsePerfumeComposition(product.composition),
+      wearMoments: parseWearMoments(product.wearMoments),
+      intensity: product.intensity ?? '',
       inStock: product.inStock,
       featured: product.featured,
       published: product.published ?? true,
+      promoTagEnabled: product.promoTagEnabled ?? false,
+      promoTagLabel: product.promoTagLabel || 'Promotion',
+      promoTagBgColor: product.promoTagBgColor || '#c81e1e',
+      promoTagTextColor: product.promoTagTextColor || '#ffffff',
     })
     setShowForm(true)
   }
 
   function onSubmit(form: ProductFormValues) {
-    const sizesArr = form.sizes
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
+    const sizeVariants = form.sizeVariants
+      .map((variant) => ({ size: variant.size.trim(), price: variant.price.trim() }))
+      .filter((variant) => variant.size && variant.price)
     const compareAtPrice = form.compareAtPrice?.trim() || null
 
     startTransition(async () => {
       try {
+        const payload = {
+          name: form.name,
+          brand: form.brand,
+          description: form.description,
+          price: form.price,
+          compareAtPrice,
+          category: form.category,
+          images: form.images,
+          sizes: sizeVariants,
+          relatedProductIds: form.relatedProductIds,
+          fragranceNotes: form.fragranceNotes,
+          composition: form.composition,
+          wearMoments: form.wearMoments,
+          intensity: form.intensity || null,
+          inStock: form.inStock,
+          featured: form.featured,
+          published: form.published,
+          promoTagEnabled: form.promoTagEnabled,
+          promoTagLabel: form.promoTagLabel.trim() || 'Promotion',
+          promoTagBgColor: form.promoTagBgColor,
+          promoTagTextColor: form.promoTagTextColor,
+        }
+
         if (editingProduct) {
-          await updateProduct(editingProduct.id, {
-            name: form.name,
-            brand: form.brand,
-            description: form.description,
-            price: form.price,
-            compareAtPrice,
-            category: form.category,
-            images: form.images,
-            sizes: sizesArr,
-            relatedProductIds: form.relatedProductIds,
-            inStock: form.inStock,
-            featured: form.featured,
-            published: form.published,
-          })
+          await updateProduct(editingProduct.id, payload)
           toast.success('Produit modifie avec succes.')
         } else {
-          await addProduct({
-            name: form.name,
-            brand: form.brand,
-            description: form.description,
-            price: form.price,
-            compareAtPrice,
-            category: form.category,
-            images: form.images,
-            sizes: sizesArr,
-            relatedProductIds: form.relatedProductIds,
-            inStock: form.inStock,
-            featured: form.featured,
-            published: form.published,
-          })
+          await addProduct(payload)
           toast.success('Produit ajoute avec succes.')
         }
         setShowForm(false)
@@ -229,20 +288,50 @@ export function AdminProductsClient({
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <input
-          type="text"
-          placeholder="Rechercher un produit..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-              navigate(searchInput, 1)
-            }
-          }}
-          className={`${adminInputWithError(false)} max-w-sm`}
-          disabled={isNavigating}
-        />
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <input
+            type="text"
+            placeholder="Rechercher un produit..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                navigate(searchInput, initialCategory, initialStock, 1)
+              }
+            }}
+            className={`${adminInputWithError(false)} w-full max-w-sm`}
+            disabled={isNavigating}
+          />
+          <div className="w-full sm:w-44">
+            <AdminSelect
+              value={initialCategory}
+              onValueChange={(value) => navigate(searchInput, value, initialStock, 1)}
+              items={[
+                { value: 'all', label: 'Toutes categories' },
+                ...categories.map((category) => ({
+                  value: category.slug,
+                  label: category.name,
+                })),
+              ]}
+              disabled={isNavigating}
+            />
+          </div>
+          <div className="w-full sm:w-40">
+            <AdminSelect
+              value={initialStock}
+              onValueChange={(value) =>
+                navigate(searchInput, initialCategory, value as 'all' | 'in' | 'out', 1)
+              }
+              items={[
+                { value: 'all', label: 'Tout le stock' },
+                { value: 'in', label: 'En stock' },
+                { value: 'out', label: 'Rupture' },
+              ]}
+              disabled={isNavigating}
+            />
+          </div>
+        </div>
         <AdminButton variant="outline" onClick={openAdd} disabled={isBusy}>
           + Ajouter un produit
         </AdminButton>
@@ -286,7 +375,12 @@ export function AdminProductsClient({
                   </td>
                   <td className={adminTableCellCls}>
                     <p className="font-medium text-slate-900">{p.name}</p>
-                    {p.featured && <AdminBadge tone="info">Mis en avant</AdminBadge>}
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {p.featured && <AdminBadge tone="info">Mis en avant</AdminBadge>}
+                      {p.promoTagEnabled && (
+                        <AdminBadge tone="danger">{p.promoTagLabel || 'Promotion'}</AdminBadge>
+                      )}
+                    </div>
                   </td>
                   <td className={adminTableMutedCls}>{p.brand}</td>
                   <td className={adminTableMutedCls}>{categoryLabel(p.category)}</td>
@@ -346,7 +440,7 @@ export function AdminProductsClient({
           pageSize={ADMIN_PAGE_SIZE}
           totalItems={total}
           loading={isNavigating}
-          onPageChange={(nextPage) => navigate(searchInput, nextPage)}
+          onPageChange={(nextPage) => navigate(searchInput, initialCategory, initialStock, nextPage)}
         />
       )}
 
@@ -396,16 +490,63 @@ export function AdminProductsClient({
                 )}
               </div>
             </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label className={`${adminLabelCls} mb-0`}>TAILLES ET PRIX</label>
+                <button
+                  type="button"
+                  onClick={() => append({ size: '', price: '' })}
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-600 px-3 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
+                >
+                  <Plus className="size-3.5" />
+                  Ajouter
+                </button>
+              </div>
+              <p className="mb-3 text-xs text-slate-500">
+                Ajoutez une ligne par taille, avec son prix. Laissez vide pour un seul prix unique.
+              </p>
+              <div className="space-y-2">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <input
+                        type="text"
+                        placeholder="Taille (45x45, Unique...)"
+                        className={adminInputWithError(!!errors.sizeVariants?.[index]?.size)}
+                        {...register(`sizeVariants.${index}.size`)}
+                      />
+                      <AdminFieldError message={errors.sizeVariants?.[index]?.size?.message} />
+                    </div>
+                    <div className="w-28 shrink-0 sm:w-32">
+                      <input
+                        type="number"
+                        step="0.001"
+                        placeholder="Prix TND"
+                        className={adminInputWithError(!!errors.sizeVariants?.[index]?.price)}
+                        {...register(`sizeVariants.${index}.price`)}
+                      />
+                      <AdminFieldError message={errors.sizeVariants?.[index]?.price?.message} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="mt-1 inline-flex size-9 shrink-0 items-center justify-center rounded-md text-red-600 transition-colors hover:bg-red-50"
+                      aria-label="Supprimer cette taille"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <AdminFieldError message={errors.sizeVariants?.message} />
+            </div>
+
             <ProductImagesField
               value={images}
               onChange={(urls) => setValue('images', urls, { shouldValidate: true })}
               error={errors.images?.message}
             />
-            <div>
-              <label className={adminLabelCls}>TAILLES (ex: 50ml, 100ml)</label>
-              <input type="text" className={adminInputWithError(!!errors.sizes)} {...register('sizes')} />
-              <AdminFieldError message={errors.sizes?.message} />
-            </div>
 
             <div>
               <label className={adminLabelCls}>DESCRIPTION</label>
@@ -444,6 +585,169 @@ export function AdminProductsClient({
               excludeId={editingProduct?.id}
               error={errors.relatedProductIds?.message}
             />
+
+            <div>
+              <label className={adminLabelCls}>PROFIL OLFACTIF</label>
+              <div className="flex flex-wrap gap-2">
+                {FRAGRANCE_NOTE_OPTIONS.map((note) => {
+                  const checked = fragranceNotes.includes(note.value)
+                  return (
+                    <button
+                      key={note.value}
+                      type="button"
+                      onClick={() =>
+                        setValue(
+                          'fragranceNotes',
+                          checked
+                            ? fragranceNotes.filter((value) => value !== note.value)
+                            : [...fragranceNotes, note.value],
+                          { shouldValidate: true },
+                        )
+                      }
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        checked
+                          ? 'border-amber-700 bg-amber-100 text-amber-900'
+                          : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {note.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <AdminFieldError message={errors.fragranceNotes?.message as string | undefined} />
+            </div>
+
+            <ProductCompositionField
+              value={composition ?? EMPTY_COMPOSITION}
+              onChange={(next) => setValue('composition', next, { shouldValidate: true })}
+              errors={errors.composition}
+            />
+
+            <div>
+              <label className={adminLabelCls}>QUAND LE PORTER</label>
+              <div className="flex flex-wrap gap-2">
+                {WEAR_MOMENT_OPTIONS.map((option) => {
+                  const checked = wearMoments.includes(option.value)
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        setValue(
+                          'wearMoments',
+                          checked
+                            ? wearMoments.filter((value) => value !== option.value)
+                            : [...wearMoments, option.value],
+                          { shouldValidate: true },
+                        )
+                      }
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        checked
+                          ? 'border-amber-700 bg-amber-100 text-amber-900'
+                          : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <AdminFieldError message={errors.wearMoments?.message as string | undefined} />
+            </div>
+
+            <div>
+              <label className={adminLabelCls}>INTENSITE</label>
+              <Controller
+                control={control}
+                name="intensity"
+                render={({ field }) => (
+                  <AdminSelect
+                    value={field.value || 'none'}
+                    onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
+                    items={[
+                      { value: 'none', label: 'Non definie' },
+                      ...INTENSITY_LEVELS.map((level) => ({ value: level.value, label: level.label })),
+                    ]}
+                  />
+                )}
+              />
+              <AdminFieldError message={errors.intensity?.message} />
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-800">
+                <input
+                  type="checkbox"
+                  className="size-4 rounded border-slate-300 accent-amber-700"
+                  {...register('promoTagEnabled')}
+                />
+                Afficher un tag promotion
+              </label>
+
+              {promoTagEnabled && (
+                <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
+                  <div>
+                    <label className={adminLabelCls}>LIBELLE DU TAG</label>
+                    <input
+                      type="text"
+                      className={adminInputWithError(!!errors.promoTagLabel)}
+                      {...register('promoTagLabel')}
+                    />
+                    <AdminFieldError message={errors.promoTagLabel?.message} />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={adminLabelCls}>COULEUR DU TAG</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          className={colorInputCls}
+                          value={promoTagBgColor}
+                          onChange={(event) =>
+                            setValue('promoTagBgColor', event.target.value, { shouldValidate: true })
+                          }
+                        />
+                        <input
+                          className={adminInputWithError(!!errors.promoTagBgColor)}
+                          {...register('promoTagBgColor')}
+                        />
+                      </div>
+                      <AdminFieldError message={errors.promoTagBgColor?.message} />
+                    </div>
+                    <div>
+                      <label className={adminLabelCls}>COULEUR DU TEXTE</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          className={colorInputCls}
+                          value={promoTagTextColor}
+                          onChange={(event) =>
+                            setValue('promoTagTextColor', event.target.value, {
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                        <input
+                          className={adminInputWithError(!!errors.promoTagTextColor)}
+                          {...register('promoTagTextColor')}
+                        />
+                      </div>
+                      <AdminFieldError message={errors.promoTagTextColor?.message} />
+                    </div>
+                  </div>
+                  <div
+                    className="inline-flex rounded px-2.5 py-1 text-xs font-semibold tracking-wide"
+                    style={{
+                      backgroundColor: promoTagBgColor,
+                      color: promoTagTextColor,
+                    }}
+                  >
+                    {promoTagLabel.trim() || 'Promotion'}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div>
               <label className={adminLabelCls}>STATUT</label>
