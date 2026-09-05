@@ -17,7 +17,7 @@ export function ProductPromoTag({
     <span
       className={
         className ??
-        'inline-flex rounded px-2.5 py-1 text-[10px] font-semibold tracking-widest uppercase'
+        'inline-flex rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wider uppercase sm:px-2.5 sm:py-1 sm:text-[10px] sm:tracking-widest'
       }
       style={{
         backgroundColor: backgroundColor || '#c81e1e',

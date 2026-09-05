@@ -97,7 +97,7 @@ export default async function ProductsPage({
   const storeCategories = mergeStoreCategories(categories, locale)
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-3 py-5 sm:px-4 sm:py-8">
       <ProductsClient
         products={productPage.items}
         total={productPage.total}

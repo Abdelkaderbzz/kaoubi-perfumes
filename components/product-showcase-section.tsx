@@ -50,7 +50,7 @@ export function ProductShowcaseSection({
         <SectionEyebrow>{eyebrow}</SectionEyebrow>
         <SectionTitle>{title}</SectionTitle>
       </Reveal>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
         {products.map((product, index) => (
           <Reveal key={product.id} delay={(index % 4) * 80}>
             <ProductCard

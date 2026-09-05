@@ -56,7 +56,7 @@ export function ProductCard({
   )
 
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
+    <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 sm:rounded-2xl">
       <Link
         href={`/products/${product.id}`}
         prefetch
@@ -93,12 +93,12 @@ export function ProductCard({
             </span>
           </div>
         )}
-        <div className="absolute top-3 left-3">
-          <span className="rounded-md bg-card/95 px-2.5 py-1 text-[11px] font-medium tracking-widest text-primary backdrop-blur-sm">
+        <div className="absolute start-2 top-2 sm:start-3 sm:top-3">
+          <span className="rounded-md bg-card/95 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-primary backdrop-blur-sm sm:px-2.5 sm:py-1 sm:text-[11px] sm:tracking-widest">
             {categoryLabel.toUpperCase()}
           </span>
         </div>
-        <div className="absolute top-3 right-3">
+        <div className="absolute end-2 top-2 sm:end-3 sm:top-3">
           <ProductPromoTag
             enabled={product.promoTagEnabled || Boolean(product.compareAtPrice)}
             label={product.promoTagLabel}
@@ -108,17 +108,17 @@ export function ProductCard({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-3">
-        <Link href={`/products/${product.id}`} prefetch className="block">
-          <p className="text-[10px] font-medium tracking-[0.18em] text-primary">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+        <Link href={`/products/${product.id}`} prefetch className="block min-w-0">
+          <p className="truncate text-[9px] font-medium tracking-[0.14em] text-primary sm:text-[10px] sm:tracking-[0.18em]">
             {product.brand.toUpperCase()}
           </p>
-          <h3 className="mt-0.5 font-serif text-sm leading-snug tracking-wide text-foreground">
+          <h3 className="mt-0.5 line-clamp-2 font-serif text-[13px] leading-snug tracking-wide text-foreground sm:text-sm">
             {product.name}
           </h3>
         </Link>
 
-        <div className="mt-2">
+        <div className="mt-1.5 sm:mt-2">
           {variants.length > 1 || product.compareAtPrice ? (
             <ProductPrice
               price={String(selectedPrice)}
@@ -134,12 +134,13 @@ export function ProductCard({
           )}
         </div>
 
+        {/* Size chips are hard to tap in a 2-col phone grid — keep them from sm up. */}
         {variants.length > 0 && (
-          <div className="mt-2">
+          <div className="mt-2 hidden sm:block">
             <p className="mb-1 text-[10px] font-medium tracking-[0.14em] text-foreground/65">
               {dictionary.products.size.toUpperCase()}
             </p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {variants.map((variant) => {
                 const active = selectedSize === variant.size
                 return (
@@ -147,7 +148,7 @@ export function ProductCard({
                     key={variant.size}
                     type="button"
                     onClick={() => setSelectedSize(variant.size)}
-                    className={`rounded px-2 py-1 text-[10px] font-medium tracking-wide transition-all ${
+                    className={`min-h-9 rounded px-2.5 py-1.5 text-[11px] font-medium tracking-wide transition-all ${
                       active
                         ? 'bg-foreground text-background'
                         : 'border border-border text-foreground hover:border-primary/50 hover:text-primary'

@@ -183,9 +183,9 @@ export function ProductsClient({
     <>
       <CategoryPhotos category={category} categories={storeCategories} />
 
-      <Reveal className="mb-8 space-y-5">
+      <Reveal className="mb-6 space-y-4 sm:mb-8 sm:space-y-5">
         {/* Search + refine toggle */}
-        <div className="flex items-end gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <form
             className="relative min-w-0 flex-1"
             onSubmit={(e) => {
@@ -203,12 +203,12 @@ export function ProductsClient({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               disabled={isPending}
-              className="w-full rounded-none border-0 border-b border-border bg-transparent py-3 ps-8 pe-20 text-sm font-light text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary disabled:opacity-60"
+              className="w-full rounded-none border-0 border-b border-border bg-transparent py-3 ps-8 pe-24 text-base font-light text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary disabled:opacity-60 sm:text-sm"
             />
             <button
               type="submit"
               disabled={isPending}
-              className="absolute end-0 top-1/2 -translate-y-1/2 text-[11px] font-light tracking-[0.2em] text-primary transition-opacity hover:opacity-70 disabled:opacity-40"
+              className="absolute end-0 top-1/2 min-h-11 -translate-y-1/2 px-1 text-[11px] font-medium tracking-[0.2em] text-primary transition-opacity hover:opacity-70 disabled:opacity-40"
             >
               {dictionary.products.search}
             </button>
@@ -220,7 +220,7 @@ export function ProductsClient({
             disabled={isPending}
             aria-expanded={filtersOpen}
             aria-label={dictionary.products.refineAria}
-            className={`mb-px inline-flex shrink-0 items-center gap-2 border-b px-1 pb-3 pt-2 text-[11px] font-light tracking-[0.18em] transition-colors disabled:opacity-60 ${
+            className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border-b px-1 text-[11px] font-medium tracking-[0.18em] transition-colors disabled:opacity-60 sm:mb-px sm:pb-3 sm:pt-2 ${
               filtersOpen || activeFilterCount > 0
                 ? 'border-primary text-primary'
                 : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
@@ -255,7 +255,7 @@ export function ProductsClient({
                     type="button"
                     onClick={() => selectCategory(cat.value)}
                     disabled={isPending}
-                    className={`relative whitespace-nowrap px-4 py-3 text-xs font-light tracking-[0.18em] transition-colors disabled:opacity-60 ${
+                    className={`relative min-h-11 whitespace-nowrap px-3 py-2.5 text-[11px] font-medium tracking-[0.14em] transition-colors disabled:opacity-60 sm:px-4 sm:py-3 sm:text-xs sm:tracking-[0.18em] ${
                       active
                         ? 'text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
@@ -403,7 +403,7 @@ export function ProductsClient({
           )
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
               {products.map((product, index) => (
                 <Reveal key={product.id} delay={(index % 4) * 70}>
                   <ProductCard
@@ -502,7 +502,7 @@ function FilterChip({
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active}
-      className={`border px-3.5 py-1.5 text-[11px] font-light tracking-wide transition-colors disabled:opacity-60 ${
+      className={`min-h-10 border px-3.5 py-2 text-xs font-medium tracking-wide transition-colors disabled:opacity-60 sm:text-[11px] sm:font-light ${
         active
           ? 'border-primary bg-primary text-primary-foreground'
           : 'border-border/80 text-muted-foreground hover:border-primary/40 hover:text-primary'
