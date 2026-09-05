@@ -1,5 +1,8 @@
 import { z } from 'zod'
 import { GOVERNORATE_SLUGS } from '@/lib/tunisia-governorates'
+import { FRAGRANCE_NOTE_OPTIONS } from '@/lib/fragrance-notes'
+import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
+import { INTENSITY_LEVELS } from '@/lib/product-intensity'
 
 const governorateSchema = z.enum(GOVERNORATE_SLUGS as [string, ...string[]])
 
@@ -12,6 +15,10 @@ export const loginSchema = z.object({
 })
 
 export type LoginFormValues = z.infer<typeof loginSchema>
+
+const hexColorSchema = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Couleur invalide (format #rrggbb)')
 
 export const productSchema = z
   .object({
@@ -33,24 +40,113 @@ export const productSchema = z
       ),
     category: z.string().min(1, 'Categorie requise'),
     images: z.array(z.string().url('URL invalide')).max(5, 'Maximum 5 images par produit'),
-    sizes: z.string(),
+    sizeVariants: z
+      .array(
+        z.object({
+          size: z.string().max(40, 'Taille trop longue'),
+          price: z.string(),
+        }),
+      )
+      .max(12, 'Maximum 12 tailles'),
     relatedProductIds: z
       .array(z.number().int().positive())
       .max(8, 'Maximum 8 produits associes'),
+    fragranceNotes: z
+      .array(z.enum(FRAGRANCE_NOTE_OPTIONS.map((note) => note.value) as [string, ...string[]]))
+      .max(FRAGRANCE_NOTE_OPTIONS.length, 'Trop de notes olfactives'),
+    composition: z.object({
+      tete: z
+        .array(
+          z.object({
+            name: z.string().max(80, 'Nom trop long'),
+            imageUrl: z.string(),
+          }),
+        )
+        .max(8, 'Maximum 8 notes de tete'),
+      coeur: z
+        .array(
+          z.object({
+            name: z.string().max(80, 'Nom trop long'),
+            imageUrl: z.string(),
+          }),
+        )
+        .max(8, 'Maximum 8 notes de coeur'),
+      fond: z
+        .array(
+          z.object({
+            name: z.string().max(80, 'Nom trop long'),
+            imageUrl: z.string(),
+          }),
+        )
+        .max(8, 'Maximum 8 notes de fond'),
+    }),
+    wearMoments: z
+      .array(z.enum(WEAR_MOMENT_OPTIONS.map((option) => option.value) as [string, ...string[]]))
+      .max(WEAR_MOMENT_OPTIONS.length, 'Trop de tags'),
+    intensity: z
+      .enum(['', ...INTENSITY_LEVELS.map((level) => level.value)] as [string, ...string[]])
+      .optional(),
     inStock: z.boolean(),
     featured: z.boolean(),
     published: z.boolean(),
+    promoTagEnabled: z.boolean(),
+    promoTagLabel: z.string().max(40, 'Libelle trop long'),
+    promoTagBgColor: hexColorSchema,
+    promoTagTextColor: hexColorSchema,
   })
   .superRefine((data, ctx) => {
-    if (!data.compareAtPrice || data.compareAtPrice === '') return
-    const price = parseFloat(data.price)
-    const compareAt = parseFloat(data.compareAtPrice)
-    if (Number.isNaN(price) || Number.isNaN(compareAt)) return
-    if (compareAt <= price) {
+    if (data.compareAtPrice && data.compareAtPrice !== '') {
+      const price = parseFloat(data.price)
+      const compareAt = parseFloat(data.compareAtPrice)
+      if (!Number.isNaN(price) && !Number.isNaN(compareAt) && compareAt <= price) {
+        ctx.addIssue({
+          code: 'custom',
+          message: "L'ancien prix doit etre superieur au prix actuel",
+          path: ['compareAtPrice'],
+        })
+      }
+    }
+
+    data.sizeVariants.forEach((variant, index) => {
+      const size = variant.size.trim()
+      const price = variant.price.trim()
+      if (!size && !price) return
+      if (!size) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Taille requise',
+          path: ['sizeVariants', index, 'size'],
+        })
+      }
+      if (!price || Number.isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Prix invalide',
+          path: ['sizeVariants', index, 'price'],
+        })
+      }
+    })
+
+    ;(['tete', 'coeur', 'fond'] as const).forEach((layer) => {
+      data.composition[layer].forEach((note, index) => {
+        const name = note.name.trim()
+        const imageUrl = note.imageUrl.trim()
+        if (!name && !imageUrl) return
+        if (!name) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Nom de la note requis',
+            path: ['composition', layer, index, 'name'],
+          })
+        }
+      })
+    })
+
+    if (data.promoTagEnabled && !data.promoTagLabel.trim()) {
       ctx.addIssue({
         code: 'custom',
-        message: "L'ancien prix doit etre superieur au prix actuel",
-        path: ['compareAtPrice'],
+        message: 'Libelle du tag requis',
+        path: ['promoTagLabel'],
       })
     }
   })
@@ -86,10 +182,6 @@ export type BannerVariant = (typeof BANNER_VARIANTS)[number]
 
 export const BANNER_FONT_SIZE_MIN = 10
 export const BANNER_FONT_SIZE_MAX = 22
-
-const hexColorSchema = z
-  .string()
-  .regex(/^#[0-9a-fA-F]{6}$/, 'Couleur invalide (format #rrggbb)')
 
 const linkHrefSchema = z
   .string()
@@ -257,52 +349,78 @@ export const orderCreateSchema = z
 
 export type OrderCreateFormValues = z.infer<typeof orderCreateSchema>
 
-export const checkoutSchema = z
-  .object({
-    orderType: z.enum(['delivery', 'boutique']),
-    customerName: z.string().min(1, 'Nom requis').max(200, 'Nom trop long'),
-    customerPhone: z
-      .string()
-      .min(1, 'Telephone requis')
-      .min(8, 'Telephone invalide (8 chiffres minimum)'),
-    customerGovernorate: z.string(),
-    customerAddress: z.string(),
-    pickupBoutiqueId: z.number().int().positive().nullable(),
-    notes: z.string().max(500, 'Notes trop longues'),
-  })
-  .superRefine((data, ctx) => {
-    if (data.orderType === 'boutique') {
-      if (data.pickupBoutiqueId == null) {
+type CheckoutValidationMessages = {
+  nameRequired: string
+  nameTooLong: string
+  phoneRequired: string
+  phoneInvalid: string
+  notesTooLong: string
+  pickBoutique: string
+  governorateRequired: string
+  addressRequired: string
+}
+
+const defaultCheckoutMessages: CheckoutValidationMessages = {
+  nameRequired: 'Nom requis',
+  nameTooLong: 'Nom trop long',
+  phoneRequired: 'Telephone requis',
+  phoneInvalid: 'Telephone invalide (8 chiffres minimum)',
+  notesTooLong: 'Notes trop longues',
+  pickBoutique: 'Choisissez la boutique de retrait',
+  governorateRequired: 'Gouvernorat requis',
+  addressRequired: 'Adresse de livraison requise',
+}
+
+export function createCheckoutSchema(messages: CheckoutValidationMessages = defaultCheckoutMessages) {
+  return z
+    .object({
+      orderType: z.enum(['delivery', 'boutique']),
+      customerName: z.string().min(1, messages.nameRequired).max(200, messages.nameTooLong),
+      customerPhone: z
+        .string()
+        .min(1, messages.phoneRequired)
+        .min(8, messages.phoneInvalid),
+      customerGovernorate: z.string(),
+      customerAddress: z.string(),
+      pickupBoutiqueId: z.number().int().positive().nullable(),
+      notes: z.string().max(500, messages.notesTooLong),
+    })
+    .superRefine((data, ctx) => {
+      if (data.orderType === 'boutique') {
+        if (data.pickupBoutiqueId == null) {
+          ctx.addIssue({
+            code: 'custom',
+            message: messages.pickBoutique,
+            path: ['pickupBoutiqueId'],
+          })
+        }
+        return
+      }
+
+      if (!data.customerGovernorate) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Choisissez la boutique de retrait',
-          path: ['pickupBoutiqueId'],
+          message: messages.governorateRequired,
+          path: ['customerGovernorate'],
+        })
+      } else if (!GOVERNORATE_SLUGS.includes(data.customerGovernorate)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: messages.governorateRequired,
+          path: ['customerGovernorate'],
         })
       }
-      return
-    }
 
-    if (!data.customerGovernorate) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Gouvernorat requis',
-        path: ['customerGovernorate'],
-      })
-    } else if (!GOVERNORATE_SLUGS.includes(data.customerGovernorate)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Gouvernorat invalide',
-        path: ['customerGovernorate'],
-      })
-    }
+      if (!data.customerAddress.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          message: messages.addressRequired,
+          path: ['customerAddress'],
+        })
+      }
+    })
+}
 
-    if (!data.customerAddress.trim()) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Adresse de livraison requise',
-        path: ['customerAddress'],
-      })
-    }
-  })
+export const checkoutSchema = createCheckoutSchema()
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>

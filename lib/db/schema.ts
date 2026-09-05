@@ -138,13 +138,27 @@ export const products = pgTable('products', {
   category: text('category').notNull().default('unisex'),
   imageUrl: text('imageUrl'),
   images: text('images').notNull().default('[]'),
+  /** JSON array of `{ size, price }` variants. Empty = single unique price. */
   sizes: text('sizes').notNull().default('[]'),
   /** JSON array of product ids curated by the admin. Empty = fall back to the
    *  same category on the storefront. */
   relatedProductIds: text('relatedProductIds').notNull().default('[]'),
+  /** JSON array of fragrance note values (see lib/fragrance-notes.ts). */
+  fragranceNotes: text('fragranceNotes').notNull().default('[]'),
+  /** JSON pyramid: `{ tete, coeur, fond }` note arrays (see lib/perfume-composition.ts). */
+  composition: text('composition').notNull().default('{"tete":[],"coeur":[],"fond":[]}'),
+  /** JSON array of "quand le porter" tags (see lib/product-wear.ts). */
+  wearMoments: text('wearMoments').notNull().default('[]'),
+  /** Single intensity level slug (see lib/product-intensity.ts), or null. */
+  intensity: text('intensity'),
   inStock: boolean('inStock').notNull().default(true),
   featured: boolean('featured').notNull().default(false),
   published: boolean('published').notNull().default(true),
+  /** Optional storefront promo badge (e.g. "Promotion"). */
+  promoTagEnabled: boolean('promoTagEnabled').notNull().default(false),
+  promoTagLabel: text('promoTagLabel').notNull().default('Promotion'),
+  promoTagBgColor: text('promoTagBgColor').notNull().default('#c81e1e'),
+  promoTagTextColor: text('promoTagTextColor').notNull().default('#ffffff'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })

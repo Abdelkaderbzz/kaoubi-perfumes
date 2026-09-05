@@ -13,3 +13,8 @@ export function resolveDatabaseUrl(url = process.env.DATABASE_URL) {
     return url
   }
 }
+
+/** Direct (non-pooled) URL for migrations, dumps, and seed scripts. */
+export function resolveAdminDatabaseUrl() {
+  return resolveDatabaseUrl(process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL)
+}

@@ -1,3 +1,4 @@
+import { getBcp47Locale, type Locale } from '@/lib/i18n/config'
 import { SITE_LOCALE } from '@/lib/locale'
 
 /** Current/sale price is `price`. Optional `compareAtPrice` is the old (strikethrough) price. */
@@ -8,8 +9,8 @@ export function parsePrice(value: string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-export function formatPriceTnd(value: number): string {
-  return value.toLocaleString(SITE_LOCALE, {
+export function formatPriceTnd(value: number, locale?: Locale): string {
+  return value.toLocaleString(locale ? getBcp47Locale(locale) : SITE_LOCALE, {
     minimumFractionDigits: 3,
     maximumFractionDigits: 3,
   })

@@ -2,14 +2,14 @@
 import { Pool } from 'pg'
 import crypto from 'crypto'
 import { promisify } from 'util'
-import { resolveDatabaseUrl } from './db-url.mjs'
+import { resolveAdminDatabaseUrl } from './db-url.mjs'
 import { loadEnv } from './load-env.mjs'
 
 loadEnv()
 
 const scrypt = promisify(crypto.scrypt)
 
-const DATABASE_URL = resolveDatabaseUrl()
+const DATABASE_URL = resolveAdminDatabaseUrl()
 if (!DATABASE_URL) {
   console.error('DATABASE_URL not set. Set it in .env or pass it in the environment.')
   process.exit(1)

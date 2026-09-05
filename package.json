@@ -16,7 +16,9 @@
     "seed:dummy:categories": "node scripts/seed-dummy-data.mjs --only=categories",
     "seed:dummy:clear": "node scripts/seed-dummy-data.mjs --clear",
     "seed:test": "node scripts/migrate.mjs && node scripts/create-admin.mjs && node scripts/seed-products.mjs --force && node scripts/seed-dummy-data.mjs",
+    "seed:reset": "node scripts/migrate.mjs --reset && node scripts/create-admin.mjs && node scripts/seed-products.mjs --force",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:reset": "node scripts/migrate.mjs --reset",
     "images:optimize": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
