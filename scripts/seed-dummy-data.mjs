@@ -2,12 +2,13 @@
 // Run: node scripts/seed-dummy-data.mjs [--only=orders|products|categories|all] [--orders=25] [--products=20] [--clear]
 
 import { Pool } from 'pg'
-import { resolveDatabaseUrl } from './db-url.mjs'
+import { resolveAdminDatabaseUrl } from './db-url.mjs'
+import { existingProductImages } from './existing-images.mjs'
 import { loadEnv } from './load-env.mjs'
 
 loadEnv()
 
-const DATABASE_URL = resolveDatabaseUrl()
+const DATABASE_URL = resolveAdminDatabaseUrl()
 if (!DATABASE_URL) {
   console.error('DATABASE_URL not set in .env')
   process.exit(1)
@@ -32,15 +33,7 @@ const GOVERNORATES = [
 ]
 
 const CATEGORY_SLUGS = ['femme', 'homme']
-const PLACEHOLDER_IMAGES = [
-  '/categories/parfums.webp',
-  '/categories/maquillage.webp',
-  '/categories/sacs.webp',
-  '/categories/soins.webp',
-  '/hero/perfume-1.webp',
-  '/hero/makeup-1.webp',
-  '/showcase/perfume-4.png',
-]
+const PLACEHOLDER_IMAGES = existingProductImages()
 
 const EXTRA_CATEGORIES = [
   { name: 'Demo Parfums Premium', slug: 'demo-parfums-premium' },
@@ -175,6 +168,11 @@ async function seedDemoCategories() {
 async function seedDemoProducts(count) {
   if (count === 0) return
 
+  if (PLACEHOLDER_IMAGES.length === 0) {
+    console.error('No ready product images found in public/hero.')
+    process.exit(1)
+  }
+
   const demoCategories = [...CATEGORY_SLUGS, ...EXTRA_CATEGORIES.map((c) => c.slug)]
 
   for (let i = 1; i <= count; i += 1) {
@@ -200,7 +198,10 @@ async function seedDemoProducts(count) {
         category,
         image,
         images,
-        JSON.stringify(['50ml', '100ml']),
+        JSON.stringify(['50ml', '100ml'].map((size) => ({
+          size,
+          price: randomPrice(),
+        }))),
         inStock,
         featured,
         published,
@@ -228,11 +229,17 @@ async function seedDemoOrders(count) {
 
   const deliveryFee = await pool.query(`SELECT "deliveryFee" FROM settings WHERE id = 1`)
   const fee = parseFloat(deliveryFee.rows[0]?.deliveryFee ?? '7')
+  const boutiquesResult = await pool.query(
+    `SELECT id, name, city FROM boutiques WHERE "pickupEnabled" = true ORDER BY "sortOrder" ASC, id ASC`,
+  )
+  const pickupBoutiques = boutiquesResult.rows
 
   for (let i = 1; i <= count; i += 1) {
-    const orderType = i % 4 === 0 ? 'boutique' : 'delivery'
+    const orderType = i % 4 === 0 && pickupBoutiques.length > 0 ? 'boutique' : 'delivery'
     const status = STATUSES[i % STATUSES.length]
     const governorate = orderType === 'delivery' ? randomItem(GOVERNORATES) : null
+    const pickup =
+      orderType === 'boutique' ? pickupBoutiques[Math.floor(i / 4) % pickupBoutiques.length] : null
     const padded = String(i).padStart(3, '0')
     const createdAt = daysAgo(randomInt(0, 45))
 
@@ -242,10 +249,19 @@ async function seedDemoOrders(count) {
 
     for (let j = 0; j < itemCount; j += 1) {
       const product = products[(i + j) % products.length]
-      const sizes = JSON.parse(product.sizes || '["Standard"]')
-      const size = sizes[0] ?? 'Standard'
+      const sizes = JSON.parse(product.sizes || '[]')
+      const first = Array.isArray(sizes) ? sizes[0] : null
+      const size =
+        typeof first === 'string'
+          ? first
+          : first && typeof first === 'object' && first.size
+            ? String(first.size)
+            : 'Standard'
       const quantity = randomInt(1, 2)
-      const unitPrice = parseFloat(product.price)
+      const unitPrice =
+        first && typeof first === 'object' && first.price
+          ? parseFloat(first.price)
+          : parseFloat(product.price)
       subtotal += unitPrice * quantity
 
       lineItems.push({
@@ -264,9 +280,10 @@ async function seedDemoOrders(count) {
     const orderResult = await pool.query(
       `INSERT INTO orders (
         "customerName", "customerPhone", "customerAddress", "customerGovernorate",
-        "orderType", status, "totalAmount", "deliveryFee", notes,
+        "orderType", "pickupBoutiqueId", "pickupBoutiqueName",
+        status, "totalAmount", "deliveryFee", notes,
         "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12)
       RETURNING id`,
       [
         `${DEMO_CLIENT_PREFIX} ${padded}`,
@@ -274,6 +291,8 @@ async function seedDemoOrders(count) {
         orderType === 'delivery' ? `${randomInt(1, 120)} Rue de Test, cite demo` : null,
         governorate,
         orderType,
+        pickup?.id ?? null,
+        pickup ? `${pickup.name} (${pickup.city})` : null,
         status,
         totalAmount,
         appliedFee.toFixed(3),
@@ -306,16 +325,22 @@ async function seedDemoOrders(count) {
 }
 
 async function printSummary() {
-  const [products, orders, categories] = await Promise.all([
+  const [products, orders, categories, boutiques, banners, hero] = await Promise.all([
     pool.query(`SELECT COUNT(*)::int AS count FROM products`),
     pool.query(`SELECT COUNT(*)::int AS count FROM orders`),
     pool.query(`SELECT COUNT(*)::int AS count FROM categories`),
+    pool.query(`SELECT COUNT(*)::int AS count FROM boutiques`),
+    pool.query(`SELECT COUNT(*)::int AS count FROM banners`),
+    pool.query(`SELECT COUNT(*)::int AS count FROM hero_images`),
   ])
 
   console.log('\nDatabase totals:')
   console.log(`  Products:   ${products.rows[0].count}`)
   console.log(`  Orders:     ${orders.rows[0].count}`)
   console.log(`  Categories: ${categories.rows[0].count}`)
+  console.log(`  Boutiques:  ${boutiques.rows[0].count}`)
+  console.log(`  Banners:    ${banners.rows[0].count}`)
+  console.log(`  Hero slots: ${hero.rows[0].count}`)
 }
 
 async function main() {

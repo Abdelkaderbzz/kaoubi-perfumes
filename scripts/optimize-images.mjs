@@ -9,6 +9,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'publ
 
 const JOBS = [
   { dir: 'hero', maxWidth: 900, quality: 72 },
+  { dir: 'products', maxWidth: 900, quality: 78 },
   { dir: 'categories', maxWidth: 900, quality: 72 },
   { dir: 'showcase', maxWidth: 900, quality: 72 },
   { file: 'logo.png', maxWidth: 800, quality: 90 },
