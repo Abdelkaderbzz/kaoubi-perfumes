@@ -1,14 +1,9 @@
 'use client'
 
 import type { ActiveBanner } from '@/app/actions/banners'
+import { useDictionary } from '@/components/locale-provider'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
-const VARIANT_LABELS = {
-  offer: 'OFFRE',
-  news: 'NOUVEAUTE',
-  discount: 'PROMO',
-} as const
 
 /** Dismissal is keyed by banner id and message, so editing the text brings the
  *  banner back for visitors who had already closed the previous version. */
@@ -21,6 +16,7 @@ function storageKey(banner: ActiveBanner) {
 }
 
 export function SiteBanner({ banner }: { banner: ActiveBanner }) {
+  const dictionary = useDictionary()
   const [dismissed, setDismissed] = useState(false)
   const key = storageKey(banner)
 
@@ -44,8 +40,14 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
 
   if (dismissed) return null
 
+  const variantLabels = {
+    offer: 'OFFRE',
+    news: dictionary.banner.news,
+    discount: 'PROMO',
+  } as const
+
   const hasLink = banner.linkHref !== ''
-  const linkLabel = banner.linkLabel || 'DECOUVRIR'
+  const linkLabel = banner.linkLabel || dictionary.banner.discover
   const isExternal = /^https?:\/\//.test(banner.linkHref)
   const linkCls =
     'hidden shrink-0 rounded-full border border-current/40 px-3 py-1 font-light tracking-[0.15em] transition-opacity hover:opacity-70 sm:inline-block'
@@ -53,7 +55,7 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
   return (
     <div
       role="region"
-      aria-label="Annonce boutique"
+      aria-label={dictionary.banner.aria}
       style={{
         backgroundColor: banner.backgroundColor,
         color: banner.textColor,
@@ -62,7 +64,7 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
     >
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2">
         <span className="hidden shrink-0 rounded-full bg-current/15 px-2 py-0.5 text-[0.7em] font-medium tracking-[0.2em] sm:inline-block">
-          {VARIANT_LABELS[banner.variant]}
+          {variantLabels[banner.variant]}
         </span>
 
         <p className="min-w-0 flex-1 truncate text-center font-light tracking-wider">
@@ -89,7 +91,7 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Fermer l'annonce"
+            aria-label={dictionary.banner.close}
             className="shrink-0 opacity-60 transition-opacity hover:opacity-100"
           >
             <svg

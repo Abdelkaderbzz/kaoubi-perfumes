@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { Reveal } from '@/components/reveal'
+import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
+import { getRequestDictionary } from '@/lib/i18n/server'
 
 export default async function SuccessPage({
   searchParams,
@@ -7,6 +9,7 @@ export default async function SuccessPage({
   searchParams: Promise<{ orderId?: string }>
 }) {
   const { orderId } = await searchParams
+  const { dictionary } = await getRequestDictionary()
 
   return (
     <Reveal className="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-4 text-center" variant="zoom">
@@ -16,22 +19,24 @@ export default async function SuccessPage({
         </svg>
       </div>
       <div>
-        <p className="text-[10px] font-light tracking-[0.4em] text-primary">MERCI</p>
-        <h1 className="mt-2 font-serif text-3xl font-light tracking-widest text-foreground">COMMANDE CONFIRMEE</h1>
+        <SectionEyebrow>{dictionary.success.thanks}</SectionEyebrow>
+        <SectionTitle as="h1" size="lg">
+          {dictionary.success.title}
+        </SectionTitle>
         {orderId && (
           <p className="mt-3 text-sm font-light text-muted-foreground">
-            Commande #{orderId}
+            {dictionary.success.order(orderId)}
           </p>
         )}
         <p className="mt-4 max-w-sm text-sm font-light leading-relaxed text-muted-foreground">
-          Nous vous contacterons bientot pour confirmer les details de votre commande.
+          {dictionary.success.copy}
         </p>
       </div>
       <Link
         href="/products"
         className="rounded-full border border-border px-8 py-3 text-xs font-light tracking-[0.3em] text-muted-foreground transition-all hover:border-primary hover:bg-primary/5 hover:text-primary"
       >
-        CONTINUER LES ACHATS
+        {dictionary.success.continue}
       </Link>
     </Reveal>
   )

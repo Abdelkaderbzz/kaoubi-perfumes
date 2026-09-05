@@ -1,18 +1,92 @@
-import { getProductById, getRelatedProducts } from '@/app/actions/products'
+import { getProductById, getPublishedProductEntries, getRelatedProducts } from '@/app/actions/products'
 import { getCategories } from '@/app/actions/categories'
-import { getDeliveryFee } from '@/app/actions/settings'
+import { FragranceProfile } from '@/components/fragrance-profile'
+import { JsonLd } from '@/components/json-ld'
+import { PerfumeCompositionSection } from '@/components/perfume-composition'
 import { ProductCard } from '@/components/product-card'
 import { ProductGallery } from '@/components/product-gallery'
 import { ProductPrice } from '@/components/product-price'
+import { ProductPromoTag } from '@/components/product-promo-tag'
 import { Reveal } from '@/components/reveal'
+import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
+import { getRequestDictionary } from '@/lib/i18n/server'
 import { parseProductImages } from '@/lib/product-images'
-import { formatPriceTnd } from '@/lib/product-price'
+import { parseProductSizeVariants } from '@/lib/product-sizes'
+import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo'
 import { getCategoryLabel } from '@/lib/store-categories'
 import { AddToCartButton } from './add-to-cart-button'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
 export const revalidate = 120
+
+export async function generateStaticParams() {
+  try {
+    const entries = await getPublishedProductEntries()
+    return entries.map((product) => ({ id: String(product.id) }))
+  } catch {
+    return []
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const productId = Number(id)
+  if (!Number.isFinite(productId)) {
+    return { title: 'Produit' }
+  }
+
+  const [{ dictionary, locale }, product, categories] = await Promise.all([
+    getRequestDictionary(),
+    getProductById(productId),
+    getCategories(),
+  ])
+
+  if (!product) {
+    return { title: 'Produit' }
+  }
+
+  const categoryLabel = getCategoryLabel(product.category, categories, locale)
+  const title = dictionary.meta.productTitle(product.brand, product.name)
+  const description =
+    product.description?.trim() ||
+    dictionary.meta.productDescription(product.brand, product.name, categoryLabel)
+  const images = parseProductImages(product)
+  const canonical = `/products/${product.id}`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        'x-default': canonical,
+        'fr-TN': canonical,
+        fr: canonical,
+        'ar-TN': canonical,
+        ar: canonical,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: canonical,
+      images: images.length > 0 ? images.map((url) => ({ url })) : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: images[0] ? [images[0]] : undefined,
+    },
+  }
+}
 
 export default async function ProductDetailPage({
   params,
@@ -20,26 +94,44 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [product, deliveryFee, categories, relatedProducts] = await Promise.all([
+  const [{ dictionary, locale }, product, categories, relatedProducts] = await Promise.all([
+    getRequestDictionary(),
     getProductById(Number(id)),
-    getDeliveryFee(),
     getCategories(),
     getRelatedProducts(Number(id)),
   ])
   if (!product) notFound()
 
-  const categoryLabel = getCategoryLabel(product.category, categories)
+  const categoryLabel = getCategoryLabel(product.category, categories, locale)
 
-  const sizes: string[] = JSON.parse(product.sizes || '[]')
+  const variants = parseProductSizeVariants(product.sizes, product.price)
   const images = parseProductImages(product)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
+      <JsonLd
+        data={[
+          productJsonLd(product),
+          breadcrumbJsonLd([
+            { name: dictionary.product.home, path: '/' },
+            { name: dictionary.product.boutique, path: '/products' },
+            { name: product.name, path: `/products/${product.id}` },
+          ]),
+        ]}
+      />
+
       <Reveal className="mb-8">
-        <nav className="flex items-center gap-2 text-[11px] font-light tracking-widest text-muted-foreground">
-          <Link href="/" className="hover:text-primary transition-colors">ACCUEIL</Link>
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-[11px] font-light tracking-widest text-muted-foreground"
+        >
+          <Link href="/" prefetch className="hover:text-primary transition-colors">
+            {dictionary.product.home}
+          </Link>
           <span>/</span>
-          <Link href="/products" className="hover:text-primary transition-colors">BOUTIQUE</Link>
+          <Link href="/products" prefetch className="hover:text-primary transition-colors">
+            {dictionary.product.boutique}
+          </Link>
           <span>/</span>
           <span className="text-foreground">{product.name.toUpperCase()}</span>
         </nav>
@@ -53,54 +145,64 @@ export default async function ProductDetailPage({
           />
         </Reveal>
 
-        <Reveal variant="right" className="flex flex-col gap-4">
+        <Reveal variant="right" className="flex flex-col gap-5">
           <div>
-            <p className="text-[10px] font-light tracking-[0.4em] text-primary">
+            <div className="mb-2">
+              <ProductPromoTag
+                enabled={product.promoTagEnabled}
+                label={product.promoTagLabel}
+                backgroundColor={product.promoTagBgColor}
+                textColor={product.promoTagTextColor}
+              />
+            </div>
+            <p className="text-xs font-medium tracking-[0.28em] text-primary">
               {product.brand.toUpperCase()}
             </p>
-            <h1 className="mt-2 font-serif text-2xl font-light tracking-wide text-foreground leading-tight md:text-3xl">
+            <h1 className="mt-2 font-serif text-2xl tracking-wide text-foreground leading-tight md:text-3xl">
               {product.name}
             </h1>
-            <p className="mt-1 text-[10px] font-light tracking-widest text-muted-foreground">
+            <p className="mt-1.5 text-xs font-medium tracking-widest text-foreground/65">
               {categoryLabel.toUpperCase()}
             </p>
           </div>
 
-          <div className="h-px w-16 bg-primary/30" />
-
-          <ProductPrice
-            price={product.price}
-            compareAtPrice={product.compareAtPrice}
-            size="lg"
-          />
+          <div className="h-px w-16 bg-primary/40" />
 
           {product.description && (
-            <p className="text-sm font-light leading-relaxed text-muted-foreground">
+            <p className="text-sm leading-relaxed text-foreground/80">
               {product.description}
             </p>
           )}
 
+          <FragranceProfile
+            wearMoments={product.wearMoments}
+            intensity={product.intensity}
+          />
+
           {!product.inStock ? (
-            <div className="border border-border px-4 py-3 text-center text-xs font-light tracking-widest text-muted-foreground">
-              RUPTURE DE STOCK
-            </div>
+            <>
+              <ProductPrice
+                price={product.price}
+                compareAtPrice={product.compareAtPrice}
+                size="lg"
+              />
+              <div className="border border-border px-4 py-3 text-center text-sm font-medium tracking-widest text-foreground/70">
+                {dictionary.product.outOfStock}
+              </div>
+            </>
           ) : (
-            <AddToCartButton product={product} sizes={sizes} />
+            <AddToCartButton product={product} variants={variants} />
           )}
 
-          <div className="border-t border-border pt-4 text-[11px] font-light tracking-wider text-muted-foreground">
-            <p>Livraison disponible en Tunisie, {formatPriceTnd(deliveryFee)} TND</p>
-          </div>
+          <PerfumeCompositionSection composition={product.composition} />
         </Reveal>
       </div>
 
       {relatedProducts.length > 0 && (
         <section className="mt-12 border-t border-border pt-8">
           <Reveal className="mb-6 text-center">
-            <p className="text-[10px] font-light tracking-[0.4em] text-primary">SELECTION</p>
-            <h2 className="mt-2 font-serif text-2xl font-light tracking-widest text-foreground">
-              VOUS AIMEREZ AUSSI
-            </h2>
+            <SectionEyebrow>{dictionary.product.relatedEyebrow}</SectionEyebrow>
+            <SectionTitle>{dictionary.product.relatedTitle}</SectionTitle>
           </Reveal>
           <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {relatedProducts.map((related, index) => (

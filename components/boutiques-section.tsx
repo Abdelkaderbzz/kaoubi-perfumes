@@ -1,7 +1,12 @@
+'use client'
+
 import Image from 'next/image'
-import { phoneHref, type Boutique } from '@/lib/boutiques'
+import { useDictionary, useLocale } from '@/components/locale-provider'
+import { localizeBoutique, phoneHref, type Boutique } from '@/lib/boutiques'
 import { FACEBOOK_URL } from '@/lib/social-links'
 import { Reveal } from '@/components/reveal'
+import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
+import type { Dictionary } from '@/lib/i18n'
 
 function StarIcon({ className }: { className?: string }) {
   return (
@@ -57,8 +62,9 @@ function FacebookIcon({ className }: { className?: string }) {
 const actionCls =
   'inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-[11px] font-light tracking-[0.18em] text-muted-foreground transition-all hover:border-primary hover:bg-primary/5 hover:text-primary'
 
-function BoutiqueHero({ boutique }: { boutique: Boutique }) {
-  const badge = (boutique.region || boutique.city).toUpperCase()
+function BoutiqueHero({ boutique, rtl }: { boutique: Boutique; rtl: boolean }) {
+  const place = boutique.region || boutique.city
+  const badge = rtl ? place : place.toUpperCase()
 
   return (
     <div className="relative aspect-4/3 overflow-hidden bg-secondary">
@@ -76,7 +82,11 @@ function BoutiqueHero({ boutique }: { boutique: Boutique }) {
         </div>
       )}
       <div className="absolute inset-0 bg-linear-to-t from-black/55 via-transparent to-transparent" />
-      <span className="absolute bottom-4 left-5 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-[10px] font-light tracking-[0.3em] text-white backdrop-blur-sm">
+      <span
+        className={`absolute bottom-4 start-5 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-[10px] font-light text-white backdrop-blur-sm ${
+          rtl ? 'tracking-normal' : 'tracking-[0.3em]'
+        }`}
+      >
         <PinIcon className="shrink-0" />
         {badge}
       </span>
@@ -84,7 +94,15 @@ function BoutiqueHero({ boutique }: { boutique: Boutique }) {
   )
 }
 
-function BoutiqueCard({ boutique }: { boutique: Boutique }) {
+function BoutiqueCard({
+  boutique,
+  labels,
+  rtl,
+}: {
+  boutique: Boutique
+  labels: Dictionary['boutiques']
+  rtl: boolean
+}) {
   return (
     <article className="group overflow-hidden rounded-3xl border border-border/80 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
       {boutique.directionsUrl ? (
@@ -94,15 +112,19 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
           rel="noopener noreferrer"
           className="block"
         >
-          <BoutiqueHero boutique={boutique} />
+          <BoutiqueHero boutique={boutique} rtl={rtl} />
         </a>
       ) : (
-        <BoutiqueHero boutique={boutique} />
+        <BoutiqueHero boutique={boutique} rtl={rtl} />
       )}
 
       <div className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="font-serif text-2xl font-light tracking-wide text-foreground">
+          <h3
+            className={`font-serif text-2xl text-foreground ${
+              rtl ? 'font-medium tracking-normal' : 'font-light tracking-wide'
+            }`}
+          >
             {boutique.city}
           </h3>
           {boutique.rating != null ? (
@@ -112,7 +134,7 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
                 {boutique.rating.toFixed(1)}
               </span>
               <span className="text-[11px] font-light tracking-wider text-muted-foreground">
-                {boutique.reviewCount ? `${boutique.reviewCount} avis · ` : ''}
+                {boutique.reviewCount ? labels.reviews(boutique.reviewCount) : ''}
                 {boutique.ratingSource}
               </span>
             </div>
@@ -131,7 +153,7 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
               <div className="flex items-start gap-2.5">
                 <dt className="mt-0.5 text-primary">
                   <PinIcon className="shrink-0" />
-                  <span className="sr-only">Adresse</span>
+                  <span className="sr-only">{labels.address}</span>
                 </dt>
                 <dd className="text-sm font-light text-muted-foreground">{boutique.address}</dd>
               </div>
@@ -140,12 +162,13 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
               <div className="flex items-start gap-2.5">
                 <dt className="mt-0.5 text-primary">
                   <PhoneIcon className="shrink-0" />
-                  <span className="sr-only">Telephone</span>
+                  <span className="sr-only">{labels.phone}</span>
                 </dt>
                 <dd>
                   <a
                     href={phoneHref(boutique.phone)}
                     className="text-sm font-light tracking-wide text-muted-foreground transition-colors hover:text-primary hover:underline"
+                    dir="ltr"
                   >
                     +216 {boutique.phone}
                   </a>
@@ -164,13 +187,13 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
               className={actionCls}
             >
               <PinIcon />
-              ITINERAIRE
+              {labels.directions}
             </a>
           ) : null}
           {boutique.phone ? (
             <a href={phoneHref(boutique.phone)} className={actionCls}>
               <PhoneIcon />
-              APPELER
+              {labels.call}
             </a>
           ) : null}
           <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={actionCls}>
@@ -183,39 +206,41 @@ function BoutiqueCard({ boutique }: { boutique: Boutique }) {
   )
 }
 
-function buildTagline(boutiques: Boutique[]) {
+function buildTagline(boutiques: Boutique[], labels: Dictionary['boutiques']) {
   const cities = [...new Set(boutiques.map((boutique) => boutique.city))]
   if (cities.length === 0) return ''
-  if (cities.length === 1) return `Venez decouvrir nos parfums a ${cities[0]}.`
+  if (cities.length === 1) return labels.taglineOne(cities[0])
 
   const last = cities[cities.length - 1]
-  return `Retrouvez nos parfums a ${cities.slice(0, -1).join(', ')} et ${last}.`
+  return labels.taglineMany(cities.slice(0, -1).join(', '), last)
 }
 
 export function BoutiquesSection({ boutiques }: { boutiques: Boutique[] }) {
-  if (boutiques.length === 0) return null
+  const dictionary = useDictionary()
+  const { locale, dir } = useLocale()
+  const rtl = dir === 'rtl'
+  const localized = boutiques.map((boutique) => localizeBoutique(boutique, locale))
+  if (localized.length === 0) return null
 
   return (
     <section id="boutiques" className="scroll-mt-16 border-t border-border bg-secondary/20 py-12 md:py-14">
       <div className="mx-auto max-w-6xl px-4">
         <Reveal className="mb-8 text-center">
-          <p className="text-[10px] font-light tracking-[0.4em] text-primary">NOS ADRESSES</p>
-          <h2 className="mt-2 font-serif text-2xl font-light tracking-widest text-foreground">
-            NOS BOUTIQUES
-          </h2>
+          <SectionEyebrow>{dictionary.boutiques.eyebrow}</SectionEyebrow>
+          <SectionTitle>{dictionary.boutiques.title}</SectionTitle>
           <p className="mx-auto mt-3 max-w-lg text-sm font-light text-muted-foreground">
-            {buildTagline(boutiques)}
+            {buildTagline(localized, dictionary.boutiques)}
           </p>
         </Reveal>
 
         <div
           className={`grid gap-6 ${
-            boutiques.length === 1 ? 'mx-auto max-w-xl' : 'md:grid-cols-2'
+            localized.length === 1 ? 'mx-auto max-w-xl' : 'md:grid-cols-2'
           }`}
         >
-          {boutiques.map((boutique, index) => (
+          {localized.map((boutique, index) => (
             <Reveal key={boutique.id} variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 90}>
-              <BoutiqueCard boutique={boutique} />
+              <BoutiqueCard boutique={boutique} labels={dictionary.boutiques} rtl={rtl} />
             </Reveal>
           ))}
         </div>

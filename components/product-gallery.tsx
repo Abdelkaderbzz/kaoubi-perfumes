@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 
 export function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
@@ -18,8 +19,15 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
 
   return (
     <div className="space-y-4">
-      <div className="aspect-square overflow-hidden border border-border bg-secondary">
-        <img src={activeImage} alt={alt} className="h-full w-full object-cover" />
+      <div className="relative aspect-square overflow-hidden border border-border bg-secondary">
+        <Image
+          src={activeImage}
+          alt={alt}
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+        />
       </div>
 
       {images.length > 1 && (
@@ -29,11 +37,17 @@ export function ProductGallery({ images, alt }: { images: string[]; alt: string 
               key={`${url}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
-              className={`aspect-square overflow-hidden border transition-colors ${
+              className={`relative aspect-square overflow-hidden border transition-colors ${
                 index === activeIndex ? 'border-primary' : 'border-border hover:border-primary/40'
               }`}
             >
-              <img src={url} alt={`${alt} ${index + 1}`} className="h-full w-full object-cover" />
+              <Image
+                src={url}
+                alt={`${alt} ${index + 1}`}
+                fill
+                sizes="96px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

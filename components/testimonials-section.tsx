@@ -1,6 +1,9 @@
-import Image from 'next/image'
-import { InstagramCommentCard, WhatsAppCommentCard } from '@/components/testimonial-cards'
+'use client'
+
+import { GoogleReviewCard, InstagramCommentCard, WhatsAppCommentCard } from '@/components/testimonial-cards'
+import { useDictionary } from '@/components/locale-provider'
 import { Reveal } from '@/components/reveal'
+import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 import {
   TESTIMONIAL_SOURCES,
   googleTestimonials,
@@ -13,41 +16,34 @@ import {
 const ROW_DURATION_SECONDS = { top: 78, bottom: 94 } as const
 
 /** How many times the item list repeats inside a single pass. One pass must be
- *  wider than the viewport or a gap opens at the trailing edge. Short rows
- *  (Google screenshots) need more copies than the mixed social row. */
+ *  wider than the viewport or a gap opens at the trailing edge. */
 function repeatsFor(count: number) {
-  return Math.max(2, Math.ceil(8 / Math.max(count, 1)))
+  return Math.max(4, Math.ceil(12 / Math.max(count, 1)))
 }
 
-/** Shared by every card so both rows line up and nothing shrinks mid-animation. */
-const ITEM_CLS = 'h-36 shrink-0 overflow-hidden sm:h-40 lg:h-46'
+/** Shared by cards in a row so the marquee track stays even. */
+const CARD_ITEM_CLS = 'flex h-auto shrink-0 overflow-hidden rounded-2xl'
 
-/** Comments are HTML, so unlike screenshots they need an explicit width. */
-const COMMENT_WIDTH_CLS = 'w-72 sm:w-80 lg:w-96'
+/** All cards are HTML now (no more raw screenshots), so they share one width. */
+const CARD_WIDTH_CLS = 'w-72 sm:w-80 lg:w-96'
 
 function TestimonialItemCard({ item, decorative }: { item: TestimonialItem; decorative: boolean }) {
-  if (item.kind === 'screenshot') {
+  if (item.kind === 'google') {
     return (
-      <li className={`${ITEM_CLS} border-r border-black/5 bg-white`}>
-        <Image
-          src={item.src}
-          alt={decorative ? '' : item.alt}
-          width={item.width}
-          height={item.height}
-          sizes="(max-width: 640px) 400px, (max-width: 1024px) 460px, 540px"
-          draggable={false}
-          // Lazy loading never fires reliably inside the animated track, which
-          // leaves blank cards drifting into view. These are a few KB each and
-          // repeat across both rows, so the browser fetches them once.
-          loading="eager"
-          className="block h-full w-auto select-none"
-        />
+      <li
+        aria-hidden={decorative}
+        className={`${CARD_ITEM_CLS} ${CARD_WIDTH_CLS} border border-border/60 shadow-sm shadow-foreground/5`}
+      >
+        <GoogleReviewCard item={item} />
       </li>
     )
   }
 
   return (
-    <li className={`${ITEM_CLS} ${COMMENT_WIDTH_CLS} border-r border-white/5`}>
+    <li
+      aria-hidden={decorative}
+      className={`${CARD_ITEM_CLS} ${CARD_WIDTH_CLS} border border-white/10 shadow-sm shadow-black/20`}
+    >
       {item.source === 'instagram' ? (
         <InstagramCommentCard item={item} />
       ) : (
@@ -95,24 +91,23 @@ function MarqueeRow({
 }
 
 export function TestimonialsSection() {
+  const dictionary = useDictionary()
   const sources = usedTestimonialSources()
 
   return (
-    <section className="border-t border-border bg-secondary py-12 md:py-14">
-      <div className="mx-auto mb-8 max-w-6xl px-4 text-center">
-        <Reveal>
-          <p className="text-[10px] font-light tracking-[0.4em] text-primary">TEMOIGNAGES</p>
-          <h2 className="mt-2 font-serif text-2xl font-light tracking-widest text-foreground">
-            ELLES NOUS FONT CONFIANCE
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm font-light text-muted-foreground">
-            Avis Google, commentaires Instagram et messages WhatsApp de nos clientes.
-          </p>
+    <section className="border-t border-border bg-secondary py-8 md:py-10">
+      <div className="mx-auto mb-5 max-w-6xl px-4">
+        <Reveal className="flex items-baseline gap-3">
+          <SectionEyebrow>{dictionary.testimonials.eyebrow}</SectionEyebrow>
+          <span className="h-px flex-1 bg-border" />
+          <SectionTitle size="sm" spaced={false}>
+            {dictionary.testimonials.title}
+          </SectionTitle>
         </Reveal>
       </div>
 
       <Reveal variant="fade">
-        <div className="relative border-y border-border/60">
+        <div className="relative flex flex-col gap-3.5 py-2">
           <MarqueeRow
             items={googleTestimonials()}
             direction="left"

@@ -1,10 +1,19 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Bodoni_Moda, Josefin_Sans } from 'next/font/google'
+import localFont from 'next/font/local'
+import { LocaleProvider } from '@/components/locale-provider'
 import { StorefrontScale } from '@/components/storefront-scale'
 import { ThemeScript } from '@/components/theme-script'
 import { ToastProvider } from '@/components/toast-provider'
-import { SITE_LANG, SITE_OG_LOCALE } from '@/lib/locale'
+import {
+  getDictionary,
+  getDirection,
+  getHtmlLang,
+  getOgLocale,
+} from '@/lib/i18n'
+import { getRequestLocale } from '@/lib/i18n/server'
+import { getSiteUrl } from '@/lib/site'
 import './globals.css'
 
 const bodoni = Bodoni_Moda({
@@ -13,6 +22,7 @@ const bodoni = Bodoni_Moda({
   style: ['normal', 'italic'],
   variable: '--font-serif',
   display: 'swap',
+  preload: true,
 })
 
 const josefin = Josefin_Sans({
@@ -20,50 +30,96 @@ const josefin = Josefin_Sans({
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sans',
   display: 'swap',
+  preload: true,
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
-const siteTitle = 'Water of Gold | Parfumerie a Sousse'
-const siteDescription =
-  'Water of Gold est une boutique de parfums a Sousse, Tunisie. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.'
-
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: siteTitle,
-  description: siteDescription,
-  keywords: [
-    'parfum',
-    'parfumerie',
-    'Sousse',
-    'Tunisie',
-    'Water of Gold',
-    'parfum femme',
-    'parfum homme',
-    'fragrance',
+const thmanyahArabic = localFont({
+  src: [
+    { path: './fonts/thmanyah/thmanyahsans-Light.woff2', weight: '300', style: 'normal' },
+    { path: './fonts/thmanyah/thmanyahsans-Regular.woff2', weight: '400', style: 'normal' },
+    { path: './fonts/thmanyah/thmanyahsans-Medium.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/thmanyah/thmanyahsans-Bold.woff2', weight: '700', style: 'normal' },
+    { path: './fonts/thmanyah/thmanyahsans-Black.woff2', weight: '900', style: 'normal' },
   ],
-  alternates: {
-    canonical: '/',
-    languages: {
-      'fr-TN': '/',
-      fr: '/',
+  variable: '--font-arabic',
+  display: 'swap',
+  preload: true,
+})
+
+const siteUrl = getSiteUrl()
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale()
+  const dictionary = getDictionary(locale)
+  const siteTitle = dictionary.meta.title
+  const siteDescription = dictionary.meta.description
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: siteTitle,
+      template: '%s | Water of Gold',
     },
-  },
-  openGraph: {
-    type: 'website',
-    locale: SITE_OG_LOCALE,
-    url: siteUrl,
-    siteName: 'Water of Gold',
-    title: siteTitle,
     description: siteDescription,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: siteTitle,
-    description: siteDescription,
-  },
+    applicationName: 'Water of Gold',
+    authors: [{ name: 'Water of Gold' }],
+    creator: 'Water of Gold',
+    publisher: 'Water of Gold',
+    keywords: [
+      'parfum',
+      'parfumerie',
+      'Sousse',
+      'Tunisie',
+      'Water of Gold',
+      'عطور',
+      'سوسة',
+      'تونس',
+      'parfum femme',
+      'parfum homme',
+    ],
+    alternates: {
+      canonical: '/',
+      languages: {
+        'x-default': '/',
+        'fr-TN': '/',
+        fr: '/',
+        'ar-TN': '/',
+        ar: '/',
+      },
+    },
+    openGraph: {
+      type: 'website',
+      locale: getOgLocale(locale),
+      alternateLocale: locale === 'ar' ? ['fr_TN'] : ['ar_TN'],
+      url: siteUrl,
+      siteName: 'Water of Gold',
+      title: siteTitle,
+      description: siteDescription,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteTitle,
+      description: siteDescription,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
+    icons: {
+      icon: [{ url: '/logo.webp', type: 'image/webp' }],
+      apple: [{ url: '/logo.png' }],
+    },
+    other: {
+      'content-language': getHtmlLang(locale),
+    },
+  }
 }
 
 export const viewport: Viewport = {
@@ -74,17 +130,31 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getRequestLocale()
+  const lang = getHtmlLang(locale)
+  const dir = getDirection(locale)
+
   return (
-    <html lang={SITE_LANG} className={`bg-background ${bodoni.variable} ${josefin.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased" suppressHydrationWarning>
+    <html
+      lang={lang}
+      dir={dir}
+      className={`bg-background ${bodoni.variable} ${josefin.variable} ${thmanyahArabic.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className={`font-sans antialiased ${locale === 'ar' ? 'font-arabic' : ''}`}
+        suppressHydrationWarning
+      >
         <ThemeScript />
         <StorefrontScale />
-        <ToastProvider>{children}</ToastProvider>
+        <LocaleProvider locale={locale}>
+          <ToastProvider>{children}</ToastProvider>
+        </LocaleProvider>
         {process.env.VERCEL === '1' && <Analytics />}
       </body>
     </html>

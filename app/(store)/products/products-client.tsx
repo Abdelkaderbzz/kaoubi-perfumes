@@ -1,12 +1,16 @@
 'use client'
 
 import { CategoryPhotos } from '@/components/category-photos'
+import { useDictionary } from '@/components/locale-provider'
 import { ProductCard } from '@/components/product-card'
 import { Reveal } from '@/components/reveal'
 import { useRouteTransition } from '@/lib/use-route-transition'
 import type { StoreCategory } from '@/lib/store-categories'
+import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
+import { INTENSITY_LEVELS } from '@/lib/product-intensity'
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
 type Product = {
   id: number
@@ -17,7 +21,15 @@ type Product = {
   imageUrl: string | null
   category: string
   inStock: boolean
+  sizes?: string | null
+  promoTagEnabled?: boolean | null
+  promoTagLabel?: string | null
+  promoTagBgColor?: string | null
+  promoTagTextColor?: string | null
 }
+
+const SEASON_VALUES = new Set(['ete', 'hiver', 'printemps', 'automne'])
+const MOMENT_VALUES = new Set(['jour', 'nuit'])
 
 export function ProductsClient({
   products,
@@ -26,6 +38,8 @@ export function ProductsClient({
   totalPages,
   search: initialSearch,
   category,
+  wear,
+  intensity,
   storeCategories,
 }: {
   products: Product[]
@@ -34,15 +48,26 @@ export function ProductsClient({
   totalPages: number
   search: string
   category: string
+  wear: string[]
+  intensity: string
   storeCategories: StoreCategory[]
 }) {
   const pathname = usePathname()
+  const dictionary = useDictionary()
+  const wearLabels = dictionary.wear as Record<string, string>
+  const intensityLabels = dictionary.intensity as Record<string, string>
   const { isPending, push } = useRouteTransition()
   const [search, setSearch] = useState(initialSearch)
+  const hasSecondaryFilters = wear.length > 0 || Boolean(intensity)
+  const [filtersOpen, setFiltersOpen] = useState(hasSecondaryFilters)
 
   useEffect(() => {
     setSearch(initialSearch)
   }, [initialSearch])
+
+  useEffect(() => {
+    if (hasSecondaryFilters) setFiltersOpen(true)
+  }, [hasSecondaryFilters])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -50,79 +75,298 @@ export function ProductsClient({
 
   const allCategories = useMemo(
     () => [
-      { value: 'all', label: 'TOUS' },
+      { value: 'all', label: dictionary.products.all },
       ...storeCategories.map((item) => ({
         value: item.slug,
-        label: item.name.toUpperCase(),
+        label: item.name,
       })),
     ],
-    [storeCategories],
+    [storeCategories, dictionary.products.all],
   )
 
-  function syncUrl(newSearch: string, newCategory: string, newPage = 1) {
+  const seasonOptions = WEAR_MOMENT_OPTIONS.filter((option) => SEASON_VALUES.has(option.value)).map(
+    (option) => ({ ...option, label: wearLabels[option.value] ?? option.label }),
+  )
+  const momentOptions = WEAR_MOMENT_OPTIONS.filter((option) => MOMENT_VALUES.has(option.value)).map(
+    (option) => ({ ...option, label: wearLabels[option.value] ?? option.label }),
+  )
+  const intensityOptions = INTENSITY_LEVELS.map((level) => ({
+    ...level,
+    label: intensityLabels[level.value] ?? level.label,
+  }))
+
+  function syncUrl(overrides: {
+    search?: string
+    category?: string
+    wear?: string[]
+    intensity?: string
+    page?: number
+  }) {
+    const nextSearch = overrides.search ?? search
+    const nextCategory = overrides.category ?? category
+    const nextWear = overrides.wear ?? wear
+    const nextIntensity = overrides.intensity ?? intensity
+    const nextPage = overrides.page ?? 1
+
     const params = new URLSearchParams()
-    if (newSearch.trim()) params.set('search', newSearch.trim())
-    if (newCategory !== 'all') params.set('category', newCategory)
-    if (newPage > 1) params.set('page', String(newPage))
+    if (nextSearch.trim()) params.set('search', nextSearch.trim())
+    if (nextCategory !== 'all') params.set('category', nextCategory)
+    if (nextWear.length > 0) params.set('wear', nextWear.join(','))
+    if (nextIntensity) params.set('intensity', nextIntensity)
+    if (nextPage > 1) params.set('page', String(nextPage))
 
     const query = params.toString()
     push(query ? `${pathname}?${query}` : pathname)
   }
 
+  const activeChips: { key: string; label: string; onClear: () => void }[] = []
+  if (initialSearch.trim()) {
+    activeChips.push({
+      key: 'search',
+      label: `« ${initialSearch.trim()} »`,
+      onClear: () => {
+        setSearch('')
+        syncUrl({ search: '' })
+      },
+    })
+  }
+  for (const tag of wear) {
+    activeChips.push({
+      key: `wear-${tag}`,
+      label: wearLabels[tag] ?? tag,
+      onClear: () => syncUrl({ wear: wear.filter((value) => value !== tag) }),
+    })
+  }
+  if (intensity) {
+    activeChips.push({
+      key: 'intensity',
+      label: intensityLabels[intensity] ?? intensity,
+      onClear: () => syncUrl({ intensity: '' }),
+    })
+  }
+
   function selectCategory(value: string) {
     if (value === category || isPending) return
-    syncUrl(search, value, 1)
+    syncUrl({ category: value })
   }
+
+  function toggleWear(value: string) {
+    if (isPending) return
+    const next = wear.includes(value) ? wear.filter((tag) => tag !== value) : [...wear, value]
+    syncUrl({ wear: next })
+  }
+
+  function selectIntensity(value: string) {
+    if (isPending) return
+    syncUrl({ intensity: intensity === value ? '' : value })
+  }
+
+  function clearSecondaryFilters() {
+    if (isPending) return
+    syncUrl({ wear: [], intensity: '' })
+  }
+
+  function clearAllFilters() {
+    if (isPending) return
+    setSearch('')
+    syncUrl({ search: '', wear: [], intensity: '' })
+  }
+
+  function submitSearch() {
+    if (isPending) return
+    syncUrl({ search })
+  }
+
+  const activeFilterCount = wear.length + (intensity ? 1 : 0)
 
   return (
     <>
       <CategoryPhotos category={category} categories={storeCategories} />
 
-      <Reveal className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-        <div className="relative w-full lg:w-72 lg:shrink-0">
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Rechercher un produit..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                syncUrl(search, category, 1)
-              }
+      <Reveal className="mb-8 space-y-5">
+        {/* Search + refine toggle */}
+        <div className="flex items-end gap-3">
+          <form
+            className="relative min-w-0 flex-1"
+            onSubmit={(e) => {
+              e.preventDefault()
+              submitSearch()
             }}
+          >
+            <Search
+              className="pointer-events-none absolute start-0 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              type="search"
+              placeholder={dictionary.products.searchPlaceholder}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              disabled={isPending}
+              className="w-full rounded-none border-0 border-b border-border bg-transparent py-3 ps-8 pe-20 text-sm font-light text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary disabled:opacity-60"
+            />
+            <button
+              type="submit"
+              disabled={isPending}
+              className="absolute end-0 top-1/2 -translate-y-1/2 text-[11px] font-light tracking-[0.2em] text-primary transition-opacity hover:opacity-70 disabled:opacity-40"
+            >
+              {dictionary.products.search}
+            </button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((open) => !open)}
             disabled={isPending}
-            className="w-full rounded-xl border border-border bg-input py-2.5 pl-9 pr-4 text-sm font-light text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/10 disabled:opacity-60"
-          />
+            aria-expanded={filtersOpen}
+            aria-label={dictionary.products.refineAria}
+            className={`mb-px inline-flex shrink-0 items-center gap-2 border-b px-1 pb-3 pt-2 text-[11px] font-light tracking-[0.18em] transition-colors disabled:opacity-60 ${
+              filtersOpen || activeFilterCount > 0
+                ? 'border-primary text-primary'
+                : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+            }`}
+          >
+            <SlidersHorizontal className="size-3.5" aria-hidden />
+            <span>{dictionary.products.refine}</span>
+            {activeFilterCount > 0 ? (
+              <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">
+                {activeFilterCount}
+              </span>
+            ) : (
+              <ChevronDown
+                className={`size-3.5 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}
+                aria-hidden
+              />
+            )}
+          </button>
         </div>
 
-        <div className="flex w-full flex-1 flex-wrap gap-2">
-          {allCategories.map((cat) => (
-            <button
-              key={cat.value}
-              type="button"
-              onClick={() => selectCategory(cat.value)}
-              disabled={isPending}
-              className={`rounded-full border px-3 py-2 text-center text-[10px] font-light tracking-[0.2em] transition-colors disabled:opacity-60 ${
-                category === cat.value
-                  ? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                  : 'border-border text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Primary: categories as underline tabs */}
+        <nav
+          aria-label={dictionary.products.categoriesAria}
+          className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <ul className="flex min-w-max gap-1 border-b border-border/70">
+            {allCategories.map((cat) => {
+              const active = category === cat.value
+              return (
+                <li key={cat.value}>
+                  <button
+                    type="button"
+                    onClick={() => selectCategory(cat.value)}
+                    disabled={isPending}
+                    className={`relative whitespace-nowrap px-4 py-3 text-xs font-light tracking-[0.18em] transition-colors disabled:opacity-60 ${
+                      active
+                        ? 'text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {cat.label.toUpperCase()}
+                    {active ? (
+                      <span className="absolute inset-x-3 bottom-0 h-px bg-primary" />
+                    ) : null}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+
+        {/* Secondary filters panel */}
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+            filtersOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+          }`}
+        >
+          <div className="overflow-hidden" inert={!filtersOpen || undefined}>
+            <div className="space-y-5 border border-border/70 bg-card/40 px-4 py-5 sm:px-5">
+              <FilterGroup label={dictionary.products.season}>
+                {seasonOptions.map((option) => (
+                  <FilterChip
+                    key={option.value}
+                    label={option.label}
+                    active={wear.includes(option.value)}
+                    disabled={isPending}
+                    onClick={() => toggleWear(option.value)}
+                  />
+                ))}
+              </FilterGroup>
+
+              <FilterGroup label={dictionary.products.moment}>
+                {momentOptions.map((option) => (
+                  <FilterChip
+                    key={option.value}
+                    label={option.label}
+                    active={wear.includes(option.value)}
+                    disabled={isPending}
+                    onClick={() => toggleWear(option.value)}
+                  />
+                ))}
+              </FilterGroup>
+
+              <FilterGroup label={dictionary.products.intensity}>
+                {intensityOptions.map((level) => (
+                  <FilterChip
+                    key={level.value}
+                    label={level.label}
+                    active={intensity === level.value}
+                    disabled={isPending}
+                    onClick={() => selectIntensity(level.value)}
+                  />
+                ))}
+              </FilterGroup>
+
+              {activeFilterCount > 0 ? (
+                <div className="flex justify-end border-t border-border/60 pt-3">
+                  <button
+                    type="button"
+                    onClick={clearSecondaryFilters}
+                    disabled={isPending}
+                    className="text-[11px] font-light tracking-[0.18em] text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline disabled:opacity-60"
+                  >
+                    {dictionary.products.clearFilters}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        {/* Results summary + active chips */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-light tracking-wide text-muted-foreground">
+            <span className="text-foreground">{total}</span>
+            {total === 1 ? ` ${dictionary.products.perfume}` : ` ${dictionary.products.perfumes}`}
+            {category !== 'all'
+              ? ` · ${allCategories.find((item) => item.value === category)?.label ?? category}`
+              : null}
+          </p>
+
+          {activeChips.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {activeChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={chip.onClear}
+                  disabled={isPending}
+                  className="inline-flex items-center gap-1.5 border border-primary/25 bg-primary/5 py-1 pl-2.5 pr-1.5 text-[11px] font-light text-primary transition-colors hover:border-primary/50 disabled:opacity-60"
+                >
+                  {chip.label}
+                  <X className="size-3" aria-hidden />
+                  <span className="sr-only">{dictionary.products.remove}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                disabled={isPending}
+                className="text-[11px] font-light tracking-[0.15em] text-muted-foreground hover:text-primary disabled:opacity-60"
+              >
+                {dictionary.products.clearAll}
+              </button>
+            </div>
+          ) : null}
         </div>
       </Reveal>
 
@@ -131,7 +375,7 @@ export function ProductsClient({
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/60 backdrop-blur-[1px]">
             <div className="flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm text-muted-foreground shadow-sm">
               <span className="size-4 animate-spin rounded-full border-2 border-border border-t-primary" />
-              Chargement...
+              {dictionary.products.loading}
             </div>
           </div>
         )}
@@ -139,11 +383,22 @@ export function ProductsClient({
         {total === 0 ? (
           category !== 'all' && storeCategories.some((item) => item.slug === category) ? (
             <p className="py-8 text-center text-sm font-light tracking-widest text-muted-foreground">
-              Produits bientot disponibles dans cette categorie
+              {dictionary.products.emptyCategory}
             </p>
           ) : (
             <div className="py-24 text-center">
-              <p className="text-sm font-light tracking-widest text-muted-foreground">AUCUN PRODUIT TROUVE</p>
+              <p className="text-sm font-light tracking-widest text-muted-foreground">
+                {dictionary.products.emptySearch}
+              </p>
+              {activeChips.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="mt-4 text-xs font-light tracking-[0.2em] text-primary underline-offset-4 hover:underline"
+                >
+                  {dictionary.products.resetFilters}
+                </button>
+              ) : null}
             </div>
           )
         ) : (
@@ -153,7 +408,11 @@ export function ProductsClient({
                 <Reveal key={product.id} delay={(index % 4) * 70}>
                   <ProductCard
                     product={product}
-                    categories={storeCategories.map((item) => ({ slug: item.slug, name: item.name }))}
+                    categories={storeCategories.map((item) => ({
+                      slug: item.slug,
+                      name: item.name,
+                    }))}
+                    priority={index < 4}
                   />
                 </Reveal>
               ))}
@@ -162,28 +421,46 @@ export function ProductsClient({
             {totalPages > 1 && (
               <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
                 <p className="text-sm font-light text-muted-foreground">
-                  Page {page} / {totalPages} · {total} produit{total > 1 ? 's' : ''}
+                  {dictionary.products.pageOf(page, totalPages, total)}
                 </p>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={page <= 1 || isPending}
-                    onClick={() => syncUrl(search, category, page - 1)}
+                    onClick={() => syncUrl({ page: page - 1 })}
                     className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-light tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden
+                      className="rtl:rotate-180"
+                    >
                       <path d="m15 18-6-6 6-6" />
                     </svg>
-                    Precedent
+                    {dictionary.products.previous}
                   </button>
                   <button
                     type="button"
                     disabled={page >= totalPages || isPending}
-                    onClick={() => syncUrl(search, category, page + 1)}
+                    onClick={() => syncUrl({ page: page + 1 })}
                     className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-light tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Suivant
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    {dictionary.products.next}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden
+                      className="rtl:rotate-180"
+                    >
                       <path d="m9 18 6-6-6-6" />
                     </svg>
                   </button>
@@ -194,5 +471,44 @@ export function ProductsClient({
         )}
       </div>
     </>
+  )
+}
+
+function FilterGroup({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:gap-6">
+      <p className="w-24 shrink-0 pt-1.5 text-[10px] font-light tracking-[0.28em] text-muted-foreground">
+        {label.toUpperCase()}
+      </p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  )
+}
+
+function FilterChip({
+  label,
+  active,
+  disabled,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  disabled?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={active}
+      className={`border px-3.5 py-1.5 text-[11px] font-light tracking-wide transition-colors disabled:opacity-60 ${
+        active
+          ? 'border-primary bg-primary text-primary-foreground'
+          : 'border-border/80 text-muted-foreground hover:border-primary/40 hover:text-primary'
+      }`}
+    >
+      {label}
+    </button>
   )
 }

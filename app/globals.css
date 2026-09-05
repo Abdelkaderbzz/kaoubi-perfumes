@@ -3,9 +3,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.font-arabic {
+  font-family: var(--font-arabic), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+[dir='rtl'] .font-serif {
+  font-family: var(--font-arabic), var(--font-serif), ui-serif, Georgia, serif;
+  letter-spacing: 0.02em;
+}
+
 @theme inline {
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-arabic: var(--font-arabic);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -54,43 +65,43 @@
   --card-foreground: #2a2418;
   --popover: #fffaf0;
   --popover-foreground: #2a2418;
-  --primary: #9a7420;
+  --primary: #8f6a1a;
   --primary-foreground: #fffaf0;
   --secondary: #efe4c8;
   --secondary-foreground: #2a2418;
   --muted: #efe6d0;
-  --muted-foreground: #6e624c;
-  --accent: #b8912f;
+  --muted-foreground: #4a4030;
+  --accent: #8f6a1a;
   --accent-foreground: #fffaf0;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2d4b0;
+  --border: #d4c49a;
   --input: #fffaf0;
-  --ring: #9a7420;
+  --ring: #8f6a1a;
   --radius: 0.625rem;
   --sidebar: #fffaf0;
   --sidebar-foreground: #2a2418;
-  --sidebar-primary: #9a7420;
+  --sidebar-primary: #8f6a1a;
   --sidebar-primary-foreground: #fffaf0;
   --sidebar-accent: #efe4c8;
   --sidebar-accent-foreground: #2a2418;
-  --sidebar-border: #e2d4b0;
-  --sidebar-ring: #9a7420;
+  --sidebar-border: #d4c49a;
+  --sidebar-ring: #8f6a1a;
 }
 
 .dark {
   color-scheme: dark;
   --background: #0b0b0b;
-  --foreground: #f3e6c4;
+  --foreground: #f7edd4;
   --card: #141210;
-  --card-foreground: #f3e6c4;
+  --card-foreground: #f7edd4;
   --popover: #141210;
-  --popover-foreground: #f3e6c4;
-  --primary: #c9a44a;
+  --popover-foreground: #f7edd4;
+  --primary: #d4ae55;
   --primary-foreground: #0b0b0b;
   --secondary: #1c1810;
-  --secondary-foreground: #f3e6c4;
+  --secondary-foreground: #f7edd4;
   --muted: #1a1712;
-  --muted-foreground: #b8a88a;
+  --muted-foreground: #d2c3a4;
   --accent: #e0c078;
   --accent-foreground: #0b0b0b;
   --destructive: oklch(0.577 0.245 27.325);
@@ -112,18 +123,24 @@
     scrollbar-gutter: stable;
   }
   html.storefront {
-    font-size: 87.5%;
+    font-size: 100%;
   }
   @media (min-width: 768px) {
     html.storefront {
-      font-size: 80%;
+      font-size: 100%;
     }
   }
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-weight: 400;
+  }
+
+  /* Prefer readable weights over ultra-light UI text on the storefront. */
+  .storefront .font-light {
+    font-weight: 500;
   }
 
   /* Didones look broken when the browser synthesizes a 300 weight. */
@@ -167,15 +184,21 @@
 /* Infinite testimonial marquee.
    The track holds two identical passes side by side, so shifting it by exactly
    -50% lands on the start of the second pass — visually identical to frame 0,
-   which is what makes the loop seamless. */
+   which is what makes the loop seamless.
+   Force LTR so page-level RTL (Arabic) does not reverse flex and break the loop. */
 .marquee {
   overflow: hidden;
+  direction: ltr;
 }
 
 .marquee-track {
   display: flex;
+  flex-direction: row;
+  gap: 0.875rem;
   width: max-content;
+  min-width: 100%;
   will-change: transform;
+  backface-visibility: hidden;
   animation: marquee-drift-left var(--marquee-duration, 70s) linear infinite;
 }
 
@@ -371,6 +394,17 @@
   line-height: 1.05;
 }
 
+/* Arabic glyphs (dots / descenders) need room — no overflow clip mask. */
+.hero-title-ar {
+  line-height: 1.35;
+  overflow: visible;
+}
+
+.hero-title-ar-in {
+  display: inline-block;
+  animation: hero-copy-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .hero-char-mask {
   display: inline-block;
   overflow: hidden;
@@ -495,12 +529,66 @@
   border-width: 0 1px 1px 0;
 }
 
+/* Boutique CTA: soft breath + gold shimmer once in view */
+@keyframes boutique-cta-breath {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: 0 0 28px 2px color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+}
+
+@keyframes boutique-cta-shine {
+  0% {
+    transform: translateX(-120%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-16deg);
+  }
+}
+
+.boutique-cta {
+  position: relative;
+  overflow: hidden;
+  animation: boutique-cta-breath 2.8s ease-in-out infinite;
+}
+
+.boutique-cta::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, white 35%, transparent),
+    transparent
+  );
+  animation: boutique-cta-shine 3.6s ease-in-out 0.8s infinite;
+}
+
+.boutique-cta:hover {
+  animation: none;
+  transform: scale(1.03);
+}
+
+.boutique-cta:hover::after {
+  animation: none;
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .reveal[data-reveal]:not([data-inview]),
   .hero-logo,
   .hero-eyebrow,
   .hero-char,
+  .hero-title-ar-in,
   .hero-rule,
   .hero-copy,
   .hero-cta,
@@ -511,7 +599,9 @@
   .hero-glow,
   .hero-glow-late,
   .hero-corner,
-  .hero-collage {
+  .hero-collage,
+  .boutique-cta,
+  .boutique-cta::after {
     animation: none;
     opacity: 1;
     transform: none;

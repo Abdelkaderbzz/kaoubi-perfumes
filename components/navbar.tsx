@@ -1,19 +1,26 @@
 'use client'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { Logo } from '@/components/logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useCart } from '@/components/cart-context'
+import { useDictionary } from '@/components/locale-provider'
+import { InstagramIcon, TikTokIcon } from '@/components/instagram-section-static'
 import { INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
 import type { StoreCategory } from '@/lib/store-categories'
 import Link from 'next/link'
 import { useState } from 'react'
 
+const socialIconCls =
+  'flex size-9 items-center justify-center rounded-full text-foreground/70 transition-colors hover:bg-primary/5 hover:text-primary'
+
 export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }) {
   const { count } = useCart()
+  const dictionary = useDictionary()
   const [menuOpen, setMenuOpen] = useState(false)
 
   const navLinks = [
-    { href: '/products', label: 'BOUTIQUE' },
+    { href: '/products', label: dictionary.nav.boutique },
     ...storeCategories.map((category) => ({
       href: `/products?category=${category.slug}`,
       label: category.name.toUpperCase(),
@@ -23,7 +30,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
-        <Link href="/" className="flex items-center gap-3" aria-label="Water of Gold — Accueil">
+        <Link href="/" className="flex items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
           <Logo size="sm" priority />
         </Link>
 
@@ -32,44 +39,51 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
             <Link
               key={link.href}
               href={link.href}
-              className="text-[11px] font-light tracking-[0.25em] text-muted-foreground transition-colors hover:text-primary"
+              prefetch
+              className="text-xs font-medium tracking-[0.18em] text-foreground/80 transition-colors hover:text-primary"
             >
               {link.label}
             </Link>
           ))}
-          <a
-            href={INSTAGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] font-light tracking-[0.25em] text-muted-foreground transition-colors hover:text-primary"
-          >
-            INSTAGRAM
-          </a>
-          <a
-            href={TIKTOK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] font-light tracking-[0.25em] text-muted-foreground transition-colors hover:text-primary"
-          >
-            TIKTOK
-          </a>
+          <div className="flex items-center gap-1">
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram Water of Gold"
+              className={socialIconCls}
+            >
+              <InstagramIcon />
+            </a>
+            <a
+              href={TIKTOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok Water of Gold"
+              className={socialIconCls}
+            >
+              <TikTokIcon />
+            </a>
+          </div>
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
+          <LanguageSwitcher />
           <ThemeToggle />
           <Link
             href="/checkout"
-            aria-label={count > 0 ? `Panier, ${count} article${count > 1 ? 's' : ''}` : 'Panier'}
-            className="relative flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-light tracking-widest text-foreground transition-colors hover:text-primary"
+            prefetch
+            aria-label={dictionary.nav.cartWithCount(count)}
+            className="relative flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-medium tracking-widest text-foreground transition-colors hover:text-primary"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 01-8 0" />
             </svg>
-            <span className="sr-only">Panier</span>
+            <span className="sr-only">{dictionary.nav.cart}</span>
             {count > 0 && (
-              <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+              <span className="absolute end-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
                 {count}
               </span>
             )}
@@ -80,7 +94,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
             className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-label={menuOpen ? dictionary.nav.closeMenu : dictionary.nav.openMenu}
           >
             <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'translate-y-2.5 rotate-45' : ''}`} />
             <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'opacity-0' : ''}`} />
@@ -96,28 +110,33 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch
                 onClick={() => setMenuOpen(false)}
-                className="text-sm font-light tracking-widest text-muted-foreground hover:text-primary"
+                className="text-sm font-medium tracking-wide text-foreground hover:text-primary"
               >
                 {link.label}
               </Link>
             ))}
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-light tracking-widest text-muted-foreground hover:text-primary"
-            >
-              INSTAGRAM
-            </a>
-            <a
-              href={TIKTOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-light tracking-widest text-muted-foreground hover:text-primary"
-            >
-              TIKTOK
-            </a>
+            <div className="flex items-center gap-3 pt-1">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram Water of Gold"
+                className={socialIconCls}
+              >
+                <InstagramIcon />
+              </a>
+              <a
+                href={TIKTOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok Water of Gold"
+                className={socialIconCls}
+              >
+                <TikTokIcon />
+              </a>
+            </div>
           </nav>
         </div>
       )}

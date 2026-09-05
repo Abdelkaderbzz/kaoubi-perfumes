@@ -1,5 +1,6 @@
 'use client'
 
+import { useDictionary } from '@/components/locale-provider'
 import { applyTheme, readDocumentTheme, type Theme } from '@/lib/theme'
 
 function SunIcon() {
@@ -20,6 +21,8 @@ function MoonIcon() {
 }
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
+  const dictionary = useDictionary()
+
   function toggle() {
     const next: Theme = readDocumentTheme() === 'dark' ? 'light' : 'dark'
     applyTheme(next)
@@ -29,17 +32,17 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
-      aria-label="Changer le theme"
-      title="Changer le theme"
+      aria-label={dictionary.theme.toggle}
+      title={dictionary.theme.toggle}
       className={`relative flex min-h-11 min-w-11 items-center justify-center text-foreground transition-colors hover:text-primary ${className}`}
     >
       <span className="dark:hidden">
         <MoonIcon />
-        <span className="sr-only">Passer en mode sombre</span>
+        <span className="sr-only">{dictionary.theme.dark}</span>
       </span>
       <span className="hidden dark:inline">
         <SunIcon />
-        <span className="sr-only">Passer en mode clair</span>
+        <span className="sr-only">{dictionary.theme.light}</span>
       </span>
     </button>
   )

@@ -5,16 +5,6 @@ type BaseTestimonial = {
   source: TestimonialSource
 }
 
-/** A real screenshot, shown as-is. Intrinsic size lets the marquee derive the
- *  card width from a fixed row height, so mixed ratios never get distorted. */
-export type TestimonialScreenshot = BaseTestimonial & {
-  kind: 'screenshot'
-  src: string
-  width: number
-  height: number
-  alt: string
-}
-
 /** A comment rendered as a card, styled after the platform it came from. */
 export type TestimonialComment = BaseTestimonial & {
   kind: 'comment'
@@ -27,21 +17,39 @@ export type TestimonialComment = BaseTestimonial & {
   storyRing?: boolean
 }
 
-export type TestimonialItem = TestimonialScreenshot | TestimonialComment
+/** A Google Maps review, rebuilt as a themed card instead of a raw screenshot
+ *  so it follows dark mode and matches the rest of the section. Quoted text
+ *  (`text`) is kept verbatim from the real review; only the surrounding
+ *  Google chrome (`meta`, `timeAgo`) is localized. */
+export type TestimonialGoogleReview = BaseTestimonial & {
+  kind: 'google'
+  source: 'google'
+  name: string
+  avatarInitial: string
+  avatarColor: string
+  meta: string
+  rating: number
+  timeAgo: string
+  text: string
+}
 
-/** One ordered wall of social proof. Google screenshots live on the top row;
- *  Instagram and WhatsApp comments share the bottom. Add screenshots to
- *  `public/reviews` and append them here — the rows and the source legend
- *  both derive from this list. */
+export type TestimonialItem = TestimonialComment | TestimonialGoogleReview
+
+/** One ordered wall of social proof. Google reviews live on the top row;
+ *  Instagram and WhatsApp comments share the bottom. The rows and the source
+ *  legend both derive from this list. */
 export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
   {
-    kind: 'screenshot',
+    kind: 'google',
     id: 'google-pulut',
     source: 'google',
-    src: '/reviews/pulut-plghuv.webp',
-    width: 714,
-    height: 278,
-    alt: 'Avis Google 5 etoiles de Pulut Plghuv : « Nice service »',
+    name: 'Pulut Plghuv',
+    avatarInitial: 'P',
+    avatarColor: '#a142f4',
+    meta: '8 avis',
+    rating: 5,
+    timeAgo: 'il y a 1 an',
+    text: 'Nice service',
   },
   {
     kind: 'comment',
@@ -62,13 +70,16 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     avatar: 'BY',
   },
   {
-    kind: 'screenshot',
+    kind: 'google',
     id: 'google-mohamed',
     source: 'google',
-    src: '/reviews/mohamed-regaya.webp',
-    width: 732,
-    height: 258,
-    alt: 'Avis Google 5 etoiles de Mohamed Regaya : « A wide variety of quality perfumes. I recommend it. »',
+    name: 'Mohamed Regaya',
+    avatarInitial: 'M',
+    avatarColor: '#4285f4',
+    meta: 'Guide Local · 9 avis · 4 photos',
+    rating: 5,
+    timeAgo: 'il y a 3 ans',
+    text: 'A wide variety of quality perfumes. I recommend it.',
   },
   {
     kind: 'comment',
@@ -90,13 +101,16 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     avatar: 'OA',
   },
   {
-    kind: 'screenshot',
+    kind: 'google',
     id: 'google-faouzia',
     source: 'google',
-    src: '/reviews/faouzia-chouki.webp',
-    width: 710,
-    height: 290,
-    alt: 'Avis Google 5 etoiles de Faouzia Chouki : « On trouve toutes sortes de parfums de grandes marques »',
+    name: 'Faouzia CHOUKI',
+    avatarInitial: 'F',
+    avatarColor: '#ea4335',
+    meta: 'Guide Local · 49 avis · 1 photo',
+    rating: 5,
+    timeAgo: 'il y a 3 ans',
+    text: 'On trouve toutes sortes de parfums de grandes marques',
   },
   {
     kind: 'comment',
@@ -108,13 +122,16 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     avatar: 'SM',
   },
   {
-    kind: 'screenshot',
+    kind: 'google',
     id: 'google-luk',
     source: 'google',
-    src: '/reviews/luk-becha.webp',
-    width: 724,
-    height: 260,
-    alt: 'Avis Google 5 etoiles de luk becha : « Numer one »',
+    name: 'luk becha',
+    avatarInitial: 'L',
+    avatarColor: '#34a853',
+    meta: '3 avis',
+    rating: 5,
+    timeAgo: 'il y a 3 ans',
+    text: 'Numer one',
   },
   {
     kind: 'comment',

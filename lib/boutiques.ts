@@ -1,3 +1,6 @@
+import type { Locale } from '@/lib/i18n'
+import { TUNISIA_GOVERNORATES } from '@/lib/tunisia-governorates'
+
 /** A boutique as the storefront consumes it, mapped from the database row. */
 export type Boutique = {
   id: number
@@ -25,6 +28,56 @@ export type PickupBoutique = {
   region: string
   address: string | null
   phone: string | null
+}
+
+/** Arabic storefront copy for boutique fields that live as French in the DB. */
+const BOUTIQUE_AR: Record<
+  string,
+  Partial<Pick<Boutique, 'city' | 'region' | 'description' | 'address'>>
+> = {
+  'sahloul-sousse': {
+    city: 'سوسة',
+    region: 'سهلول',
+    description:
+      'متجرنا موجود في سوسة، تلقاو فيه كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
+    address: 'شارع ياسر عرفات، سوسة',
+  },
+  'moknine-monastir': {
+    city: 'المكنين',
+    region: 'المنستير',
+    description:
+      'عنواننا في المكنين. نفس تشكيلة العطور المستوحاة والعطور المختارة، بثبات يدوم.',
+  },
+}
+
+const CITY_AR_EXTRA: Record<string, string> = {
+  Moknine: 'المكنين',
+  Sahloul: 'سهلول',
+}
+
+function cityInArabic(city: string) {
+  const fromExtra = CITY_AR_EXTRA[city]
+  if (fromExtra) return fromExtra
+  const governorate = TUNISIA_GOVERNORATES.find(
+    (g) => g.name.toLowerCase() === city.toLowerCase(),
+  )
+  return governorate?.nameAr ?? city
+}
+
+/** Localize boutique display fields for the active storefront locale. */
+export function localizeBoutique<T extends Pick<Boutique, 'slug' | 'city' | 'region' | 'description' | 'address'>>(
+  boutique: T,
+  locale: Locale,
+): T {
+  if (locale !== 'ar') return boutique
+  const override = BOUTIQUE_AR[boutique.slug]
+  return {
+    ...boutique,
+    city: override?.city ?? cityInArabic(boutique.city),
+    region: override?.region ?? cityInArabic(boutique.region),
+    description: override?.description ?? boutique.description,
+    address: override?.address ?? boutique.address,
+  }
 }
 
 /** Display number -> tel: href (Tunisian mobile, no spaces). */

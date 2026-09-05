@@ -1,3 +1,5 @@
+import { getDictionary, type Locale } from '@/lib/i18n'
+
 export type StoreCategory = {
   slug: string
   name: string
@@ -57,35 +59,64 @@ export type DbCategory = {
   bannerUrl?: string | null
 }
 
-export function mergeStoreCategories(dbCategories: DbCategory[]): StoreCategory[] {
+/** Ready-made translation for a known slug (femme/homme/unisexe/chta/sif), or
+ *  undefined for a custom category an admin added — those just render
+ *  whatever the admin typed, in whichever language they typed it. */
+function localizedCategoryText(slug: string, locale: Locale) {
+  const table = getDictionary(locale).categories as
+    | Record<string, { name: string; tagline: string } | undefined>
+    | undefined
+  return table?.[slug]
+}
+
+/** Category names/taglines are admin-edited DB text, so in French (the
+ *  default) the DB value always wins — that's what the admin typed. In
+ *  Arabic there's no DB column for it, so known slugs get overridden with
+ *  the fixed translation above; anything else falls back to the DB text. */
+export function mergeStoreCategories(dbCategories: DbCategory[], locale: Locale = 'fr'): StoreCategory[] {
   const dbBySlug = new Map(dbCategories.map((category) => [category.slug, category]))
+  const arabic = locale === 'ar'
 
   const fromDefaults = STORE_CATEGORIES.map((category) => {
     const fromDb = dbBySlug.get(category.slug)
+    const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
     return {
       ...category,
-      name: fromDb?.name ?? category.name,
+      name: translated?.name ?? fromDb?.name ?? category.name,
+      tagline: translated?.tagline ?? category.tagline,
       image: fromDb?.bannerUrl ?? category.image,
     }
   })
 
   const extras = dbCategories
     .filter((category) => !STORE_CATEGORIES.some((item) => item.slug === category.slug))
-    .map((category) => ({
-      slug: category.slug,
-      name: category.name,
-      tagline: category.name,
-      image: category.bannerUrl ?? '',
-    }))
+    .map((category) => {
+      const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
+      const frDefault = localizedCategoryText(category.slug, 'fr')
+      return {
+        slug: category.slug,
+        name: translated?.name ?? category.name,
+        tagline: translated?.tagline ?? frDefault?.tagline ?? category.name,
+        image: category.bannerUrl ?? '',
+      }
+    })
 
   return [...fromDefaults, ...extras]
 }
 
-export function getMergedCategoryBySlug(slug: string, dbCategories: DbCategory[]) {
-  return mergeStoreCategories(dbCategories).find((category) => category.slug === slug)
+export function getMergedCategoryBySlug(slug: string, dbCategories: DbCategory[], locale: Locale = 'fr') {
+  return mergeStoreCategories(dbCategories, locale).find((category) => category.slug === slug)
 }
 
-export function getCategoryLabel(slug: string, categories?: { slug: string; name: string }[]) {
+export function getCategoryLabel(
+  slug: string,
+  categories?: { slug: string; name: string }[],
+  locale: Locale = 'fr',
+) {
+  if (locale === 'ar') {
+    const translated = localizedCategoryText(slug, 'ar')
+    if (translated) return translated.name
+  }
   const fromDb = categories?.find((c) => c.slug === slug)
   if (fromDb) return fromDb.name
   return getCategoryBySlug(slug)?.name ?? slug

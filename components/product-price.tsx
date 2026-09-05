@@ -1,3 +1,6 @@
+'use client'
+
+import { useLocale } from '@/components/locale-provider'
 import {
   formatPriceTnd,
   getDiscountPercent,
@@ -18,6 +21,8 @@ export function ProductPrice({
   size = 'sm',
   className,
 }: ProductPriceProps) {
+  const { locale, dictionary } = useLocale()
+  const currency = dictionary.currency
   const current = parsePrice(price) ?? 0
   const percent = getDiscountPercent(price, compareAtPrice)
   const compareAt = parsePrice(compareAtPrice)
@@ -26,55 +31,54 @@ export function ProductPrice({
     return (
       <p
         className={cn(
-          size === 'lg'
-            ? 'text-2xl font-medium tabular-nums tracking-normal text-foreground'
-            : 'text-sm font-light text-foreground',
+          'tabular-nums tracking-normal text-foreground',
+          size === 'lg' ? 'text-3xl font-semibold' : 'text-sm font-semibold',
           className,
         )}
       >
-        {formatPriceTnd(current)}{' '}
+        {formatPriceTnd(current, locale)}{' '}
         <span
           className={cn(
-            'text-muted-foreground',
-            size === 'lg' ? 'text-sm font-normal' : 'text-[10px]',
+            'font-medium text-foreground/65',
+            size === 'lg' ? 'text-base' : 'text-[11px]',
           )}
         >
-          TND
+          {currency}
         </span>
       </p>
     )
   }
 
   return (
-    <div className={cn('flex flex-wrap items-baseline gap-x-2 gap-y-1', className)}>
+    <div className={cn('flex flex-wrap items-baseline gap-x-2 gap-y-0.5', className)}>
       <p
         className={cn(
           'tabular-nums text-foreground',
-          size === 'lg' ? 'text-2xl font-medium' : 'text-sm font-medium',
+          size === 'lg' ? 'text-3xl font-semibold' : 'text-sm font-semibold',
         )}
       >
-        {formatPriceTnd(current)}{' '}
+        {formatPriceTnd(current, locale)}{' '}
         <span
           className={cn(
-            'text-muted-foreground',
-            size === 'lg' ? 'text-sm font-normal' : 'text-[10px] font-light',
+            'font-medium text-foreground/65',
+            size === 'lg' ? 'text-base' : 'text-[11px]',
           )}
         >
-          TND
+          {currency}
         </span>
       </p>
       <p
         className={cn(
-          'tabular-nums text-muted-foreground line-through decoration-from-font',
-          size === 'lg' ? 'text-base font-light' : 'text-xs font-light',
+          'tabular-nums text-foreground/55 line-through decoration-from-font',
+          size === 'lg' ? 'text-lg font-medium' : 'text-[11px] font-medium',
         )}
       >
-        {formatPriceTnd(compareAt)} TND
+        {formatPriceTnd(compareAt, locale)} {currency}
       </p>
       <span
         className={cn(
-          'font-medium tracking-wide text-primary',
-          size === 'lg' ? 'text-sm' : 'text-[11px]',
+          'font-semibold tracking-wide text-primary',
+          size === 'lg' ? 'text-base' : 'text-[11px]',
         )}
       >
         -{percent}%

@@ -1,4 +1,4 @@
-import type { TestimonialComment } from '@/lib/testimonials'
+import type { TestimonialComment, TestimonialGoogleReview } from '@/lib/testimonials'
 
 const AVATAR_GRADIENTS = {
   instagram: 'from-pink-500 via-purple-500 to-orange-400',
@@ -47,15 +47,15 @@ const CHAT_WALLPAPER = `url("data:image/svg+xml,%3Csvg width='60' height='60' vi
 
 export function InstagramCommentCard({ item }: { item: TestimonialComment }) {
   return (
-    <div className="flex h-full flex-col justify-center bg-[#121212] px-4 py-3">
-      <div className="mb-2 flex items-center gap-1.5 text-[9px] tracking-wider text-white/40">
+    <div className="flex h-full w-full flex-col bg-[#121212] px-3.5 py-3">
+      <div className="mb-1.5 flex items-center gap-1.5 text-[9px] tracking-wider text-white/40">
         <InstagramGlyph />
         INSTAGRAM
       </div>
-      <div className="flex gap-2.5">
+      <div className="flex flex-1 gap-2.5">
         <Avatar item={item} />
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-3 text-[13px] leading-snug text-white">
+          <p className="line-clamp-3 text-[12px] leading-snug text-white">
             <span className="font-semibold">{item.username}</span>{' '}
             <span className="font-normal text-white/90">{item.message}</span>
           </p>
@@ -66,22 +66,91 @@ export function InstagramCommentCard({ item }: { item: TestimonialComment }) {
   )
 }
 
+function GoogleGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden className="shrink-0">
+      <path
+        fill="#FFC107"
+        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+      />
+      <path
+        fill="#FF3D00"
+        d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+      />
+    </svg>
+  )
+}
+
+function StarRow({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5" aria-label={`${rating} sur 5 etoiles`}>
+      {Array.from({ length: 5 }, (_, index) => (
+        <svg
+          key={index}
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill={index < rating ? '#f5b400' : 'none'}
+          stroke={index < rating ? 'none' : 'currentColor'}
+          strokeWidth="1.5"
+          className={index < rating ? '' : 'text-border'}
+          aria-hidden
+        >
+          <path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+export function GoogleReviewCard({ item }: { item: TestimonialGoogleReview }) {
+  return (
+    <div className="flex h-full w-full flex-col bg-card px-3.5 py-3">
+      <div className="flex items-center gap-2.5">
+        <div
+          className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+          style={{ backgroundColor: item.avatarColor }}
+        >
+          {item.avatarInitial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[12.5px] font-medium leading-tight text-foreground">{item.name}</p>
+          <p className="truncate text-[10px] leading-tight text-muted-foreground">{item.meta}</p>
+        </div>
+        <GoogleGlyph />
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
+        <StarRow rating={item.rating} />
+        <span className="text-[10px] text-muted-foreground">{item.timeAgo}</span>
+      </div>
+
+      <p className="mt-1.5 line-clamp-3 text-[12px] leading-snug text-foreground/80">{item.text}</p>
+    </div>
+  )
+}
+
 export function WhatsAppCommentCard({ item }: { item: TestimonialComment }) {
   return (
-    <div className="flex h-full flex-col bg-[#0b141a]">
-      <div className="flex items-center gap-2 border-b border-white/5 bg-[#1f2c34] px-3 py-2">
+    <div className="flex h-full w-full flex-col bg-[#0b141a]">
+      <div className="flex items-center gap-2 border-b border-white/5 bg-[#1f2c34] px-3 py-1.5">
         <Avatar item={item} />
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-medium text-white">{item.username}</p>
-          <p className="text-[9px] text-emerald-400">en ligne</p>
+          <p className="truncate text-[12.5px] font-medium leading-tight text-white">{item.username}</p>
+          <p className="text-[9px] leading-tight text-emerald-400">en ligne</p>
         </div>
       </div>
-      <div
-        className="flex flex-1 items-center px-3 py-3"
-        style={{ backgroundImage: CHAT_WALLPAPER }}
-      >
+      <div className="flex flex-1 flex-col px-3 py-2" style={{ backgroundImage: CHAT_WALLPAPER }}>
         <div className="max-w-[92%] rounded-lg rounded-tl-none bg-[#005c4b] px-2.5 py-1.5">
-          <p className="line-clamp-3 text-[12.5px] leading-relaxed text-[#e9edef]">{item.message}</p>
+          <p className="line-clamp-3 text-[12px] leading-snug text-[#e9edef]">{item.message}</p>
           <div className="mt-0.5 flex items-center justify-end gap-1">
             <span className="text-[9px] text-white/50">{item.time}</span>
             <ReadReceipt />
