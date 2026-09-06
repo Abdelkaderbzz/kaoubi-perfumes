@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import { Bodoni_Moda, Josefin_Sans } from 'next/font/google'
 import localFont from 'next/font/local'
@@ -158,7 +159,12 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <ToastProvider>{children}</ToastProvider>
         </LocaleProvider>
-        {process.env.VERCEL === '1' && <Analytics />}
+        {process.env.VERCEL === '1' && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   )
