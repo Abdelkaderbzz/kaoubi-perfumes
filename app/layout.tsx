@@ -158,7 +158,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <ToastProvider>{children}</ToastProvider>
         </LocaleProvider>
-        {process.env.VERCEL === '1' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )
