@@ -1,4 +1,11 @@
+import type { Locale } from '@/lib/i18n'
+
 export type TestimonialSource = 'google' | 'instagram' | 'whatsapp'
+
+export type LocalizedCopy = {
+  ar: string
+  fr: string
+}
 
 type BaseTestimonial = {
   id: string
@@ -18,22 +25,26 @@ export type TestimonialComment = BaseTestimonial & {
 }
 
 /** A Google Maps review, rebuilt as a themed card instead of a raw screenshot
- *  so it follows dark mode and matches the rest of the section. Quoted text
- *  (`text`) is kept verbatim from the real review; only the surrounding
- *  Google chrome (`meta`, `timeAgo`) is localized. */
+ *  so it follows dark mode and matches the rest of the section. Review body
+ *  (`text`) is Tunisian Arabic; Google chrome (`meta`, `timeAgo`) follows the
+ *  active locale. */
 export type TestimonialGoogleReview = BaseTestimonial & {
   kind: 'google'
   source: 'google'
   name: string
   avatarInitial: string
   avatarColor: string
-  meta: string
+  meta: LocalizedCopy
   rating: number
-  timeAgo: string
+  timeAgo: LocalizedCopy
   text: string
 }
 
 export type TestimonialItem = TestimonialComment | TestimonialGoogleReview
+
+export function localizedCopy(copy: LocalizedCopy, locale: Locale) {
+  return copy[locale]
+}
 
 /** One ordered wall of social proof. Google reviews live on the top row;
  *  Instagram and WhatsApp comments share the bottom. The rows and the source
@@ -46,10 +57,10 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     name: 'Pulut Plghuv',
     avatarInitial: 'P',
     avatarColor: '#a142f4',
-    meta: '8 avis',
+    meta: { ar: '8 تقييمات', fr: '8 avis' },
     rating: 5,
-    timeAgo: 'il y a 1 an',
-    text: 'Nice service',
+    timeAgo: { ar: 'هاذي عام', fr: 'il y a 1 an' },
+    text: 'الخدمة مزيانة برشا',
   },
   {
     kind: 'comment',
@@ -76,10 +87,10 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     name: 'Mohamed Regaya',
     avatarInitial: 'M',
     avatarColor: '#4285f4',
-    meta: 'Guide Local · 9 avis · 4 photos',
+    meta: { ar: 'مرشد محلي · 9 تقييمات · 4 صور', fr: 'Guide Local · 9 avis · 4 photos' },
     rating: 5,
-    timeAgo: 'il y a 3 ans',
-    text: 'A wide variety of quality perfumes. I recommend it.',
+    timeAgo: { ar: 'هاذي 3 سنين', fr: 'il y a 3 ans' },
+    text: 'فما برشا عطور جودة عالية. ننصح بيها.',
   },
   {
     kind: 'comment',
@@ -107,10 +118,10 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     name: 'Faouzia CHOUKI',
     avatarInitial: 'F',
     avatarColor: '#ea4335',
-    meta: 'Guide Local · 49 avis · 1 photo',
+    meta: { ar: 'مرشد محلي · 49 تقييم · 1 صورة', fr: 'Guide Local · 49 avis · 1 photo' },
     rating: 5,
-    timeAgo: 'il y a 3 ans',
-    text: 'On trouve toutes sortes de parfums de grandes marques',
+    timeAgo: { ar: 'هاذي 3 سنين', fr: 'il y a 3 ans' },
+    text: 'تلقاو كل أنواع العطور متاع الماركات الكبيرة',
   },
   {
     kind: 'comment',
@@ -128,10 +139,10 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
     name: 'luk becha',
     avatarInitial: 'L',
     avatarColor: '#34a853',
-    meta: '3 avis',
+    meta: { ar: '3 تقييمات', fr: '3 avis' },
     rating: 5,
-    timeAgo: 'il y a 3 ans',
-    text: 'Numer one',
+    timeAgo: { ar: 'هاذي 3 سنين', fr: 'il y a 3 ans' },
+    text: 'الأحسن بلا منازع',
   },
   {
     kind: 'comment',
@@ -144,10 +155,10 @@ export const TESTIMONIAL_ITEMS: TestimonialItem[] = [
   },
 ]
 
-export const TESTIMONIAL_SOURCES: Record<TestimonialSource, { label: string; dotClass: string }> = {
-  google: { label: 'Avis Google', dotClass: 'bg-[#4285f4]' },
-  instagram: { label: 'Instagram', dotClass: 'bg-linear-to-r from-pink-500 to-orange-400' },
-  whatsapp: { label: 'WhatsApp', dotClass: 'bg-emerald-500' },
+export const TESTIMONIAL_SOURCES: Record<TestimonialSource, { dotClass: string }> = {
+  google: { dotClass: 'bg-[#4285f4]' },
+  instagram: { dotClass: 'bg-linear-to-r from-pink-500 to-orange-400' },
+  whatsapp: { dotClass: 'bg-emerald-500' },
 }
 
 const SOURCE_ORDER: TestimonialSource[] = ['google', 'instagram', 'whatsapp']

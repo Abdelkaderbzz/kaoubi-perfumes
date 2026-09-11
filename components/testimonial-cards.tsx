@@ -1,4 +1,7 @@
-import type { TestimonialComment, TestimonialGoogleReview } from '@/lib/testimonials'
+'use client'
+
+import { useLocale } from '@/components/locale-provider'
+import { localizedCopy, type TestimonialComment, type TestimonialGoogleReview } from '@/lib/testimonials'
 
 const AVATAR_GRADIENTS = {
   instagram: 'from-pink-500 via-purple-500 to-orange-400',
@@ -89,9 +92,9 @@ function GoogleGlyph() {
   )
 }
 
-function StarRow({ rating }: { rating: number }) {
+function StarRow({ rating, label }: { rating: number; label: string }) {
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${rating} sur 5 etoiles`}>
+    <div className="flex items-center gap-0.5" aria-label={label}>
       {Array.from({ length: 5 }, (_, index) => (
         <svg
           key={index}
@@ -112,6 +115,8 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export function GoogleReviewCard({ item }: { item: TestimonialGoogleReview }) {
+  const { locale, dictionary } = useLocale()
+
   return (
     <div className="flex h-full w-full flex-col bg-card px-3.5 py-3">
       <div className="flex items-center gap-2.5">
@@ -123,17 +128,25 @@ export function GoogleReviewCard({ item }: { item: TestimonialGoogleReview }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[12.5px] font-medium leading-tight text-foreground">{item.name}</p>
-          <p className="truncate text-[10px] leading-tight text-muted-foreground">{item.meta}</p>
+          <p className="truncate text-[10px] leading-tight text-muted-foreground">
+            {localizedCopy(item.meta, locale)}
+          </p>
         </div>
         <GoogleGlyph />
       </div>
 
       <div className="mt-2 flex items-center gap-2">
-        <StarRow rating={item.rating} />
-        <span className="text-[10px] text-muted-foreground">{item.timeAgo}</span>
+        <StarRow rating={item.rating} label={dictionary.testimonials.starsAria(item.rating)} />
+        <span className="text-[10px] text-muted-foreground">{localizedCopy(item.timeAgo, locale)}</span>
       </div>
 
-      <p className="mt-1.5 line-clamp-3 text-[12px] leading-snug text-foreground/80">{item.text}</p>
+      <p
+        dir="rtl"
+        lang="ar-TN"
+        className="mt-1.5 line-clamp-3 text-right text-[12px] leading-snug text-foreground/80"
+      >
+        {item.text}
+      </p>
     </div>
   )
 }

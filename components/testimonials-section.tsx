@@ -129,7 +129,7 @@ export function TestimonialsSection() {
           {sources.map((source) => (
             <span key={source} className="flex items-center gap-2">
               <span className={`h-2 w-2 rounded-full ${TESTIMONIAL_SOURCES[source].dotClass}`} />
-              {TESTIMONIAL_SOURCES[source].label}
+              {dictionary.testimonials[source]}
             </span>
           ))}
         </Reveal>
