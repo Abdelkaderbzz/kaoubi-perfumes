@@ -326,6 +326,24 @@ html.storefront.dark {
   transform: none;
 }
 
+/* Maison plaque footer — black-and-gold seal, independent of theme. */
+.site-footer {
+  background: #160d10;
+  color: #f3e4cc;
+  border-top: 1px solid rgba(201, 164, 74, 0.38);
+}
+
+.site-footer-plaque {
+  border: 1px solid rgba(201, 164, 74, 0.42);
+  box-shadow:
+    inset 0 0 0 6px #160d10,
+    inset 0 0 0 7px rgba(201, 164, 74, 0.3);
+}
+
+.site-footer-rule {
+  border-top: 1px solid rgba(201, 164, 74, 0.22);
+}
+
 /* Campaign hero: still photography, gold plate, one copy reveal. */
 @keyframes hero-kicker-in {
   from {
@@ -685,6 +703,48 @@ html.storefront.dark {
 .whatsapp-fab:hover .whatsapp-fab-ping,
 .whatsapp-fab:focus-visible .whatsapp-fab-ping {
   animation-play-state: paused;
+}
+
+.incoming-facade {
+  display: flex;
+  width: 4.25rem;
+  flex-direction: column;
+  align-items: center;
+  color: var(--primary);
+}
+
+.incoming-facade-roof {
+  display: block;
+  width: 100%;
+  height: 0;
+  border-inline: 0.7rem solid transparent;
+  border-bottom: 0.55rem solid currentColor;
+  opacity: 0.7;
+}
+
+.incoming-facade-body {
+  display: grid;
+  width: 3.35rem;
+  grid-template-columns: 1fr 0.7fr 1fr;
+  gap: 0.18rem;
+  border: 1px solid currentColor;
+  padding: 0.28rem 0.22rem 0.18rem;
+  opacity: 0.85;
+}
+
+.incoming-facade-window {
+  display: block;
+  height: 0.7rem;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+}
+
+.incoming-facade-door {
+  display: block;
+  height: 0.95rem;
+  align-self: end;
+  border: 1px solid currentColor;
+  background: color-mix(in oklab, var(--primary) 18%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
