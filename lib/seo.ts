@@ -1,9 +1,17 @@
 import { FACEBOOK_URL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
+import {
+  STORE_CITY,
+  STORE_EMAIL,
+  STORE_GOVERNORATE,
+  STORE_MAPS_URL,
+  STORE_PHONE,
+  STORE_POSTAL_CODE,
+} from '@/lib/contact'
 import { getSiteUrl } from '@/lib/site'
 import { parsePrice } from '@/lib/product-price'
 import { getPrimaryImage } from '@/lib/product-images'
 
-const BRAND = 'Water of Gold'
+const BRAND = 'KAOUBI PERFUMES'
 
 export function organizationJsonLd() {
   const siteUrl = getSiteUrl()
@@ -14,6 +22,8 @@ export function organizationJsonLd() {
     name: BRAND,
     url: siteUrl,
     logo: `${siteUrl}/logo.webp`,
+    email: STORE_EMAIL,
+    telephone: `+216 ${STORE_PHONE}`,
     sameAs: [INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL],
   }
 }
@@ -37,6 +47,7 @@ export function perfumeStoreJsonLd(boutiques: {
     },
     telephone: boutique.phone || undefined,
     url: boutique.directionsUrl || siteUrl,
+    hasMap: boutique.directionsUrl || STORE_MAPS_URL,
   }))
 
   return {
@@ -48,9 +59,15 @@ export function perfumeStoreJsonLd(boutiques: {
     priceRange: '$$',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Sousse',
+      streetAddress: boutiques[0]?.address || undefined,
+      addressLocality: STORE_CITY,
+      addressRegion: STORE_GOVERNORATE,
+      postalCode: STORE_POSTAL_CODE,
       addressCountry: 'TN',
     },
+    email: STORE_EMAIL,
+    telephone: `+216 ${STORE_PHONE}`,
+    hasMap: boutiques[0]?.directionsUrl || STORE_MAPS_URL,
     sameAs: [INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL],
     ...(locations.length > 0 ? { department: locations } : {}),
   }

@@ -12,7 +12,7 @@ function storageKey(banner: ActiveBanner) {
   for (let index = 0; index < banner.message.length; index += 1) {
     hash = (hash * 31 + banner.message.charCodeAt(index)) | 0
   }
-  return `wog-banner-dismissed-${banner.id}-${hash}`
+  return `kaoubi-banner-dismissed-${banner.id}-${hash}`
 }
 
 export function SiteBanner({ banner }: { banner: ActiveBanner }) {

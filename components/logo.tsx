@@ -7,10 +7,10 @@ type LogoProps = {
 }
 
 const sizes = {
-  sm: { className: 'h-9 w-9', px: 72 },
-  md: { className: 'h-16 w-16', px: 128 },
-  lg: { className: 'h-28 w-28', px: 224 },
-  xl: { className: 'h-36 w-36', px: 288 },
+  sm: { className: 'h-9 w-9', px: 72, src: '/logo-mark.webp' },
+  md: { className: 'h-16 w-16', px: 128, src: '/logo-mark.webp' },
+  lg: { className: 'h-28 w-28', px: 224, src: '/logo.webp' },
+  xl: { className: 'h-36 w-36', px: 288, src: '/logo.webp' },
 }
 
 export function Logo({ size = 'md', className = '', priority = false }: LogoProps) {
@@ -19,8 +19,8 @@ export function Logo({ size = 'md', className = '', priority = false }: LogoProp
   return (
     <div className={`relative shrink-0 overflow-hidden rounded-md bg-black ${config.className} ${className}`}>
       <Image
-        src="/logo-wog.webp"
-        alt="Water of Gold"
+        src={config.src}
+        alt="KAOUBI PERFUMES"
         width={config.px}
         height={config.px}
         sizes={`${config.px}px`}

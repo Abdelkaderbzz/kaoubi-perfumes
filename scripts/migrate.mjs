@@ -234,6 +234,35 @@ const INCREMENTAL_ALTERS = [
      AND "imageUrl" != ''
      AND ("images" IS NULL OR "images" = '[]')`,
   `DELETE FROM "categories" WHERE "slug" IN ('parfums', 'maquillage', 'sacs', 'soins', 'unisex', 'tous')`,
+  `UPDATE "boutiques"
+   SET "slug" = 'douz-kebili',
+       "name" = 'KAOUBI PERFUMES Douz',
+       "city" = 'Douz',
+       "region" = 'Douz Nord',
+       "description" = 'Notre boutique a Douz, Kébili. Toute la collection femme et homme, avec conseil personnalise sur place.',
+       "imageAlt" = 'Boutique KAOUBI PERFUMES a Douz',
+       "address" = 'Rue de Habib Bourguiba, Douz Nord, Douz, Kébili, 4260',
+       "phone" = '94 090 440',
+       "rating" = NULL,
+       "reviewCount" = NULL,
+       "ratingSource" = 'Google Maps',
+       "directionsUrl" = 'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46',
+       "updatedAt" = NOW()
+   WHERE "slug" = 'sahloul-sousse'
+     AND NOT EXISTS (SELECT 1 FROM "boutiques" WHERE "slug" = 'douz-kebili')`,
+  `UPDATE "boutiques"
+   SET "name" = 'KAOUBI PERFUMES Douz',
+       "city" = 'Douz',
+       "region" = 'Douz Nord',
+       "description" = 'Notre boutique a Douz, Kébili. Toute la collection femme et homme, avec conseil personnalise sur place.',
+       "imageAlt" = 'Boutique KAOUBI PERFUMES a Douz',
+       "address" = 'Rue de Habib Bourguiba, Douz Nord, Douz, Kébili, 4260',
+       "phone" = '94 090 440',
+       "directionsUrl" = 'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46',
+       "updatedAt" = NOW()
+   WHERE "slug" = 'douz-kebili'`,
+  `UPDATE "boutiques" SET "published" = false, "pickupEnabled" = false, "updatedAt" = NOW()
+   WHERE "slug" = 'moknine-monastir'`,
 ]
 
 const BASELINE_DATA = [
@@ -249,16 +278,11 @@ const BASELINE_DATA = [
   `INSERT INTO "boutiques"
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "sortOrder")
    VALUES
-    ('sahloul-sousse', 'Water of Gold Sousse', 'Sousse', 'Sahloul',
-     'Notre boutique a Sousse. Toute la collection femme et homme, avec conseil personnalise sur place.',
-     '/boutiques/storefront.webp', 'Facade de la boutique Water of Gold a Sousse, de nuit',
-     'Av. Yasser Arafat, Sousse', '27 330 407', 4.9, NULL, 'Google Maps',
-     'https://www.google.com/maps/dir/?api=1&destination=35.8377722%2C10.5965168', 0),
-    ('moknine-monastir', 'Water of Gold Moknine', 'Moknine', 'Monastir',
-     'Notre adresse a Moknine. La meme selection de fragrances inspirees et de parfums de choix, longue tenue.',
-     '/boutiques/interior.webp', 'Interieur de la boutique Water of Gold, presentoirs de parfums',
-     NULL, NULL, 4.7, 72, 'Facebook',
-     'https://www.google.com/maps/dir/?api=1&destination=Moknine%2C+Monastir%2C+Tunisie', 1)
+    ('douz-kebili', 'KAOUBI PERFUMES Douz', 'Douz', 'Douz Nord',
+     'Notre boutique a Douz, Kébili. Toute la collection femme et homme, avec conseil personnalise sur place.',
+     '/boutiques/storefront.webp', 'Boutique KAOUBI PERFUMES a Douz',
+     'Rue de Habib Bourguiba, Douz Nord, Douz, Kébili, 4260', '94 090 440', NULL, NULL, 'Google Maps',
+     'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46', 0)
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "carousel_videos" ("url", "sortOrder") VALUES
     ('https://www.instagram.com/reel/DZ3XNGpsShF/', 0),
@@ -267,10 +291,10 @@ const BASELINE_DATA = [
     ('https://www.instagram.com/reel/DZvMI4OsOJd/', 3)
    ON CONFLICT ("url") DO NOTHING`,
   `INSERT INTO "hero_images" ("slot", "imageUrl", "alt") VALUES
-    (0, '/hero/campaign-ramadan.webp', 'Campagne Water of Gold'),
-    (1, '/hero/boutique-shelves.webp', 'Boutique Water of Gold'),
-    (2, '/hero/lifestyle-signature.webp', 'Parfum signature Water of Gold'),
-    (3, '/hero/gold-bottles.webp', 'Selection Water of Gold')
+    (0, '/hero/boutique-arches.webp', 'Rayonnages de la boutique KAOUBI PERFUMES'),
+    (1, '/hero/boutique-cosmetic.webp', 'Espace cosmetique KAOUBI PERFUMES'),
+    (2, '/hero/boutique-counter.webp', 'Comptoir de la boutique KAOUBI PERFUMES'),
+    (3, '/hero/boutique-logo-wall.webp', 'Boutique KAOUBI PERFUMES a Douz')
    ON CONFLICT ("slot") DO NOTHING`,
   `INSERT INTO "banners" (
       "name", "message", "variant", "backgroundColor", "textColor", "fontSize",
@@ -278,9 +302,9 @@ const BASELINE_DATA = [
     )
     SELECT
       'Livraison',
-      'Livraison partout en Tunisie · Retrait en boutique a Sousse et Moknine',
+      'Livraison partout en Tunisie · Retrait en boutique a Douz',
       'offer',
-      '#c9a44a',
+      '#d4af37',
       '#0b0b0b',
       13,
       'Voir la boutique',

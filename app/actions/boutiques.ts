@@ -2,6 +2,7 @@
 
 import { requireAdminId } from '@/lib/admin-auth'
 import { slugifyBoutique, type Boutique, type PickupBoutique } from '@/lib/boutiques'
+import { STORE_MAPS_URL } from '@/lib/contact'
 import { db } from '@/lib/db'
 import { boutiques } from '@/lib/db/schema'
 import type { BoutiqueFormValues } from '@/lib/validations'
@@ -13,6 +14,9 @@ type BoutiqueRow = typeof boutiques.$inferSelect
 export type BoutiqueActionResult<T = undefined> =
   | { success: true; data: T }
   | { success: false; error: string }
+
+const LEGACY_MAPS_URL =
+  'https://www.google.com/maps/dir/?api=1&destination=Rue+de+Habib+Bourguiba%2C+Douz+Nord%2C+Douz%2C+Kebili%2C+Tunisia+4260'
 
 function toBoutique(row: BoutiqueRow): Boutique {
   return {
@@ -29,7 +33,10 @@ function toBoutique(row: BoutiqueRow): Boutique {
     rating: row.rating == null ? null : parseFloat(row.rating),
     reviewCount: row.reviewCount,
     ratingSource: row.ratingSource,
-    directionsUrl: row.directionsUrl,
+    directionsUrl:
+      !row.directionsUrl || row.directionsUrl === LEGACY_MAPS_URL
+        ? STORE_MAPS_URL
+        : row.directionsUrl,
     pickupEnabled: row.pickupEnabled,
   }
 }

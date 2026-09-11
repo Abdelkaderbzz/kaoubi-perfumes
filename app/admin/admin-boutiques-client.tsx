@@ -308,7 +308,7 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 <label className={adminLabelCls}>NOM *</label>
                 <input
                   className={adminInputWithError(!!errors.name)}
-                  placeholder="Ex: Water of Gold Sousse"
+                  placeholder="Ex: KAOUBI PERFUMES Douz"
                   disabled={isPending}
                   {...register('name')}
                 />
@@ -318,7 +318,7 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 <label className={adminLabelCls}>VILLE *</label>
                 <input
                   className={adminInputWithError(!!errors.city)}
-                  placeholder="Ex: Sousse"
+                  placeholder="Ex: Douz"
                   disabled={isPending}
                   {...register('city')}
                 />
@@ -328,7 +328,7 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 <label className={adminLabelCls}>QUARTIER / REGION</label>
                 <input
                   className={adminInputWithError(!!errors.region)}
-                  placeholder="Ex: Sahloul"
+                  placeholder="Ex: Douz Nord"
                   disabled={isPending}
                   {...register('region')}
                 />
@@ -363,7 +363,7 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 <label className={adminLabelCls}>ADRESSE</label>
                 <input
                   className={adminInputWithError(!!errors.address)}
-                  placeholder="Ex: Av. Yasser Arafat, Sousse"
+                  placeholder="Ex: Rue de Habib Bourguiba, Douz"
                   disabled={isPending}
                   {...register('address')}
                 />
@@ -418,7 +418,7 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
               <label className={adminLabelCls}>LIEN ITINERAIRE (GOOGLE MAPS)</label>
               <input
                 className={adminInputWithError(!!errors.directionsUrl)}
-                placeholder="https://www.google.com/maps/dir/?api=1&destination=..."
+                placeholder="https://maps.app.goo.gl/..."
                 disabled={isPending}
                 {...register('directionsUrl')}
               />

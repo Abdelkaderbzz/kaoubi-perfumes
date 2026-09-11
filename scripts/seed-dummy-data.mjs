@@ -78,7 +78,7 @@ function parseArgs(argv) {
 
 function printHelp() {
   console.log(`
-Dummy data seeder — Water of Gold
+Dummy data seeder — KAOUBI PERFUMES
 
 Usage:
   node scripts/seed-dummy-data.mjs [options]

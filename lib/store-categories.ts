@@ -24,10 +24,10 @@ export const STORE_CATEGORIES: StoreCategory[] = [
 
 /** @deprecated Prefer getHeroImages() from app/actions/hero — kept for showcase gallery refs. */
 export const HERO_IMAGES = [
-  { src: '/hero/campaign-ramadan.webp', alt: 'Campagne Water of Gold' },
-  { src: '/hero/boutique-shelves.webp', alt: 'Boutique Water of Gold' },
-  { src: '/hero/lifestyle-signature.webp', alt: 'Parfum signature' },
-  { src: '/hero/gold-bottles.webp', alt: 'Selection Water of Gold' },
+  { src: '/hero/boutique-arches.webp', alt: 'Rayonnages de la boutique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-cosmetic.webp', alt: 'Espace cosmetique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-counter.webp', alt: 'Comptoir KAOUBI PERFUMES' },
+  { src: '/hero/boutique-logo-wall.webp', alt: 'Boutique KAOUBI PERFUMES' },
 ]
 
 export type ShowcaseImage = {
@@ -41,8 +41,8 @@ export const SHOWCASE_GALLERY: ShowcaseImage[] = [
   { src: '/hero/ysl-libre.webp', alt: 'Eau de parfum', category: 'femme' },
   { src: '/hero/campaign-ramadan.webp', alt: 'Collection femme', category: 'femme' },
   { src: '/hero/givenchy-gentleman.webp', alt: 'Parfum homme', category: 'homme' },
-  { src: '/hero/boutique-shelves.webp', alt: 'Boutique Water of Gold', category: 'homme' },
-  { src: '/hero/gold-bottles.webp', alt: 'Fragrances Water of Gold', category: 'femme' },
+  { src: '/hero/boutique-arches.webp', alt: 'Boutique KAOUBI PERFUMES', category: 'homme' },
+  { src: '/hero/boutique-cosmetic.webp', alt: 'Fragrances KAOUBI PERFUMES', category: 'femme' },
 ]
 
 export function getShowcaseByCategory(category: string) {

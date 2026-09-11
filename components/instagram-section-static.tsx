@@ -1,7 +1,7 @@
 'use client'
 
 import { useDictionary } from '@/components/locale-provider'
-import { INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
+import { FACEBOOK_URL, INSTAGRAM_URL, SOCIAL_HANDLE, TIKTOK_URL } from '@/lib/social-links'
 import { Reveal } from '@/components/reveal'
 import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 
@@ -23,6 +23,14 @@ export function TikTokIcon({ className }: { className?: string }) {
   )
 }
 
+export function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M14.5 8.5h2.5V5.2c-.4-.06-1.4-.2-2.6-.2-2.6 0-4.3 1.6-4.3 4.6V12H7.5v3.6h2.6V22h3.6v-6.4h2.6l.4-3.6h-3V9.9c0-1 .3-1.4 1.3-1.4z" />
+    </svg>
+  )
+}
+
 const followButtonCls =
   'inline-flex items-center gap-2.5 rounded-full border border-border px-6 py-2.5 text-[11px] font-light tracking-[0.25em] text-muted-foreground transition-all hover:border-primary hover:bg-primary/5 hover:text-primary'
 
@@ -31,7 +39,7 @@ export function InstagramSectionHeader() {
   return (
     <Reveal className="mb-8 text-center">
       <SectionEyebrow>{dictionary.instagram.eyebrow}</SectionEyebrow>
-      <SectionTitle>@waterofgold</SectionTitle>
+      <SectionTitle>@{SOCIAL_HANDLE}</SectionTitle>
       <p className="mx-auto mt-3 max-w-md text-sm font-light text-muted-foreground">
         {dictionary.instagram.copy}
       </p>
@@ -49,6 +57,10 @@ export function InstagramFollowButton() {
       </a>
       <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" className={followButtonCls}>
         <TikTokIcon />
+        {dictionary.instagram.follow}
+      </a>
+      <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={followButtonCls}>
+        <FacebookIcon />
         {dictionary.instagram.follow}
       </a>
     </div>

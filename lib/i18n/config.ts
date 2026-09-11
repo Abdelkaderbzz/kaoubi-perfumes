@@ -3,7 +3,7 @@ export type Locale = (typeof locales)[number]
 
 export const defaultLocale: Locale = 'fr'
 
-export const LOCALE_COOKIE = 'wog-locale'
+export const LOCALE_COOKIE = 'kaoubi-locale'
 
 export function isLocale(value: unknown): value is Locale {
   return value === 'fr' || value === 'ar'

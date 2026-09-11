@@ -2,19 +2,19 @@ import type { Locale } from './config'
 
 const fr = {
   meta: {
-    title: 'Water of Gold | Parfumerie a Sousse',
+    title: 'KAOUBI PERFUMES | Parfumerie a Douz',
     description:
-      'Water of Gold est une boutique de parfums a Sousse, Tunisie. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.',
+      'KAOUBI PERFUMES est une boutique de parfums a Douz, Kébili, Tunisie. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.',
     productsTitle: 'Boutique de parfums',
     productsDescription:
-      'Decouvrez notre selection de parfums femme, homme et mixtes a Sousse. Fragrances de longue tenue inspirees des grandes maisons.',
+      'Decouvrez notre selection de parfums femme, homme et mixtes a Douz. Fragrances de longue tenue inspirees des grandes maisons.',
     productTitle: (brand: string, name: string) => `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — parfum ${category} disponible chez Water of Gold a Sousse, Tunisie.`,
+      `${brand} ${name} — parfum ${category} disponible chez KAOUBI PERFUMES a Douz, Tunisie.`,
   },
   nav: {
     boutique: 'BOUTIQUE',
-    homeAria: 'Water of Gold — Accueil',
+    homeAria: 'KAOUBI PERFUMES — Accueil',
     cart: 'Panier',
     cartWithCount: (count: number) =>
       count > 0 ? `Panier, ${count} article${count > 1 ? 's' : ''}` : 'Panier',
@@ -24,12 +24,12 @@ const fr = {
   },
   footer: {
     tagline: 'PARFUMERIE · FEMME & HOMME',
-    location: 'SOUSSE, TUNISIE',
+    location: 'DOUZ, KÉBILI · TUNISIE',
     madeBy: 'Site web cree par',
   },
   hero: {
-    eyebrow: 'MAISON DE PARFUM · SOUSSE',
-    title: 'Water of Gold',
+    eyebrow: 'MAISON DE PARFUM · DOUZ',
+    title: 'KAOUBI',
     copy: 'Fragrances inspirees des grandes maisons, de longue tenue, pour femmes et hommes.',
     discover: 'DECOUVRIR',
     women: 'FEMME',
@@ -71,13 +71,14 @@ const fr = {
     reviews: (count: number) => `${count} avis · `,
     address: 'Adresse',
     phone: 'Telephone',
+    email: 'Email',
     directions: 'ITINERAIRE',
     call: 'APPELER',
   },
   instagram: {
     eyebrow: 'INSTAGRAM',
-    copy: 'Coulisses, nouveautes et inspirations parfumees a Sousse.',
-    follow: 'SUIVRE @waterofgold',
+    copy: 'Coulisses, nouveautes et inspirations parfumees a Douz.',
+    follow: 'SUIVRE @kaoubi.perfumes',
   },
   banner: {
     news: 'NOUVEAUTE',
@@ -225,19 +226,19 @@ export type Dictionary = DeepStringify<typeof fr>
 
 const ar: Dictionary = {
   meta: {
-    title: 'Water of Gold | عطور بسوسة',
+    title: 'KAOUBI PERFUMES | عطور بدوز',
     description:
-      'Water of Gold متجر عطور في سوسة، تونس. عطور مستوحاة من أكبر الدور العالمية، بثبات طويل، للنساء والرجال.',
+      'KAOUBI PERFUMES متجر عطور في دوز، قبلي، تونس. عطور مستوحاة من أكبر الدور العالمية، بثبات طويل، للنساء والرجال.',
     productsTitle: 'متجر العطور',
     productsDescription:
-      'اكتشفوا مجموعتنا من عطور النساء والرجال والمختلطة في سوسة. عطور بثبات طويل مستوحاة من كبرى الدور.',
+      'اكتشفوا مجموعتنا من عطور النساء والرجال والمختلطة في دوز. عطور بثبات طويل مستوحاة من كبرى الدور.',
     productTitle: (brand: string, name: string) => `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — عطر ${category} متوفر لدى Water of Gold في سوسة، تونس.`,
+      `${brand} ${name} — عطر ${category} متوفر لدى KAOUBI PERFUMES في دوز، تونس.`,
   },
   nav: {
     boutique: 'المتجر',
-    homeAria: 'Water of Gold — الرئيسية',
+    homeAria: 'KAOUBI PERFUMES — الرئيسية',
     cart: 'السلة',
     cartWithCount: (count: number) =>
       count > 0 ? `السلة، ${count} منتج` : 'السلة',
@@ -247,12 +248,12 @@ const ar: Dictionary = {
   },
   footer: {
     tagline: 'عطور · نساء ورجال',
-    location: 'سوسة، تونس',
+    location: 'دوز، قبلي · تونس',
     madeBy: 'الموقع من إنجاز',
   },
   hero: {
-    eyebrow: 'دار عطور · سوسة',
-    title: 'ماء الذهب',
+    eyebrow: 'دار عطور · دوز',
+    title: 'كعوبي',
     copy: 'عطور مستوحاة من الدور الكبرى، بثبات طويل، للنساء والرجال.',
     discover: 'اكتشف',
     women: 'نساء',
@@ -291,13 +292,14 @@ const ar: Dictionary = {
     reviews: (count: number) => `${count} تقييم · `,
     address: 'العنوان',
     phone: 'الهاتف',
+    email: 'البريد',
     directions: 'الاتجاهات',
     call: 'اتصال',
   },
   instagram: {
     eyebrow: 'إنستغرام',
-    copy: 'كواليس، جديد، وإلهام عطري من سوسة.',
-    follow: 'متابعة @waterofgold',
+    copy: 'كواليس، جديد، وإلهام عطري من دوز.',
+    follow: 'متابعة @kaoubi.perfumes',
   },
   banner: {
     news: 'جديد',

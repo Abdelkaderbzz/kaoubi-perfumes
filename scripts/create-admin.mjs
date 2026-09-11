@@ -29,7 +29,7 @@ async function hashPassword(password) {
   return `${salt}:${derivedKey.toString('hex')}`
 }
 
-const email = 'admin@waterofcold.tn'
+const email = 'admin@kaoubi.tn'
 const password = 'Admin2025!'
 const name = 'Admin'
 

@@ -75,8 +75,8 @@ export const banners = pgTable('banners', {
   message: text('message').notNull(),
   /** Preset that seeds the colours; colours stay independently editable. */
   variant: text('variant').notNull().default('offer'),
-  backgroundColor: text('backgroundColor').notNull().default('#c9a44a'),
-  textColor: text('textColor').notNull().default('#0b0b0b'),
+  backgroundColor: text('backgroundColor').notNull().default('#d4af37'),
+  textColor: text('textColor').notNull().default('#0a0a0a'),
   fontSize: integer('fontSize').notNull().default(13),
   linkLabel: text('linkLabel').notNull().default(''),
   linkHref: text('linkHref').notNull().default(''),

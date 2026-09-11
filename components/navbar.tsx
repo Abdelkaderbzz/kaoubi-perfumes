@@ -5,8 +5,8 @@ import { Logo } from '@/components/logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useCart } from '@/components/cart-context'
 import { useDictionary } from '@/components/locale-provider'
-import { InstagramIcon, TikTokIcon } from '@/components/instagram-section-static'
-import { INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
+import { FacebookIcon, InstagramIcon, TikTokIcon } from '@/components/instagram-section-static'
+import { FACEBOOK_URL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
 import type { StoreCategory } from '@/lib/store-categories'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -50,7 +50,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Instagram Water of Gold"
+              aria-label="Instagram KAOUBI PERFUMES"
               className={socialIconCls}
             >
               <InstagramIcon />
@@ -59,10 +59,19 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
               href={TIKTOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="TikTok Water of Gold"
+              aria-label="TikTok KAOUBI PERFUMES"
               className={socialIconCls}
             >
               <TikTokIcon />
+            </a>
+            <a
+              href={FACEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook Beit El Otour"
+              className={socialIconCls}
+            >
+              <FacebookIcon />
             </a>
           </div>
         </nav>
@@ -122,7 +131,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
                 href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Instagram Water of Gold"
+                aria-label="Instagram KAOUBI PERFUMES"
                 className={socialIconCls}
               >
                 <InstagramIcon />
@@ -131,10 +140,19 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
                 href={TIKTOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="TikTok Water of Gold"
+                aria-label="TikTok KAOUBI PERFUMES"
                 className={socialIconCls}
               >
                 <TikTokIcon />
+              </a>
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook Beit El Otour"
+                className={socialIconCls}
+              >
+                <FacebookIcon />
               </a>
             </div>
           </nav>

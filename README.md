@@ -1,6 +1,6 @@
-# Water of Gold
+# KAOUBI PERFUMES
 
-Boutique de parfums a Sousse, Tunisie — Next.js storefront and admin dashboard.
+Boutique de parfums a Douz, Kébili, Tunisie — Next.js storefront and admin dashboard.
 
 Parfums inspires des grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.
 

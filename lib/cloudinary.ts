@@ -13,7 +13,7 @@ export function getCloudinaryConfig() {
     cloudName: requireEnv('CLOUDINARY_CLOUD_NAME'),
     apiKey: requireEnv('CLOUDINARY_API_KEY'),
     apiSecret: requireEnv('CLOUDINARY_API_SECRET'),
-    folder: process.env.CLOUDINARY_FOLDER ?? 'water-of-cold/products',
+    folder: process.env.CLOUDINARY_FOLDER ?? 'kaoubi-perfumes/products',
   }
 }
 

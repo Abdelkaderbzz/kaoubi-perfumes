@@ -35,24 +35,20 @@ const BOUTIQUE_AR: Record<
   string,
   Partial<Pick<Boutique, 'city' | 'region' | 'description' | 'address'>>
 > = {
-  'sahloul-sousse': {
-    city: 'سوسة',
-    region: 'سهلول',
+  'douz-kebili': {
+    city: 'دوز',
+    region: 'دوز الشمالية',
     description:
-      'متجرنا موجود في سوسة، تلقاو فيه كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
-    address: 'شارع ياسر عرفات، سوسة',
-  },
-  'moknine-monastir': {
-    city: 'المكنين',
-    region: 'المنستير',
-    description:
-      'عنواننا في المكنين. نفس تشكيلة العطور المستوحاة والعطور المختارة، بثبات يدوم.',
+      'متجرنا في دوز، قبلي. تلقاو فيه كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
+    address: 'نهج الحبيب بورقيبة، دوز الشمالية، دوز، قبلي، 4260',
   },
 }
 
 const CITY_AR_EXTRA: Record<string, string> = {
-  Moknine: 'المكنين',
-  Sahloul: 'سهلول',
+  Douz: 'دوز',
+  'Douz Nord': 'دوز الشمالية',
+  'Kébili': 'قبلي',
+  Kebili: 'قبلي',
 }
 
 function cityInArabic(city: string) {

@@ -1,5 +1,5 @@
 // Run with: node scripts/seed-products.mjs
-// Upserts the Water of Gold perfume catalog and wires relatedProductIds.
+// Upserts the KAOUBI PERFUMES perfume catalog and wires relatedProductIds.
 // Only products with a dedicated ready bottle photo are seeded.
 // --force also removes leftover non-catalog products (except open-order SKUs).
 import { Pool } from 'pg'
@@ -131,7 +131,7 @@ const PRODUCTS = [
   {
     key: 'libre',
     name: 'Libre',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de YSL Libre. Bouquet floral-lavande, vanille et orange amere. Tenue longue, pour le jour comme le soir.',
     price: '79.000',
@@ -145,7 +145,7 @@ const PRODUCTS = [
   {
     key: 'devotion',
     name: 'Devotion',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Dolce & Gabbana Devotion. Citron, vanille et pamplemousse, gourmande et lumineuse.',
     price: '85.000',
@@ -158,7 +158,7 @@ const PRODUCTS = [
   {
     key: 'vanilla-42',
     name: 'Vanilla 42',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Kayali Vanilla 28 / Candy Rock Sugar. Vanille, praline et sucre. Gourmande pure.',
     price: '82.000',
@@ -172,7 +172,7 @@ const PRODUCTS = [
   {
     key: 'alien-mugler',
     name: 'Alien Mugler',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Mugler Alien. Jasmin, ambre et bois. Capiteuse, mysterieuse, sillage iconique.',
     price: '50.000',
@@ -185,7 +185,7 @@ const PRODUCTS = [
   {
     key: 'aura-rosea',
     name: 'AURA ROSEA / Gucci Guilty',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Gucci Guilty. Floral-fruite, rose et patchouli. Moderne et envoûtante.',
     price: '100.000',
@@ -198,7 +198,7 @@ const PRODUCTS = [
   {
     key: 'black-opium',
     name: 'Black Opium – YSL',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de YSL Black Opium. Cafe, vanille et poire blanche. Gourmande, addictive, pour la nuit.',
     price: '50.000',
@@ -211,7 +211,7 @@ const PRODUCTS = [
   {
     key: 'black-opium-glitter',
     name: 'Black Opium Glitter YSL',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de YSL Black Opium Glitter. Edition scintillante, cafe et vanille, sillage festif.',
     price: '70.000',
@@ -224,7 +224,7 @@ const PRODUCTS = [
   {
     key: 'belle-fortuna',
     name: 'BELLE FORTUNA / Chanel Chance',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Chanel Chance. Pamplemousse, jasmin et musc blanc. Fraiche et poudree.',
     price: '70.000',
@@ -237,7 +237,7 @@ const PRODUCTS = [
   {
     key: 'bamboo-gucci',
     name: 'Bamboo Gucci',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Gucci Bamboo. Floral-boise, bergamote et santal. Elegant et contemporain.',
     price: '65.000',
@@ -251,7 +251,7 @@ const PRODUCTS = [
   {
     key: 'alexandria-ii',
     name: 'ALEXANDRIA II - XERJOFF',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Xerjoff Alexandria II. Oriental luxueux, rose, bois precieux et vanille. Tenue exceptionnelle.',
     price: '70.000',
@@ -265,7 +265,7 @@ const PRODUCTS = [
   {
     key: 'ambre-des-abysses',
     name: 'AMBRE DES HABYSSES - HOUBIGANT',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Houbigant Ambre des Abysses. Ambre profond, boise et envelopant. Mixte, sillage noble.',
     price: '70.000',
@@ -279,7 +279,7 @@ const PRODUCTS = [
   {
     key: 'arabesque-tonka',
     name: 'ARABESQUE TONKA / Arabians Tonka Montale',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Montale Arabians Tonka. Oriental gourmand, tonka et epices, sillage fort.',
     price: '70.000',
@@ -293,7 +293,7 @@ const PRODUCTS = [
   {
     key: 'bleu-lazuli',
     name: 'Bleu Lazuli – Armani Privé',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Armani Privé Bleu Lazuli. Boise-aromatique de prestige, sillage raffine.',
     price: '50.000',
@@ -307,7 +307,7 @@ const PRODUCTS = [
   {
     key: 'beluga-supreme',
     name: 'BELUGA SUPREME / CUIR BELUGA',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Guerlain Cuir Beluga. Cuir doux, vanille et ambre. Chaleureux et luxueux.',
     price: '70.000',
@@ -321,7 +321,7 @@ const PRODUCTS = [
   {
     key: 'baccarat-rouge-540',
     name: 'Baccarat Rouge 540 – MFK',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Maison Francis Kurkdjian Baccarat Rouge 540. Safran, ambre et bois mineral.',
     price: '60.000',
@@ -335,7 +335,7 @@ const PRODUCTS = [
   {
     key: 'bois-imperial',
     name: 'Bois Impérial Essential Parfums',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Essential Parfums Bois Imperial. Boise-aromatique, poivre et vetiver.',
     price: '70.000',
@@ -349,7 +349,7 @@ const PRODUCTS = [
   {
     key: 'bois-lumiere',
     name: 'BOIS LUMIERE / Cedrat Boise Mancera',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Mancera Cedrat Boise. Agrumes, bois et musc. Lumineux, frais et tenace.',
     price: '70.000',
@@ -364,7 +364,7 @@ const PRODUCTS = [
   {
     key: 'gentleman',
     name: 'Gentleman',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       "Fragrance inspiree de Givenchy Gentleman. Iris, bois et lavande. Elegant, poudre, pour l'homme de ville.",
     price: '79.000',
@@ -377,7 +377,7 @@ const PRODUCTS = [
   {
     key: 'allure-sport',
     name: 'Allure Sport',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       "Fragrance inspiree de Chanel Allure Homme Sport. Frais, dynamique, notes d'agrumes et de bois.",
     price: '50.000',
@@ -390,7 +390,7 @@ const PRODUCTS = [
   {
     key: 'amyris-homme',
     name: 'Amyris Homme – MFK',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Maison Francis Kurkdjian Amyris Homme. Boise-ambre, elegant et sophistique.',
     price: '50.000',
@@ -403,7 +403,7 @@ const PRODUCTS = [
   {
     key: 'aqua-di-gio-elixir',
     name: 'Aqua Di Gio Elixir',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Giorgio Armani Acqua di Gio Elixir. Marine intense, profonde et moderne.',
     price: '70.000',
@@ -416,7 +416,7 @@ const PRODUCTS = [
   {
     key: 'aureus-eros',
     name: 'AUREUS / Eros Parfum Versace',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Versace Eros Parfum. Menthe, vanille et bois, frais-sucre et audacieux.',
     price: '70.000',
@@ -429,7 +429,7 @@ const PRODUCTS = [
   {
     key: 'bleu-exclusif',
     name: "Bleu de Chanel L'Exclusif",
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       "Fragrance inspiree de Bleu de Chanel L'Exclusif. Boise intense, profondeur et elegance nocturne.",
     price: '70.000',
@@ -442,7 +442,7 @@ const PRODUCTS = [
   {
     key: 'bleu-chanel',
     name: 'Bleu Chanel',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Bleu de Chanel. Agrumes, gingembre et bois de gaiac. Frais-boise, polyvalent.',
     price: '60.000',
@@ -473,7 +473,7 @@ const PRODUCTS = [
   {
     key: 'azure-line',
     name: 'AZURE LINE / Chrome Azzaro',
-    brand: 'Water of Gold',
+    brand: 'KAOUBI PERFUMES',
     description:
       'Fragrance inspiree de Azzaro Chrome. Aquatique, frais et propre. Ideal au quotidien.',
     price: '70.000',

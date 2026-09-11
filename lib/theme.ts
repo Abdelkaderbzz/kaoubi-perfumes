@@ -1,4 +1,4 @@
-export const THEME_STORAGE_KEY = 'wog-theme'
+export const THEME_STORAGE_KEY = 'kaoubi-theme'
 export type Theme = 'light' | 'dark'
 
 export function getStoredTheme(): Theme | null {

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { getErrorMessage } from '@/lib/get-error-message'
+import { Logo } from '@/components/logo'
 import { useToast } from '@/components/toast-provider'
 import { ExternalLink, Store } from 'lucide-react'
 import { useState } from 'react'
@@ -56,8 +57,9 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
     <>
       <header className="shrink-0 border-b border-slate-200 bg-white lg:hidden">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <Link href="/admin" className="text-base font-bold text-amber-800">
-            HF Admin
+          <Link href="/admin" className="flex items-center gap-2.5 text-base font-bold text-amber-800">
+            <Logo size="sm" />
+            KAOUBI Admin
           </Link>
           <div className="flex items-center gap-3">
             <Link
@@ -99,10 +101,13 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
 
       <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="border-b border-slate-200 px-6 py-6">
-          <Link href="/admin" className="text-xl font-bold text-amber-800">
-            HF Admin
+          <Link href="/admin" className="flex items-center gap-3 text-xl font-bold text-amber-800">
+            <Logo size="sm" />
+            <span>
+              KAOUBI Admin
+              <span className="mt-1 block text-sm font-medium text-slate-500">KAOUBI PERFUMES</span>
+            </span>
           </Link>
-          <p className="mt-1 text-sm font-medium text-slate-500">Water of Gold</p>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">

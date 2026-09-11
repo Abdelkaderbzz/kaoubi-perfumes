@@ -3,7 +3,9 @@
 import Image from 'next/image'
 import { useDictionary, useLocale } from '@/components/locale-provider'
 import { localizeBoutique, phoneHref, type Boutique } from '@/lib/boutiques'
+import { FacebookIcon } from '@/components/instagram-section-static'
 import { FACEBOOK_URL } from '@/lib/social-links'
+import { STORE_EMAIL, STORE_MAPS_URL } from '@/lib/contact'
 import { Reveal } from '@/components/reveal'
 import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 import type { Dictionary } from '@/lib/i18n'
@@ -51,10 +53,20 @@ function PhoneIcon({ className }: { className?: string }) {
   )
 }
 
-function FacebookIcon({ className }: { className?: string }) {
+function EmailIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M14.5 8.5h2.5V5.2c-.4-.06-1.4-.2-2.6-.2-2.6 0-4.3 1.6-4.3 4.6V12H7.5v3.6h2.6V22h3.6v-6.4h2.6l.4-3.6h-3V9.9c0-1 .3-1.4 1.3-1.4z" />
+    <svg
+      className={className}
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 7 9-7" />
     </svg>
   )
 }
@@ -103,20 +115,13 @@ function BoutiqueCard({
   labels: Dictionary['boutiques']
   rtl: boolean
 }) {
+  const mapsUrl = boutique.directionsUrl || STORE_MAPS_URL
+
   return (
     <article className="group overflow-hidden rounded-3xl border border-border/80 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
-      {boutique.directionsUrl ? (
-        <a
-          href={boutique.directionsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <BoutiqueHero boutique={boutique} rtl={rtl} />
-        </a>
-      ) : (
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block">
         <BoutiqueHero boutique={boutique} rtl={rtl} />
-      )}
+      </a>
 
       <div className="p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -147,7 +152,7 @@ function BoutiqueCard({
           </p>
         ) : null}
 
-        {boutique.address || boutique.phone ? (
+        {boutique.address || boutique.phone || STORE_EMAIL ? (
           <dl className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
             {boutique.address ? (
               <div className="flex items-start gap-2.5">
@@ -155,7 +160,16 @@ function BoutiqueCard({
                   <PinIcon className="shrink-0" />
                   <span className="sr-only">{labels.address}</span>
                 </dt>
-                <dd className="text-sm font-light text-muted-foreground">{boutique.address}</dd>
+                <dd>
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-light text-muted-foreground transition-colors hover:text-primary hover:underline"
+                  >
+                    {boutique.address}
+                  </a>
+                </dd>
               </div>
             ) : null}
             {boutique.phone ? (
@@ -175,21 +189,28 @@ function BoutiqueCard({
                 </dd>
               </div>
             ) : null}
+            <div className="flex items-start gap-2.5">
+              <dt className="mt-0.5 text-primary">
+                <EmailIcon className="shrink-0" />
+                <span className="sr-only">{labels.email}</span>
+              </dt>
+              <dd>
+                <a
+                  href={`mailto:${STORE_EMAIL}`}
+                  className="text-sm font-light tracking-wide text-muted-foreground transition-colors hover:text-primary hover:underline"
+                >
+                  {STORE_EMAIL}
+                </a>
+              </dd>
+            </div>
           </dl>
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">
-          {boutique.directionsUrl ? (
-            <a
-              href={boutique.directionsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={actionCls}
-            >
-              <PinIcon />
-              {labels.directions}
-            </a>
-          ) : null}
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className={actionCls}>
+            <PinIcon />
+            {labels.directions}
+          </a>
           {boutique.phone ? (
             <a href={phoneHref(boutique.phone)} className={actionCls}>
               <PhoneIcon />
