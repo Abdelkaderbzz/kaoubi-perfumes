@@ -4,7 +4,7 @@ import { CartProvider } from '@/components/cart-context'
 import { SiteBanner } from '@/components/site-banner'
 import { StoreRoutePrefetch } from '@/components/store-route-prefetch'
 import { WhatsAppButton } from '@/components/whatsapp-button'
-import { FACEBOOK_URL, INSTAGRAM_URL, SOCIAL_HANDLE, TIKTOK_URL } from '@/lib/social-links'
+import { FACEBOOK_URL, INSTAGRAM_URL, SOCIAL_HANDLE, TIKTOK_HANDLE, TIKTOK_URL } from '@/lib/social-links'
 import { STORE_ADDRESS, STORE_ADDRESS_AR, STORE_EMAIL, STORE_MAPS_URL, STORE_PHONE } from '@/lib/contact'
 import { Logo } from '@/components/logo'
 import { Navbar } from '@/components/navbar'
@@ -75,7 +75,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
               rel="noopener noreferrer"
               className="text-xs font-light tracking-widest text-primary hover:underline"
             >
-              @{SOCIAL_HANDLE}
+              @{TIKTOK_HANDLE}
             </a>
             <a
               href={FACEBOOK_URL}
