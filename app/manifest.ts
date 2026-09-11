@@ -5,12 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'KAOUBI PERFUMES',
     short_name: 'KAOUBI',
     description:
-      'Parfumerie a Douz, Kébili, Tunisie. Fragrances de longue tenue pour femmes et hommes.',
+      'KAOUBI PERFUMES متجر عطور في دوز، قبلي، تونس. عطور بثبات طويل للنساء والرجال.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#0a0a0a',
-    theme_color: '#d4af37',
-    lang: 'fr',
+    background_color: '#f6edea',
+    theme_color: '#b08a32',
+    lang: 'ar',
     icons: [
       {
         src: '/logo-mark.png',

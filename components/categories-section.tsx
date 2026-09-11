@@ -10,7 +10,7 @@ export function CategoriesSection({ categories }: { categories: StoreCategory[] 
   const dictionary = useDictionary()
 
   return (
-    <section className="border-t border-border bg-secondary/20 py-8 md:py-10">
+    <section className="border-t border-border bg-secondary/40 py-8 md:py-10">
       <div className="mx-auto max-w-6xl px-4">
         <Reveal className="mb-5 flex items-baseline gap-3">
           <SectionEyebrow>{dictionary.home.categoriesEyebrow}</SectionEyebrow>
@@ -20,7 +20,7 @@ export function CategoriesSection({ categories }: { categories: StoreCategory[] 
           </SectionTitle>
         </Reveal>
 
-        <div className="-mx-4 flex gap-x-5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:gap-x-8 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex gap-x-6 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:justify-center sm:gap-x-10 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
           {categories.map((category, index) => (
             <Reveal key={category.slug} variant="zoom" delay={index * 60} className="shrink-0">
               <CategoryCard category={category} />

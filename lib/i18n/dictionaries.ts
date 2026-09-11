@@ -4,13 +4,13 @@ const fr = {
   meta: {
     title: 'KAOUBI PERFUMES | Parfumerie a Douz',
     description:
-      'KAOUBI PERFUMES est une boutique de parfums a Douz, Kébili, Tunisie. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.',
-    productsTitle: 'Boutique de parfums',
+      'KAOUBI PERFUMES est une boutique a Douz, Kébili, Tunisie. Parfums, soins MRAZIG et bakhoor traditionnel, pour femmes et hommes.',
+    productsTitle: 'Boutique KAOUBI PERFUMES',
     productsDescription:
-      'Decouvrez notre selection de parfums femme, homme et mixtes a Douz. Fragrances de longue tenue inspirees des grandes maisons.',
+      'Parfums femme et homme, cremes et gels MRAZIG, bakhoor traditionnel a Douz.',
     productTitle: (brand: string, name: string) => `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — parfum ${category} disponible chez KAOUBI PERFUMES a Douz, Tunisie.`,
+      `${brand} ${name} — ${category} disponible chez KAOUBI PERFUMES a Douz, Tunisie.`,
   },
   nav: {
     boutique: 'BOUTIQUE',
@@ -23,44 +23,50 @@ const fr = {
     language: 'Langue',
   },
   footer: {
-    tagline: 'PARFUMERIE · FEMME & HOMME',
+    tagline: 'PARFUMS · SOINS · BAKHOOR',
     location: 'DOUZ, KÉBILI · TUNISIE',
     madeBy: 'Site web cree par',
   },
   hero: {
-    eyebrow: 'MAISON DE PARFUM · DOUZ',
-    title: 'KAOUBI',
-    copy: 'Fragrances inspirees des grandes maisons, de longue tenue, pour femmes et hommes.',
-    discover: 'DECOUVRIR',
-    women: 'FEMME',
-    men: 'HOMME',
+    eyebrow: 'Douz, Tunisie',
+    title: 'KAOUBI PERFUMES',
+    tagline: '',
+    copy: 'Parfums de longue tenue, soins MRAZIG et bakhoor traditionnel — une maison a Douz.',
+    discover: 'Decouvrir la boutique',
+    women: 'Femme',
+    men: 'Homme',
+    galleryLabel: 'Vues de la boutique',
   },
   home: {
     categoriesEyebrow: 'NOS UNIVERS',
-    categoriesTitle: 'NOS PARFUMS',
+    categoriesTitle: 'NOS COLLECTIONS',
     featuredEyebrow: 'SELECTION',
     featuredTitle: 'COUPS DE COEUR',
     newEyebrow: 'NOUVEAU',
     newTitle: 'NOUVEAUTES',
     promoEyebrow: 'OFFRES',
-    promoTitle: 'PARFUMS EN PROMOTION',
+    promoTitle: 'EN PROMOTION',
     bestEyebrow: 'TENDANCE',
     bestTitle: 'LES PLUS VENDUS',
     allBoutique: 'TOUTE LA BOUTIQUE',
   },
   /** Display text for the fixed default/known category slugs. Custom
    *  categories an admin adds later fall back to whatever they typed —
-   *  only these five ship with a ready-made translation. */
+   *  only these slugs ship with a ready-made translation. */
   categories: {
     femme: { name: 'Femme', tagline: 'Fragrances feminines de longue tenue' },
     homme: { name: 'Homme', tagline: 'Fragrances masculines de longue tenue' },
     unisexe: { name: 'Mixte', tagline: 'Fragrances pour elle et lui' },
-    chta: { name: "Parfum d'Hiver", tagline: 'Fragrances chaleureuses de saison froide' },
-    sif: { name: "Parfum d'Ete", tagline: 'Fragrances fraiches de saison chaude' },
+    soins: { name: 'Soins', tagline: 'Cremes, gels et cosmetiques MRAZIG' },
+    bakhoor: { name: 'Bakhoor', tagline: 'Encens Mrazig traditionnel' },
   },
   testimonials: {
     eyebrow: 'TEMOIGNAGES',
     title: 'ELLES NOUS FONT CONFIANCE',
+    google: 'Avis Google',
+    instagram: 'Instagram',
+    whatsapp: 'WhatsApp',
+    starsAria: (rating: number) => `${rating} sur 5 etoiles`,
   },
   boutiques: {
     eyebrow: 'NOS ADRESSES',
@@ -88,7 +94,7 @@ const fr = {
   },
   products: {
     all: 'Tous',
-    searchPlaceholder: 'Rechercher un parfum, une marque…',
+    searchPlaceholder: 'Rechercher un produit, une marque…',
     search: 'CHERCHER',
     refine: 'Affiner',
     refineAria: 'Affiner la recherche',
@@ -101,8 +107,8 @@ const fr = {
     remove: 'Retirer',
     size: 'Taille',
     outOfStockBadge: 'Rupture',
-    perfume: 'parfum',
-    perfumes: 'parfums',
+    perfume: 'produit',
+    perfumes: 'produits',
     loading: 'Chargement...',
     emptyCategory: 'Produits bientot disponibles dans cette categorie',
     emptySearch: 'AUCUN PRODUIT TROUVE',
@@ -113,7 +119,7 @@ const fr = {
     next: 'Suivant',
     catalogEyebrow: 'NOTRE BOUTIQUE',
     catalogTitle: 'Boutique',
-    catalogCopy: 'Parfums femme et homme, de longue tenue',
+    catalogCopy: 'Parfums, soins MRAZIG et bakhoor traditionnel',
   },
   wear: {
     ete: 'Ete',
@@ -228,13 +234,13 @@ const ar: Dictionary = {
   meta: {
     title: 'KAOUBI PERFUMES | عطور بدوز',
     description:
-      'KAOUBI PERFUMES متجر عطور في دوز، قبلي، تونس. عطور مستوحاة من أكبر الدور العالمية، بثبات طويل، للنساء والرجال.',
-    productsTitle: 'متجر العطور',
+      'KAOUBI PERFUMES متجر في دوز، قبلي، تونس. عطور، عناية MRAZIG، وبخور مرازيق تقليدي للنساء والرجال.',
+    productsTitle: 'متجر KAOUBI PERFUMES',
     productsDescription:
-      'اكتشفوا مجموعتنا من عطور النساء والرجال والمختلطة في دوز. عطور بثبات طويل مستوحاة من كبرى الدور.',
+      'عطور للنساء والرجال، كريمات وجل MRAZIG، وبخور تقليدي في دوز.',
     productTitle: (brand: string, name: string) => `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — عطر ${category} متوفر لدى KAOUBI PERFUMES في دوز، تونس.`,
+      `${brand} ${name} — ${category} متوفر لدى KAOUBI PERFUMES في دوز، تونس.`,
   },
   nav: {
     boutique: 'المتجر',
@@ -247,27 +253,29 @@ const ar: Dictionary = {
     language: 'اللغة',
   },
   footer: {
-    tagline: 'عطور · نساء ورجال',
+    tagline: 'عطور · عناية · بخور',
     location: 'دوز، قبلي · تونس',
     madeBy: 'الموقع من إنجاز',
   },
   hero: {
-    eyebrow: 'دار عطور · دوز',
-    title: 'كعوبي',
-    copy: 'عطور مستوحاة من الدور الكبرى، بثبات طويل، للنساء والرجال.',
-    discover: 'اكتشف',
+    eyebrow: 'دوز، تونس',
+    title: 'كعوبي للعطور',
+    tagline: 'ريحة تبقى في الذاكرة ✨',
+    copy: 'عطور بثبات قوي، وبخور تقليدي أصيل من قلب دوز. اختار ريحتك وخلي حضورك يحكي عليك.',
+    discover: 'اكتشف المتجر',
     women: 'نساء',
     men: 'رجال',
+    galleryLabel: 'صور المتجر',
   },
   home: {
     categoriesEyebrow: 'عوالمنا',
-    categoriesTitle: 'عطورنا',
+    categoriesTitle: 'مجموعاتنا',
     featuredEyebrow: 'مختارات',
     featuredTitle: 'الأكثر إعجاباً',
     newEyebrow: 'جديد',
     newTitle: 'الوافدون الجدد',
     promoEyebrow: 'عروض',
-    promoTitle: 'عطور مخفضة',
+    promoTitle: 'عروض تخفيض',
     bestEyebrow: 'رائج',
     bestTitle: 'الأكثر مبيعاً',
     allBoutique: 'كل المتجر',
@@ -276,12 +284,16 @@ const ar: Dictionary = {
     femme: { name: 'نساء', tagline: 'عطور نسائية بثبات طويل' },
     homme: { name: 'رجال', tagline: 'عطور رجالية بثبات طويل' },
     unisexe: { name: 'للجنسين', tagline: 'عطور تناسب الجميع' },
-    chta: { name: 'عطور الشتاء', tagline: 'روائح دافئة لأيام الشتاء' },
-    sif: { name: 'عطور الصيف', tagline: 'روائح منعشة لأيام الصيف' },
+    soins: { name: 'عناية', tagline: 'كريمات وجل ومستحضرات MRAZIG' },
+    bakhoor: { name: 'بخور', tagline: 'بخور المرازيق التقليدي' },
   },
   testimonials: {
     eyebrow: 'آراء الزبائن',
     title: 'يثقون بنا',
+    google: 'تقييمات غوغل',
+    instagram: 'إنستغرام',
+    whatsapp: 'واتساب',
+    starsAria: (rating: number) => `${rating} من 5 نجوم`,
   },
   boutiques: {
     eyebrow: 'عناويننا',
@@ -309,7 +321,7 @@ const ar: Dictionary = {
   },
   products: {
     all: 'الكل',
-    searchPlaceholder: 'ابحث عن عطر أو علامة…',
+    searchPlaceholder: 'ابحث عن منتج أو علامة…',
     search: 'بحث',
     refine: 'تصفية',
     refineAria: 'تصفية البحث',
@@ -322,8 +334,8 @@ const ar: Dictionary = {
     remove: 'إزالة',
     size: 'المقاس',
     outOfStockBadge: 'نفدت الكمية',
-    perfume: 'عطر',
-    perfumes: 'عطور',
+    perfume: 'منتج',
+    perfumes: 'منتجات',
     loading: 'جاري التحميل...',
     emptyCategory: 'منتجات قريباً في هذا التصنيف',
     emptySearch: 'لا توجد نتائج',
@@ -334,7 +346,7 @@ const ar: Dictionary = {
     next: 'التالي',
     catalogEyebrow: 'متجرنا',
     catalogTitle: 'المتجر',
-    catalogCopy: 'عطور للنساء والرجال، بثبات طويل',
+    catalogCopy: 'عطور، عناية MRAZIG، وبخور تقليدي',
   },
   wear: {
     ete: 'صيف',
@@ -438,5 +450,5 @@ const ar: Dictionary = {
 const dictionaries: Record<Locale, Dictionary> = { fr: fr as Dictionary, ar }
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale] ?? dictionaries.fr
+  return dictionaries[locale] ?? dictionaries.ar
 }

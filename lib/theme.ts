@@ -1,5 +1,6 @@
 export const THEME_STORAGE_KEY = 'kaoubi-theme'
 export type Theme = 'light' | 'dark'
+export const defaultTheme: Theme = 'light'
 
 export function getStoredTheme(): Theme | null {
   try {

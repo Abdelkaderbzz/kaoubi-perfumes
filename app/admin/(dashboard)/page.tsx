@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
         <AdminQuickLink
           href="/admin/categories"
           title="Gerer les categories"
-          description="Organiser les parfums femme et homme."
+          description="Parfums, soins et bakhoor de la boutique."
         />
         <AdminQuickLink
           href="/admin/boutiques"
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
         <AdminQuickLink
           href="/admin/hero"
           title="Images hero"
-          description="Modifier les 4 photos du collage d accueil."
+          description="Modifier les 4 photos du diaporama d accueil."
         />
         <AdminQuickLink
           href="/admin/banner"

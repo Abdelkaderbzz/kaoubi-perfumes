@@ -1,8 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
-import { Bodoni_Moda, Josefin_Sans } from 'next/font/google'
-import localFont from 'next/font/local'
+import { Bodoni_Moda, Montserrat, Tajawal } from 'next/font/google'
 import { LocaleProvider } from '@/components/locale-provider'
 import { StorefrontScale } from '@/components/storefront-scale'
 import { ThemeScript } from '@/components/theme-script'
@@ -26,7 +25,7 @@ const bodoni = Bodoni_Moda({
   preload: true,
 })
 
-const josefin = Josefin_Sans({
+const montserrat = Montserrat({
   subsets: ['latin', 'latin-ext'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sans',
@@ -34,14 +33,9 @@ const josefin = Josefin_Sans({
   preload: true,
 })
 
-const thmanyahArabic = localFont({
-  src: [
-    { path: './fonts/thmanyah/thmanyahsans-Light.woff2', weight: '300', style: 'normal' },
-    { path: './fonts/thmanyah/thmanyahsans-Regular.woff2', weight: '400', style: 'normal' },
-    { path: './fonts/thmanyah/thmanyahsans-Medium.woff2', weight: '500', style: 'normal' },
-    { path: './fonts/thmanyah/thmanyahsans-Bold.woff2', weight: '700', style: 'normal' },
-    { path: './fonts/thmanyah/thmanyahsans-Black.woff2', weight: '900', style: 'normal' },
-  ],
+const tajawal = Tajawal({
+  subsets: ['arabic', 'latin'],
+  weight: ['300', '400', '500', '700', '800'],
   variable: '--font-arabic',
   display: 'swap',
   preload: true,
@@ -135,11 +129,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f7eef1' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
-  ],
+  colorScheme: 'light',
+  themeColor: '#f6edea',
 }
 
 export default async function RootLayout({
@@ -155,7 +146,7 @@ export default async function RootLayout({
     <html
       lang={lang}
       dir={dir}
-      className={`bg-background ${bodoni.variable} ${josefin.variable} ${thmanyahArabic.variable}`}
+      className={`bg-background ${bodoni.variable} ${montserrat.variable} ${tajawal.variable}`}
       suppressHydrationWarning
     >
       <body
