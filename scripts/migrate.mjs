@@ -262,6 +262,13 @@ const INCREMENTAL_ALTERS = [
    WHERE "slug" = 'douz-kebili'`,
   `UPDATE "boutiques" SET "published" = false, "pickupEnabled" = false, "updatedAt" = NOW()
    WHERE "slug" = 'moknine-monastir'`,
+  `INSERT INTO "boutiques"
+    ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
+   VALUES
+    ('moknine-monastir', 'KAOUBI PERFUMES Moknine', 'Moknine', 'Monastir',
+     'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
+     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
+   ON CONFLICT ("slug") DO NOTHING`,
 ]
 
 const BASELINE_DATA = [
@@ -275,13 +282,16 @@ const BASELINE_DATA = [
     ('Bakhoor', 'bakhoor')
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "boutiques"
-    ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "sortOrder")
+    ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
    VALUES
     ('douz-kebili', 'KAOUBI PERFUMES Douz', 'Douz', 'Douz Nord',
      'Notre boutique a Douz, Kébili. Toute la collection femme et homme, avec conseil personnalise sur place.',
      '/boutiques/storefront.webp', 'Boutique KAOUBI PERFUMES a Douz',
      'Rue de Habib Bourguiba, Douz Nord, Douz, Kébili, 4260', '94 090 440', NULL, NULL, 'Google Maps',
-     'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46', 0)
+     'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46', true, true, 0),
+    ('moknine-monastir', 'KAOUBI PERFUMES Moknine', 'Moknine', 'Monastir',
+     'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
+     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "carousel_videos" ("url", "sortOrder") VALUES
     ('https://www.instagram.com/reel/DZ3XNGpsShF/', 0),

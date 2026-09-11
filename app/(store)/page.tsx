@@ -48,7 +48,9 @@ export default async function HomePage() {
 
   return (
     <div>
-      <JsonLd data={[organizationJsonLd(), perfumeStoreJsonLd(boutiques)]} />
+      <JsonLd
+        data={[organizationJsonLd(), perfumeStoreJsonLd(boutiques.filter((boutique) => boutique.published))]}
+      />
 
       <HeroSection images={heroImages} />
 

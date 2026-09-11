@@ -104,7 +104,7 @@ export const boutiques = pgTable('boutiques', {
   directionsUrl: text('directionsUrl').notNull().default(''),
   /** Offered as a pickup point at checkout. */
   pickupEnabled: boolean('pickupEnabled').notNull().default(true),
-  /** Shown in the homepage boutiques section. */
+  /** Open boutique on the homepage. Unpublished shops still appear as coming soon. */
   published: boolean('published').notNull().default(true),
   sortOrder: integer('sortOrder').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),

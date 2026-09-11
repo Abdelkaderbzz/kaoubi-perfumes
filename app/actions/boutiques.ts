@@ -38,6 +38,7 @@ function toBoutique(row: BoutiqueRow): Boutique {
         ? STORE_MAPS_URL
         : row.directionsUrl,
     pickupEnabled: row.pickupEnabled,
+    published: row.published,
   }
 }
 
@@ -50,20 +51,15 @@ function revalidateBoutiques() {
 
 const orderedBoutiques = [asc(boutiques.sortOrder), asc(boutiques.name)] as const
 
-const getPublishedBoutiquesCached = unstable_cache(
-  async () =>
-    db
-      .select()
-      .from(boutiques)
-      .where(eq(boutiques.published, true))
-      .orderBy(...orderedBoutiques),
-  ['published-boutiques'],
+const getStorefrontBoutiquesCached = unstable_cache(
+  async () => db.select().from(boutiques).orderBy(...orderedBoutiques),
+  ['storefront-boutiques'],
   { revalidate: 300, tags: ['boutiques'] },
 )
 
-/** Homepage boutiques section. */
+/** Homepage boutiques section: open shops plus unpublished coming-soon locations. */
 export async function getBoutiques(): Promise<Boutique[]> {
-  const rows = await getPublishedBoutiquesCached()
+  const rows = await getStorefrontBoutiquesCached()
   return rows.map(toBoutique)
 }
 

@@ -245,8 +245,8 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 </td>
                 <td className={adminTableCellCls}>
                   <div className="flex flex-col items-start gap-1.5">
-                    <AdminBadge tone={boutique.published ? 'success' : 'default'}>
-                      {boutique.published ? 'Visible' : 'Masquee'}
+                    <AdminBadge tone={boutique.published ? 'success' : 'warning'}>
+                      {boutique.published ? 'Ouverte' : 'En cours'}
                     </AdminBadge>
                     <AdminBadge tone={boutique.pickupEnabled ? 'info' : 'default'}>
                       {boutique.pickupEnabled ? 'Retrait actif' : 'Sans retrait'}
@@ -460,10 +460,10 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 />
                 <span>
                   <span className="block text-sm font-semibold text-slate-900">
-                    Afficher sur la boutique
+                    Boutique ouverte
                   </span>
                   <span className="mt-0.5 block text-sm text-slate-500">
-                    Visible dans la section Nos boutiques.
+                    Decochez pour l afficher comme en cours / bientot sur l accueil.
                   </span>
                 </span>
               </label>

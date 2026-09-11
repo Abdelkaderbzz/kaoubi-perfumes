@@ -18,6 +18,8 @@ export type Boutique = {
   ratingSource: string
   directionsUrl: string
   pickupEnabled: boolean
+  /** Open on the storefront. Unpublished shops render as coming soon. */
+  published: boolean
 }
 
 /** A pickup point offered at checkout. */
@@ -42,6 +44,11 @@ const BOUTIQUE_AR: Record<
       'متجرنا في دوز، قبلي. تلقاو فيه كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
     address: 'نهج الحبيب بورقيبة، دوز الشمالية، دوز، قبلي، 4260',
   },
+  'moknine-monastir': {
+    city: 'المكنين',
+    region: 'المنستير',
+    description: 'الفتح قيد التحضير. نفس مجموعة العطور، عناية MRAZIG، والبخور.',
+  },
 }
 
 const CITY_AR_EXTRA: Record<string, string> = {
@@ -49,6 +56,8 @@ const CITY_AR_EXTRA: Record<string, string> = {
   'Douz Nord': 'دوز الشمالية',
   'Kébili': 'قبلي',
   Kebili: 'قبلي',
+  Moknine: 'المكنين',
+  Monastir: 'المنستير',
 }
 
 function cityInArabic(city: string) {
