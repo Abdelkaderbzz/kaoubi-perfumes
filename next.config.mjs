@@ -19,6 +19,10 @@ const nextConfig = {
       bodySizeLimit: '6mb',
     },
     optimizePackageImports: ['lucide-react', '@phosphor-icons/react'],
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   async headers() {
     return [

@@ -82,7 +82,7 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
               {linkLabel.toUpperCase()}
             </a>
           ) : (
-            <Link href={banner.linkHref} className={`${linkCls} text-[0.8em]`}>
+            <Link href={banner.linkHref} prefetch className={`${linkCls} text-[0.8em]`}>
               {linkLabel.toUpperCase()}
             </Link>
           ))}

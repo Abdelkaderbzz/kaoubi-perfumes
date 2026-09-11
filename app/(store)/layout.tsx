@@ -16,10 +16,15 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     getActiveBanner(),
   ])
   const storeCategories = mergeStoreCategories(categories, locale)
+  const prefetchHrefs = [
+    '/products',
+    '/checkout',
+    ...storeCategories.map((category) => `/products?category=${category.slug}`),
+  ]
 
   return (
     <CartProvider>
-      <StoreRoutePrefetch />
+      <StoreRoutePrefetch hrefs={prefetchHrefs} />
       {banner && <SiteBanner banner={banner} />}
       <Navbar storeCategories={storeCategories} />
       <main className="min-h-screen">{children}</main>

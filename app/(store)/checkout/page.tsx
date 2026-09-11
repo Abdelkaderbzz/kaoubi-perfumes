@@ -110,6 +110,7 @@ function CheckoutForm() {
         <p className="text-sm font-light tracking-widest text-muted-foreground">{t.empty}</p>
         <Link
           href="/products"
+          prefetch
           className="rounded-full border border-primary bg-primary/5 px-8 py-3 text-xs font-light tracking-[0.3em] text-primary transition-all hover:bg-primary hover:text-primary-foreground"
         >
           {t.seeBoutique}

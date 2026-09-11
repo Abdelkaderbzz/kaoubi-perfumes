@@ -3,27 +3,31 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-const STORE_ROUTES = ['/products', '/checkout'] as const
+const DEFAULT_ROUTES = ['/products', '/checkout'] as const
+
+function scheduleIdle(task: () => void) {
+  if (typeof window.requestIdleCallback === 'function') {
+    const id = window.requestIdleCallback(task, { timeout: 1800 })
+    return () => window.cancelIdleCallback(id)
+  }
+
+  const timeoutId = window.setTimeout(task, 200)
+  return () => window.clearTimeout(timeoutId)
+}
 
 /** Prefetch key storefront routes during idle time for faster navigation. */
-export function StoreRoutePrefetch() {
+export function StoreRoutePrefetch({ hrefs }: { hrefs?: readonly string[] }) {
   const router = useRouter()
+  const routesKey = (hrefs && hrefs.length > 0 ? hrefs : DEFAULT_ROUTES).join('|')
 
   useEffect(() => {
-    function prefetchRoutes() {
-      for (const href of STORE_ROUTES) {
-        router.prefetch(href)
+    const routes = routesKey.split('|').filter(Boolean)
+    return scheduleIdle(() => {
+      for (const href of routes) {
+        void router.prefetch(href)
       }
-    }
-
-    if (typeof window.requestIdleCallback === 'function') {
-      const id = window.requestIdleCallback(prefetchRoutes, { timeout: 2500 })
-      return () => window.cancelIdleCallback(id)
-    }
-
-    const timeoutId = setTimeout(prefetchRoutes, 400)
-    return () => clearTimeout(timeoutId)
-  }, [router])
+    })
+  }, [router, routesKey])
 
   return null
 }
