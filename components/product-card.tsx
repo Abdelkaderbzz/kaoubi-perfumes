@@ -12,6 +12,7 @@ import {
   getVariantPrice,
   parseProductSizeVariants,
 } from '@/lib/product-sizes'
+import { resolveProductImageUrl } from '@/lib/product-images'
 import { getCategoryLabel } from '@/lib/store-categories'
 
 export type ProductCardProduct = {
@@ -64,7 +65,7 @@ export function ProductCard({
       >
         {product.imageUrl ? (
           <Image
-            src={product.imageUrl}
+            src={resolveProductImageUrl(product.imageUrl)}
             alt={`${product.brand} ${product.name}`}
             fill
             priority={priority}
@@ -148,6 +149,7 @@ export function ProductCard({
                     key={variant.size}
                     type="button"
                     onClick={() => setSelectedSize(variant.size)}
+                    dir="ltr"
                     className={`min-h-9 rounded px-2.5 py-1.5 text-[11px] font-medium tracking-wide transition-all ${
                       active
                         ? 'bg-foreground text-background'

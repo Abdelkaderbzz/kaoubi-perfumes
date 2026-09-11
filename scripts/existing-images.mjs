@@ -4,13 +4,8 @@ import { fileURLToPath } from 'url'
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
 
-/** Legacy hero bottle shots kept for older seeded products. */
-export const READY_PRODUCT_IMAGES = [
-  '/hero/ysl-libre.webp',
-  '/hero/dg-devotion.webp',
-  '/hero/givenchy-gentleman.webp',
-  '/hero/perfume-2.webp',
-]
+/** Extra bottle shots outside public/products (none currently). */
+export const READY_PRODUCT_IMAGES = []
 
 function fileFor(url) {
   return join(PUBLIC_DIR, url.replace(/^\//, ''))

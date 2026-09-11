@@ -8,6 +8,7 @@ import {
   getVariantPrice,
   type ProductSizeVariant,
 } from '@/lib/product-sizes'
+import { resolveProductImageUrl } from '@/lib/product-images'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
@@ -46,7 +47,7 @@ export function AddToCartButton({
       size: selectedSize,
       quantity: 1,
       price: selectedPrice,
-      imageUrl: product.imageUrl ?? undefined,
+      imageUrl: product.imageUrl ? resolveProductImageUrl(product.imageUrl) : undefined,
     })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
@@ -76,6 +77,7 @@ export function AddToCartButton({
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border text-foreground hover:border-primary/50 hover:bg-primary/5'
                 }`}
+                dir="ltr"
               >
                 {variant.size}
               </button>

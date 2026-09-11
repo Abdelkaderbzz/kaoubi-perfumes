@@ -3,7 +3,8 @@
 import { requireAdminId } from '@/lib/admin-auth'
 import { db } from '@/lib/db'
 import { categories, products } from '@/lib/db/schema'
-import { asc, eq, sql } from 'drizzle-orm'
+import { HIDDEN_CATEGORY_SLUGS } from '@/lib/store-categories'
+import { asc, eq, notInArray, sql } from 'drizzle-orm'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 
 export type CategoryRow = {
@@ -49,8 +50,13 @@ function revalidateCategoryPaths() {
 
 export async function getCategories() {
   return unstable_cache(
-    async () => db.select().from(categories).orderBy(asc(categories.name)),
-    ['categories-list-v2'],
+    async () =>
+      db
+        .select()
+        .from(categories)
+        .where(notInArray(categories.slug, [...HIDDEN_CATEGORY_SLUGS]))
+        .orderBy(asc(categories.name)),
+    ['categories-list-v3'],
     { revalidate: 300, tags: ['categories'] },
   )()
 }

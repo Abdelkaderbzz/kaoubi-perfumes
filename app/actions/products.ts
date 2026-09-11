@@ -162,15 +162,22 @@ export async function getAdminProducts() {
   return result.items
 }
 
+const FEATURED_HOME_ORDER = sql`CASE ${products.name}
+  WHEN 'بخور المرازيق التقليدي' THEN 1
+  WHEN 'Crème à mains nourrissante' THEN 2
+  WHEN 'Gel nettoyant sans huile' THEN 3
+  ELSE 99
+END`
+
 const getFeaturedProductsCached = unstable_cache(
   async () =>
     db
       .select()
       .from(products)
       .where(and(eq(products.featured, true), eq(products.published, true)))
-      .orderBy(desc(products.createdAt))
+      .orderBy(FEATURED_HOME_ORDER, desc(products.createdAt))
       .limit(4),
-  ['featured-products'],
+  ['featured-products', 'v3'],
   { revalidate: 120, tags: ['products'] },
 )
 
@@ -186,7 +193,7 @@ const getNewProductsCached = unstable_cache(
       .where(eq(products.published, true))
       .orderBy(desc(products.createdAt))
       .limit(8),
-  ['new-products'],
+  ['new-products', 'v2'],
   { revalidate: 120, tags: ['products'] },
 )
 
@@ -258,7 +265,7 @@ export async function getProductById(id: number) {
         .limit(1)
       return result[0] ?? null
     },
-    ['product-by-id', String(id)],
+    ['product-by-id', 'v2', String(id)],
     { revalidate: 120, tags: ['products', `product-${id}`] },
   )()
 }
@@ -342,7 +349,7 @@ export async function getRelatedProducts(productId: number) {
 
       return [...curated, ...fallback]
     },
-    ['related-products', String(productId)],
+    ['related-products', 'v2', String(productId)],
     { revalidate: 120, tags: ['products', `product-${productId}`] },
   )()
 }

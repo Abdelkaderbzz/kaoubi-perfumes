@@ -1,4 +1,4 @@
-import { getDictionary, type Locale } from '@/lib/i18n'
+import { defaultLocale, getDictionary, type Locale } from '@/lib/i18n'
 
 export type StoreCategory = {
   slug: string
@@ -20,14 +20,29 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     tagline: 'Fragrances masculines de longue tenue',
     image: '/categories/homme.webp',
   },
+  {
+    slug: 'soins',
+    name: 'Soins',
+    tagline: 'Cremes, gels et cosmetiques MRAZIG',
+    image: '/products/creme-mains.webp',
+  },
+  {
+    slug: 'bakhoor',
+    name: 'Bakhoor',
+    tagline: 'Encens Mrazig traditionnel',
+    image: '/products/bakhoor-mrazig.webp',
+  },
 ]
+
+/** Seasonal collections that should not appear in nav, homepage, or filters. */
+export const HIDDEN_CATEGORY_SLUGS = new Set(['sif', 'chta'])
 
 /** @deprecated Prefer getHeroImages() from app/actions/hero — kept for showcase gallery refs. */
 export const HERO_IMAGES = [
-  { src: '/hero/boutique-arches.webp', alt: 'Rayonnages de la boutique KAOUBI PERFUMES' },
-  { src: '/hero/boutique-cosmetic.webp', alt: 'Espace cosmetique KAOUBI PERFUMES' },
-  { src: '/hero/boutique-counter.webp', alt: 'Comptoir KAOUBI PERFUMES' },
-  { src: '/hero/boutique-logo-wall.webp', alt: 'Boutique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-stand.webp', alt: 'Boutique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-counter-v2.webp', alt: 'Comptoir KAOUBI PERFUMES' },
+  { src: '/hero/boutique-arches.png', alt: 'Rayonnages de la boutique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-signature.webp', alt: 'Mur logo de la boutique KAOUBI PERFUMES' },
 ]
 
 export type ShowcaseImage = {
@@ -41,7 +56,7 @@ export const SHOWCASE_GALLERY: ShowcaseImage[] = [
   { src: '/hero/ysl-libre.webp', alt: 'Eau de parfum', category: 'femme' },
   { src: '/hero/campaign-ramadan.webp', alt: 'Collection femme', category: 'femme' },
   { src: '/hero/givenchy-gentleman.webp', alt: 'Parfum homme', category: 'homme' },
-  { src: '/hero/boutique-arches.webp', alt: 'Boutique KAOUBI PERFUMES', category: 'homme' },
+  { src: '/hero/boutique-arches.png', alt: 'Boutique KAOUBI PERFUMES', category: 'homme' },
   { src: '/hero/boutique-cosmetic.webp', alt: 'Fragrances KAOUBI PERFUMES', category: 'femme' },
 ]
 
@@ -59,9 +74,9 @@ export type DbCategory = {
   bannerUrl?: string | null
 }
 
-/** Ready-made translation for a known slug (femme/homme/unisexe/chta/sif), or
- *  undefined for a custom category an admin added — those just render
- *  whatever the admin typed, in whichever language they typed it. */
+/** Ready-made translation for a known slug
+ *  (femme/homme/unisexe/soins/bakhoor), or undefined for a custom
+ *  category an admin added — those just render whatever the admin typed. */
 function localizedCategoryText(slug: string, locale: Locale) {
   const table = getDictionary(locale).categories as
     | Record<string, { name: string; tagline: string } | undefined>
@@ -73,7 +88,10 @@ function localizedCategoryText(slug: string, locale: Locale) {
  *  default) the DB value always wins — that's what the admin typed. In
  *  Arabic there's no DB column for it, so known slugs get overridden with
  *  the fixed translation above; anything else falls back to the DB text. */
-export function mergeStoreCategories(dbCategories: DbCategory[], locale: Locale = 'fr'): StoreCategory[] {
+export function mergeStoreCategories(
+  dbCategories: DbCategory[],
+  locale: Locale = defaultLocale,
+): StoreCategory[] {
   const dbBySlug = new Map(dbCategories.map((category) => [category.slug, category]))
   const arabic = locale === 'ar'
 
@@ -89,7 +107,11 @@ export function mergeStoreCategories(dbCategories: DbCategory[], locale: Locale 
   })
 
   const extras = dbCategories
-    .filter((category) => !STORE_CATEGORIES.some((item) => item.slug === category.slug))
+    .filter(
+      (category) =>
+        !HIDDEN_CATEGORY_SLUGS.has(category.slug) &&
+        !STORE_CATEGORIES.some((item) => item.slug === category.slug),
+    )
     .map((category) => {
       const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
       const frDefault = localizedCategoryText(category.slug, 'fr')
@@ -104,14 +126,18 @@ export function mergeStoreCategories(dbCategories: DbCategory[], locale: Locale 
   return [...fromDefaults, ...extras]
 }
 
-export function getMergedCategoryBySlug(slug: string, dbCategories: DbCategory[], locale: Locale = 'fr') {
+export function getMergedCategoryBySlug(
+  slug: string,
+  dbCategories: DbCategory[],
+  locale: Locale = defaultLocale,
+) {
   return mergeStoreCategories(dbCategories, locale).find((category) => category.slug === slug)
 }
 
 export function getCategoryLabel(
   slug: string,
   categories?: { slug: string; name: string }[],
-  locale: Locale = 'fr',
+  locale: Locale = defaultLocale,
 ) {
   if (locale === 'ar') {
     const translated = localizedCategoryText(slug, 'ar')

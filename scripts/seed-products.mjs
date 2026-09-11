@@ -4,7 +4,7 @@
 // --force also removes leftover non-catalog products (except open-order SKUs).
 import { Pool } from 'pg'
 import { resolveAdminDatabaseUrl } from './db-url.mjs'
-import { existingProductImages, imageExists, resolveExistingImage } from './existing-images.mjs'
+import { existingProductImages, imageExists } from './existing-images.mjs'
 import { loadEnv } from './load-env.mjs'
 
 loadEnv()
@@ -21,13 +21,11 @@ const CATEGORIES = [
   { name: 'Femme', slug: 'femme' },
   { name: 'Homme', slug: 'homme' },
   { name: 'Mixte', slug: 'unisexe' },
+  { name: 'Soins', slug: 'soins' },
+  { name: 'Bakhoor', slug: 'bakhoor' },
 ]
 
 const IMG = {
-  libre: '/hero/ysl-libre.webp',
-  devotion: '/hero/dg-devotion.webp',
-  gentleman: '/hero/givenchy-gentleman.webp',
-  vanilla42: '/hero/perfume-2.webp',
   allureSport: '/products/allure-sport.webp',
   amyrisHomme: '/products/amyris-homme.webp',
   aquaDiGio: '/products/aqua-di-gio-elixir.webp',
@@ -49,6 +47,22 @@ const IMG = {
   baccarat: '/products/baccarat-rouge-540.webp',
   boisImperial: '/products/bois-imperial.webp',
   boisLumiere: '/products/bois-lumiere.webp',
+  gelNettoyant: '/products/gel-nettoyant-v2.webp',
+  cremeMains: '/products/creme-mains.webp',
+  bakhoorMrazig: '/products/bakhoor-mrazig.webp',
+}
+
+const NOTE = {
+  bergamote: { name: 'Bergamote', imageUrl: '/notes/bergamote.webp' },
+  safran: { name: 'Safran', imageUrl: '/notes/safran.webp' },
+  jasmin: { name: 'Jasmin', imageUrl: '/notes/jasmin.webp' },
+  ambre: { name: 'Ambre', imageUrl: '/notes/ambre.webp' },
+  cedre: { name: 'Cèdre', imageUrl: '/notes/cedre.webp' },
+  vanille: { name: 'Vanille', imageUrl: '/notes/vanille.webp' },
+}
+
+function n(name) {
+  return { name, imageUrl: '' }
 }
 
 const AVAILABLE_IMAGES = existingProductImages()
@@ -60,11 +74,15 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   description: string
  *   price: string
  *   compareAtPrice?: string | null
- *   category: 'femme' | 'homme' | 'unisexe'
+ *   category: 'femme' | 'homme' | 'unisexe' | 'soins' | 'bakhoor'
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
  *   related: string[]
+ *   fragranceNotes?: string[]
+ *   wearMoments?: string[]
+ *   intensity?: string
+ *   composition?: { tete: { name: string, imageUrl: string }[], coeur: { name: string, imageUrl: string }[], fond: { name: string, imageUrl: string }[] }
  *   promoTagEnabled?: boolean
  *   promoTagLabel?: string
  * }} SeedProduct
@@ -88,9 +106,6 @@ function sizeVariants(price) {
 }
 
 const FEMME_KEYS = [
-  'libre',
-  'devotion',
-  'vanilla-42',
   'alien-mugler',
   'aura-rosea',
   'black-opium',
@@ -100,7 +115,6 @@ const FEMME_KEYS = [
 ]
 
 const HOMME_KEYS = [
-  'gentleman',
   'allure-sport',
   'amyris-homme',
   'aqua-di-gio-elixir',
@@ -127,48 +141,7 @@ function relatedOf(keys, key) {
 
 /** @type {SeedProduct[]} */
 const PRODUCTS = [
-  // —— Femme (legacy) ——
-  {
-    key: 'libre',
-    name: 'Libre',
-    brand: 'KAOUBI PERFUMES',
-    description:
-      'Fragrance inspiree de YSL Libre. Bouquet floral-lavande, vanille et orange amere. Tenue longue, pour le jour comme le soir.',
-    price: '79.000',
-    compareAtPrice: '95.000',
-    category: 'femme',
-    image: IMG.libre,
-    sizes: sizeVariants('79.000'),
-    featured: true,
-    related: relatedOf(FEMME_KEYS, 'libre'),
-  },
-  {
-    key: 'devotion',
-    name: 'Devotion',
-    brand: 'KAOUBI PERFUMES',
-    description:
-      'Fragrance inspiree de Dolce & Gabbana Devotion. Citron, vanille et pamplemousse, gourmande et lumineuse.',
-    price: '85.000',
-    category: 'femme',
-    image: IMG.devotion,
-    sizes: sizeVariants('85.000'),
-    featured: true,
-    related: relatedOf(FEMME_KEYS, 'devotion'),
-  },
-  {
-    key: 'vanilla-42',
-    name: 'Vanilla 42',
-    brand: 'KAOUBI PERFUMES',
-    description:
-      'Fragrance inspiree de Kayali Vanilla 28 / Candy Rock Sugar. Vanille, praline et sucre. Gourmande pure.',
-    price: '82.000',
-    category: 'femme',
-    image: IMG.vanilla42,
-    sizes: sizeVariants('82.000'),
-    featured: true,
-    related: relatedOf(FEMME_KEYS, 'vanilla-42'),
-  },
-  // —— Femme (catalog) ——
+  // —— Femme ——
   {
     key: 'alien-mugler',
     name: 'Alien Mugler',
@@ -362,19 +335,6 @@ const PRODUCTS = [
   },
   // —— Homme ——
   {
-    key: 'gentleman',
-    name: 'Gentleman',
-    brand: 'KAOUBI PERFUMES',
-    description:
-      "Fragrance inspiree de Givenchy Gentleman. Iris, bois et lavande. Elegant, poudre, pour l'homme de ville.",
-    price: '79.000',
-    category: 'homme',
-    image: IMG.gentleman,
-    sizes: sizeVariants('79.000'),
-    featured: true,
-    related: relatedOf(HOMME_KEYS, 'gentleman'),
-  },
-  {
     key: 'allure-sport',
     name: 'Allure Sport',
     brand: 'KAOUBI PERFUMES',
@@ -449,26 +409,8 @@ const PRODUCTS = [
     category: 'homme',
     image: IMG.bleuChanel,
     sizes: sizeVariants('60.000'),
-    featured: true,
+    featured: false,
     related: relatedOf(HOMME_KEYS, 'bleu-chanel'),
-    fragranceNotes: ['citrus', 'woody', 'fresh-spicy'],
-    wearMoments: ['jour', 'nuit'],
-    intensity: 'forte',
-    composition: {
-      tete: [
-        { name: 'Bergamote', imageUrl: '/notes/bergamote.webp' },
-        { name: 'Safran', imageUrl: '/notes/safran.webp' },
-      ],
-      coeur: [
-        { name: 'Jasmin', imageUrl: '/notes/jasmin.webp' },
-        { name: 'Ambre', imageUrl: '/notes/ambre.webp' },
-      ],
-      fond: [
-        { name: 'Cèdre', imageUrl: '/notes/cedre.webp' },
-        { name: 'Vanille', imageUrl: '/notes/vanille.webp' },
-        { name: 'Ambre', imageUrl: '/notes/ambre.webp' },
-      ],
-    },
   },
   {
     key: 'azure-line',
@@ -483,7 +425,267 @@ const PRODUCTS = [
     featured: false,
     related: relatedOf(HOMME_KEYS, 'azure-line'),
   },
+  // —— Soins & bakhoor MRAZIG ——
+  {
+    key: 'creme-mains-mrazig',
+    name: 'Crème à mains nourrissante',
+    brand: 'MRAZIG',
+    description:
+      'كريم مرطب ومغذي لليدين. Creme a mains au beurre de cacao, huile d\'amande douce, huile de pepins de raisin, HE orange et HE clou de girofle. Nourrit et protege les mains. 50 g.',
+    price: '28.000',
+    category: 'soins',
+    image: IMG.cremeMains,
+    sizes: [{ size: '50 g', price: '28.000' }],
+    featured: true,
+    related: ['gel-nettoyant-mrazig'],
+  },
+  {
+    key: 'gel-nettoyant-mrazig',
+    name: 'Gel nettoyant sans huile',
+    brand: 'MRAZIG',
+    description:
+      'Gel nettoyante tous types de peaux. Nettoie, hydrate et apaise. Formule oil-free au kaolin, extrait d\'aloe vera et vitamine E. 150 ml.',
+    price: '25.000',
+    category: 'soins',
+    image: IMG.gelNettoyant,
+    sizes: [{ size: '150 ml', price: '25.000' }],
+    featured: true,
+    related: ['creme-mains-mrazig'],
+  },
+  {
+    key: 'bakhoor-mrazig',
+    name: 'بخور المرازيق التقليدي',
+    brand: 'MRAZIG',
+    description:
+      'Bakhoor Mrazig traditionnel (بخور مريير). Encens artisanal aux notes chaudes et orientales, pour parfumer la maison.',
+    price: '20.000',
+    category: 'bakhoor',
+    image: IMG.bakhoorMrazig,
+    sizes: [{ size: 'Pot', price: '20.000' }],
+    featured: true,
+    related: [],
+  },
 ]
+
+const FEATURED_KEYS = new Set([
+  'bakhoor-mrazig',
+  'creme-mains-mrazig',
+  'gel-nettoyant-mrazig',
+])
+
+/** Olfactive extras keyed by product.key. */
+const OLFACTIVE = {
+  'alien-mugler': {
+    fragranceNotes: ['floral', 'oriental', 'woody'],
+    wearMoments: ['nuit', 'automne', 'hiver'],
+    intensity: 'tres-forte',
+    composition: {
+      tete: [n('Cassis')],
+      coeur: [NOTE.jasmin],
+      fond: [NOTE.ambre, NOTE.cedre],
+    },
+  },
+  'aura-rosea': {
+    fragranceNotes: ['floral', 'fruity', 'powdery'],
+    wearMoments: ['jour', 'printemps', 'ete'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote, n('Pêche')],
+      coeur: [NOTE.jasmin],
+      fond: [n('Patchouli'), NOTE.vanille],
+    },
+  },
+  'black-opium': {
+    fragranceNotes: ['gourmand', 'vanilla', 'sweet'],
+    wearMoments: ['nuit', 'automne', 'hiver'],
+    intensity: 'forte',
+    composition: {
+      tete: [n('Poire'), n('Café')],
+      coeur: [NOTE.jasmin],
+      fond: [NOTE.vanille, NOTE.cedre],
+    },
+  },
+  'black-opium-glitter': {
+    fragranceNotes: ['gourmand', 'vanilla', 'sweet'],
+    wearMoments: ['nuit'],
+    intensity: 'forte',
+    composition: {
+      tete: [n('Poire'), n('Café')],
+      coeur: [NOTE.jasmin],
+      fond: [NOTE.vanille, NOTE.ambre],
+    },
+  },
+  'belle-fortuna': {
+    fragranceNotes: ['citrus', 'floral', 'powdery'],
+    wearMoments: ['jour', 'printemps'],
+    intensity: 'moderee',
+    composition: {
+      tete: [n('Pamplemousse'), NOTE.bergamote],
+      coeur: [NOTE.jasmin],
+      fond: [n('Musc blanc'), NOTE.vanille],
+    },
+  },
+  'bamboo-gucci': {
+    fragranceNotes: ['floral', 'woody', 'citrus'],
+    wearMoments: ['jour', 'printemps', 'ete'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [NOTE.jasmin],
+      fond: [NOTE.cedre, NOTE.vanille],
+    },
+  },
+  'alexandria-ii': {
+    fragranceNotes: ['oriental', 'woody', 'vanilla'],
+    wearMoments: ['nuit', 'hiver'],
+    intensity: 'tres-forte',
+    composition: {
+      tete: [n('Rose'), n('Cannelle')],
+      coeur: [NOTE.jasmin, NOTE.ambre],
+      fond: [NOTE.vanille, NOTE.cedre],
+    },
+  },
+  'ambre-des-abysses': {
+    fragranceNotes: ['oriental', 'woody', 'vanilla'],
+    wearMoments: ['nuit', 'automne', 'hiver'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [NOTE.ambre, NOTE.jasmin],
+      fond: [NOTE.vanille, NOTE.cedre],
+    },
+  },
+  'arabesque-tonka': {
+    fragranceNotes: ['oriental', 'gourmand', 'vanilla'],
+    wearMoments: ['nuit', 'hiver'],
+    intensity: 'tres-forte',
+    composition: {
+      tete: [NOTE.safran, n('Épices')],
+      coeur: [n('Tonka'), NOTE.ambre],
+      fond: [NOTE.vanille, NOTE.cedre],
+    },
+  },
+  'bleu-lazuli': {
+    fragranceNotes: ['woody', 'aromatic', 'citrus'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [NOTE.jasmin, n('Iris')],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'beluga-supreme': {
+    fragranceNotes: ['powdery', 'vanilla', 'musky'],
+    wearMoments: ['nuit', 'hiver'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [n('Héliotrope'), NOTE.jasmin],
+      fond: [NOTE.vanille, NOTE.ambre],
+    },
+  },
+  'baccarat-rouge-540': {
+    fragranceNotes: ['oriental', 'woody', 'sweet'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'tres-forte',
+    composition: {
+      tete: [NOTE.safran, NOTE.bergamote],
+      coeur: [NOTE.jasmin, NOTE.ambre],
+      fond: [NOTE.cedre, NOTE.vanille],
+    },
+  },
+  'bois-imperial': {
+    fragranceNotes: ['woody', 'fresh-spicy', 'aromatic'],
+    wearMoments: ['jour', 'ete', 'printemps'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote, n('Poivre')],
+      coeur: [n('Vétiver'), n('Géranium')],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'bois-lumiere': {
+    fragranceNotes: ['citrus', 'woody', 'musky'],
+    wearMoments: ['jour', 'ete'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote, n('Cédrat')],
+      coeur: [NOTE.jasmin],
+      fond: [NOTE.cedre, NOTE.vanille],
+    },
+  },
+  'allure-sport': {
+    fragranceNotes: ['citrus', 'woody', 'fresh-spicy'],
+    wearMoments: ['jour', 'ete'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote, n('Orange')],
+      coeur: [n('Néroli'), NOTE.jasmin],
+      fond: [NOTE.cedre, NOTE.vanille],
+    },
+  },
+  'amyris-homme': {
+    fragranceNotes: ['woody', 'citrus', 'aromatic'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [NOTE.jasmin, n('Amyris')],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'aqua-di-gio-elixir': {
+    fragranceNotes: ['aquatic', 'aromatic', 'woody'],
+    wearMoments: ['jour', 'ete'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote, n('Notes marines')],
+      coeur: [n('Romarin'), NOTE.jasmin],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'aureus-eros': {
+    fragranceNotes: ['fresh-spicy', 'vanilla', 'woody'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'forte',
+    composition: {
+      tete: [n('Menthe'), NOTE.bergamote],
+      coeur: [NOTE.vanille, NOTE.jasmin],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'bleu-exclusif': {
+    fragranceNotes: ['woody', 'aromatic', 'citrus'],
+    wearMoments: ['nuit', 'automne'],
+    intensity: 'tres-forte',
+    composition: {
+      tete: [NOTE.bergamote, n('Citron')],
+      coeur: [NOTE.jasmin, n('Gingembre')],
+      fond: [NOTE.cedre, NOTE.ambre],
+    },
+  },
+  'bleu-chanel': {
+    fragranceNotes: ['citrus', 'woody', 'fresh-spicy'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote, NOTE.safran],
+      coeur: [NOTE.jasmin, NOTE.ambre],
+      fond: [NOTE.cedre, NOTE.vanille, NOTE.ambre],
+    },
+  },
+  'azure-line': {
+    fragranceNotes: ['aquatic', 'citrus', 'fresh-spicy'],
+    wearMoments: ['jour', 'ete'],
+    intensity: 'moderee',
+    composition: {
+      tete: [NOTE.bergamote, n('Citron')],
+      coeur: [n('Notes aquatiques')],
+      fond: [NOTE.cedre, n('Musc')],
+    },
+  },
+}
 
 async function ensureCategories() {
   for (const category of CATEGORIES) {
@@ -634,10 +836,16 @@ async function seed() {
   await ensureCategories()
 
   const idsByKey = new Map()
-  for (const [index, product] of PRODUCTS.entries()) {
+  for (const product of PRODUCTS) {
+    if (!imageExists(product.image)) {
+      console.warn(`  Skipping "${product.name}" — missing ${product.image}`)
+      continue
+    }
     const id = await upsertProduct({
       ...product,
-      image: resolveExistingImage(product.image, AVAILABLE_IMAGES, index),
+      ...(OLFACTIVE[product.key] ?? {}),
+      featured: FEATURED_KEYS.has(product.key),
+      image: product.image,
     })
     idsByKey.set(product.key, id)
     console.log(`  [${product.category}] ${product.name} → ${product.image}`)
@@ -645,6 +853,7 @@ async function seed() {
 
   for (const product of PRODUCTS) {
     const id = idsByKey.get(product.key)
+    if (!id) continue
     const relatedIds = product.related
       .map((key) => idsByKey.get(key))
       .filter((relatedId) => Number.isInteger(relatedId) && relatedId !== id)
