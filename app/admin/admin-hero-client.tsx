@@ -91,8 +91,8 @@ export function AdminHeroClient({ initialImages }: { initialImages: HeroImageSlo
   return (
     <div>
       <p className="mb-6 text-sm text-slate-600">
-        Ces 4 images forment le collage de la page d accueil. Televersez une photo par emplacement
-        (JPG, PNG, WEBP ou GIF, 5 Mo max).
+        Ces 4 photos forment le diaporama plein ecran de la page d accueil. La premiere est
+        l image principale. Televersez une photo large (JPG, PNG, WEBP ou GIF, 5 Mo max).
       </p>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -108,7 +108,7 @@ export function AdminHeroClient({ initialImages }: { initialImages: HeroImageSlo
                   <p className="text-sm font-semibold text-slate-900">
                     {image.label}
                     <span className="ml-2 text-xs font-medium uppercase tracking-wide text-slate-400">
-                      {image.shape === 'tall' ? 'Portrait' : 'Carre'}
+                      {image.shape === 'wide' ? 'Paysage' : image.shape === 'tall' ? 'Portrait' : 'Carre'}
                     </span>
                   </p>
                   <p className="mt-0.5 text-xs text-slate-500">{image.position}</p>
@@ -125,7 +125,7 @@ export function AdminHeroClient({ initialImages }: { initialImages: HeroImageSlo
 
               <div
                 className={`relative mb-3 overflow-hidden rounded-md border border-slate-200 bg-slate-50 ${
-                  image.shape === 'tall' ? 'aspect-[3/4]' : 'aspect-square'
+                  image.shape === 'wide' ? 'aspect-4/3' : image.shape === 'tall' ? 'aspect-3/4' : 'aspect-square'
                 }`}
               >
                 <img

@@ -5,7 +5,7 @@ export default function AdminHeroLoading() {
     <AdminPageSkeleton
       eyebrow="PAGE D ACCUEIL"
       title="Images hero"
-      description="Televersez les 4 images du collage affiche en haut de la page d accueil."
+      description="Televersez les 4 photos du diaporama plein ecran en haut de la page d accueil."
       rows={4}
       columns={2}
     />

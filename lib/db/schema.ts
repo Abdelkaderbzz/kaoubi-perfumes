@@ -119,7 +119,7 @@ export const carouselVideos = pgTable('carousel_videos', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-/** Fixed homepage hero collage slots (0–3). */
+/** Fixed homepage hero campaign slots (0–3). */
 export const heroImages = pgTable('hero_images', {
   slot: integer('slot').primaryKey(),
   imageUrl: text('imageUrl').notNull(),
