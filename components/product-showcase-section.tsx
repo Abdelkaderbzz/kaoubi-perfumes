@@ -52,13 +52,12 @@ export function ProductShowcaseSection({
       </Reveal>
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
         {products.map((product, index) => (
-          <Reveal key={product.id} delay={(index % 4) * 80}>
-            <ProductCard
-              product={product}
-              categories={categories}
-              priority={priorityImages && index < 4}
-            />
-          </Reveal>
+          <ProductCard
+            key={product.id}
+            product={product}
+            categories={categories}
+            priority={priorityImages && index < 4}
+          />
         ))}
       </div>
       <Reveal className="mt-8 text-center" variant="zoom" delay={160}>

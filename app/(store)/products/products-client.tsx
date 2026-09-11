@@ -406,16 +406,15 @@ export function ProductsClient({
           <>
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
               {products.map((product, index) => (
-                <Reveal key={product.id} delay={(index % 4) * 70}>
-                  <ProductCard
-                    product={product}
-                    categories={storeCategories.map((item) => ({
-                      slug: item.slug,
-                      name: item.name,
-                    }))}
-                    priority={index < 4}
-                  />
-                </Reveal>
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  categories={storeCategories.map((item) => ({
+                    slug: item.slug,
+                    name: item.name,
+                  }))}
+                  priority={index < 4}
+                />
               ))}
             </div>
 

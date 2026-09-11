@@ -32,7 +32,7 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
     }, SLIDE_MS)
 
     return () => window.clearInterval(id)
-  }, [paused, reduceMotion, slides.length, active])
+  }, [paused, reduceMotion, slides.length])
 
   const onSelect = useCallback((index: number) => {
     setActive(index)
@@ -61,7 +61,7 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
                   src={image.imageUrl}
                   alt=""
                   fill
-                  priority={index < 2}
+                  priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   sizes="100vw"
                   className="object-cover"
