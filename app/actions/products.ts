@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { orderItems, orders, products } from '@/lib/db/schema'
 import {
   ADMIN_PAGE_SIZE,
+  STORE_PAGE_SIZE,
   buildPaginatedResult,
   normalizePage,
   normalizePageSize,
@@ -142,7 +143,27 @@ export async function getStoreProductsPaginated(options: {
   wear?: string[]
   intensity?: string
 } = {}) {
-  return queryProductsPaginated({ ...options, publishedOnly: true })
+  const page = normalizePage(options.page)
+  const pageSize = normalizePageSize(options.pageSize, STORE_PAGE_SIZE)
+  const search = options.search?.trim() ?? ''
+  const category = options.category?.trim() || 'all'
+  const wear = [...(options.wear ?? [])].filter(Boolean).sort()
+  const intensity = options.intensity?.trim() ?? ''
+
+  return unstable_cache(
+    async () =>
+      queryProductsPaginated({
+        page,
+        pageSize,
+        search,
+        category,
+        wear,
+        intensity,
+        publishedOnly: true,
+      }),
+    ['store-products-paginated', String(page), String(pageSize), search, category, wear.join(','), intensity],
+    { revalidate: 60, tags: ['products'] },
+  )()
 }
 
 /** @deprecated Use getStoreProductsPaginated for paginated reads. */

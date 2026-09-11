@@ -48,17 +48,19 @@ function revalidateCategoryPaths() {
   revalidatePath('/')
 }
 
+const getCategoriesCached = unstable_cache(
+  async () =>
+    db
+      .select()
+      .from(categories)
+      .where(notInArray(categories.slug, [...HIDDEN_CATEGORY_SLUGS]))
+      .orderBy(asc(categories.name)),
+  ['categories-list-v3'],
+  { revalidate: 300, tags: ['categories'] },
+)
+
 export async function getCategories() {
-  return unstable_cache(
-    async () =>
-      db
-        .select()
-        .from(categories)
-        .where(notInArray(categories.slug, [...HIDDEN_CATEGORY_SLUGS]))
-        .orderBy(asc(categories.name)),
-    ['categories-list-v3'],
-    { revalidate: 300, tags: ['categories'] },
-  )()
+  return getCategoriesCached()
 }
 
 export async function addCategory(data: {
