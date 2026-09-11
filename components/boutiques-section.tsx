@@ -1,112 +1,37 @@
 'use client'
 
 import Image from 'next/image'
+import { EnvelopeSimple, FacebookLogo, MapPin, Phone } from '@phosphor-icons/react'
 import { useDictionary, useLocale } from '@/components/locale-provider'
 import { localizeBoutique, phoneHref, type Boutique } from '@/lib/boutiques'
-import { FacebookIcon } from '@/components/instagram-section-static'
 import { FACEBOOK_URL } from '@/lib/social-links'
 import { STORE_EMAIL, STORE_MAPS_URL } from '@/lib/contact'
 import { Reveal } from '@/components/reveal'
 import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 import type { Dictionary } from '@/lib/i18n'
 
-function StarIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2.5l2.9 6.2 6.6.9-4.8 4.7 1.2 6.7L12 17.8l-5.9 3.2 1.2-6.7L2.5 9.6l6.6-.9L12 2.5z" />
-    </svg>
-  )
-}
-
-function PinIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden
-    >
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1116 0z" />
-      <circle cx="12" cy="10" r="2.75" />
-    </svg>
-  )
-}
-
-function PhoneIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden
-    >
-      <path d="M21 16.9v2.4a1.5 1.5 0 01-1.6 1.5 16.3 16.3 0 01-7.1-2.5 16 16 0 01-4.9-4.9A16.3 16.3 0 014.9 6.3 1.5 1.5 0 016.4 4.7h2.4a1.5 1.5 0 011.5 1.3c.1.8.3 1.6.6 2.4a1.5 1.5 0 01-.4 1.6l-1 1a12.7 12.7 0 004.9 4.9l1-1a1.5 1.5 0 011.6-.4c.8.3 1.6.5 2.4.6a1.5 1.5 0 011.3 1.5z" />
-    </svg>
-  )
-}
-
-function EmailIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden
-    >
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M3 7l9 7 9-7" />
-    </svg>
-  )
-}
-
 const actionCls =
-  'inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-[11px] font-light tracking-[0.18em] text-muted-foreground transition-all hover:border-primary hover:bg-primary/5 hover:text-primary'
+  'inline-flex items-center gap-1.5 border-b border-border pb-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground transition-colors hover:border-primary hover:text-primary'
 
-function BoutiqueHero({ boutique, rtl }: { boutique: Boutique; rtl: boolean }) {
-  const place = boutique.region || boutique.city
-  const badge = rtl ? place : place.toUpperCase()
-
-  return (
-    <div className="relative aspect-4/3 overflow-hidden bg-secondary">
-      {boutique.image ? (
-        <Image
-          src={boutique.image}
-          alt={boutique.imageAlt || boutique.name}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-      ) : (
-        <div className="flex h-full items-center justify-center text-primary/40">
-          <PinIcon className="size-10" />
-        </div>
-      )}
-      <div className="absolute inset-0 bg-linear-to-t from-black/55 via-transparent to-transparent" />
-      <span
-        className={`absolute bottom-4 start-5 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-[10px] font-light text-white backdrop-blur-sm ${
-          rtl ? 'tracking-normal' : 'tracking-[0.3em]'
-        }`}
-      >
-        <PinIcon className="shrink-0" />
-        {badge}
-      </span>
-    </div>
-  )
+function uniqueCities(boutiques: Boutique[]) {
+  return [...new Set(boutiques.map((boutique) => boutique.city).filter(Boolean))]
 }
 
-function BoutiqueCard({
+function buildTagline(open: Boutique[], hasIncoming: boolean, labels: Dictionary['boutiques']) {
+  const openCities = uniqueCities(open)
+  const parts: string[] = []
+
+  if (openCities.length === 1) parts.push(labels.taglineOne(openCities[0]))
+  else if (openCities.length > 1) {
+    const last = openCities[openCities.length - 1]
+    parts.push(labels.taglineMany(openCities.slice(0, -1).join(', '), last))
+  }
+
+  if (hasIncoming) parts.push(labels.comingSoonLine)
+  return parts.join(' ')
+}
+
+function OpenBoutique({
   boutique,
   labels,
   rtl,
@@ -116,109 +41,106 @@ function BoutiqueCard({
   rtl: boolean
 }) {
   const mapsUrl = boutique.directionsUrl || STORE_MAPS_URL
+  const place = boutique.region && boutique.region !== boutique.city ? boutique.region : null
 
   return (
-    <article className="group overflow-hidden rounded-3xl border border-border/80 bg-card transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10">
-      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block">
-        <BoutiqueHero boutique={boutique} rtl={rtl} />
+    <article className="grid overflow-hidden border border-border/70 bg-card md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="relative block h-36 sm:h-40 md:h-44">
+        {boutique.image ? (
+          <Image
+            src={boutique.image}
+            alt={boutique.imageAlt || boutique.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 40vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-secondary text-primary/40">
+            <MapPin className="size-7" weight="duotone" aria-hidden />
+          </div>
+        )}
       </a>
 
-      <div className="p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col justify-center px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
           <h3
-            className={`font-serif text-2xl text-foreground ${
+            className={`font-serif text-xl text-foreground sm:text-2xl ${
               rtl ? 'font-medium tracking-normal' : 'font-light tracking-wide'
             }`}
           >
             {boutique.city}
           </h3>
-          {boutique.rating != null ? (
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-light tracking-wider text-primary">
-                <StarIcon />
-                {boutique.rating.toFixed(1)}
-              </span>
-              <span className="text-[11px] font-light tracking-wider text-muted-foreground">
-                {boutique.reviewCount ? labels.reviews(boutique.reviewCount) : ''}
-                {boutique.ratingSource}
-              </span>
-            </div>
-          ) : null}
+          <p className={`text-primary ${rtl ? 'text-xs font-light' : 'text-[10px] font-medium tracking-[0.28em]'}`}>
+            {labels.open}
+            {place ? ` · ${place}` : ''}
+          </p>
         </div>
 
         {boutique.description ? (
-          <p className="mt-4 text-sm font-light leading-relaxed text-muted-foreground">
+          <p className="mt-1.5 line-clamp-2 max-w-md text-xs font-light leading-relaxed text-muted-foreground sm:text-sm">
             {boutique.description}
           </p>
         ) : null}
 
-        {boutique.address || boutique.phone || STORE_EMAIL ? (
-          <dl className="mt-5 space-y-2.5 border-t border-border/60 pt-5">
-            {boutique.address ? (
-              <div className="flex items-start gap-2.5">
-                <dt className="mt-0.5 text-primary">
-                  <PinIcon className="shrink-0" />
-                  <span className="sr-only">{labels.address}</span>
-                </dt>
-                <dd>
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-light text-muted-foreground transition-colors hover:text-primary hover:underline"
-                  >
-                    {boutique.address}
-                  </a>
-                </dd>
-              </div>
-            ) : null}
-            {boutique.phone ? (
-              <div className="flex items-start gap-2.5">
-                <dt className="mt-0.5 text-primary">
-                  <PhoneIcon className="shrink-0" />
-                  <span className="sr-only">{labels.phone}</span>
-                </dt>
-                <dd>
-                  <a
-                    href={phoneHref(boutique.phone)}
-                    className="text-sm font-light tracking-wide text-muted-foreground transition-colors hover:text-primary hover:underline"
-                    dir="ltr"
-                  >
-                    +216 {boutique.phone}
-                  </a>
-                </dd>
-              </div>
-            ) : null}
-            <div className="flex items-start gap-2.5">
-              <dt className="mt-0.5 text-primary">
-                <EmailIcon className="shrink-0" />
-                <span className="sr-only">{labels.email}</span>
-              </dt>
-              <dd>
-                <a
-                  href={`mailto:${STORE_EMAIL}`}
-                  className="text-sm font-light tracking-wide text-muted-foreground transition-colors hover:text-primary hover:underline"
-                >
-                  {STORE_EMAIL}
-                </a>
-              </dd>
-            </div>
-          </dl>
-        ) : null}
+        <ul className="mt-2.5 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-4 sm:gap-y-1">
+          {boutique.address ? (
+            <li className="min-w-0">
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 truncate text-xs font-light text-muted-foreground transition-colors hover:text-primary"
+              >
+                <MapPin className="size-3.5 shrink-0 text-primary" weight="duotone" aria-hidden />
+                <span className="truncate">
+                  <span className="sr-only">{labels.address}: </span>
+                  {boutique.address}
+                </span>
+              </a>
+            </li>
+          ) : null}
+          {boutique.phone ? (
+            <li>
+              <a
+                href={phoneHref(boutique.phone)}
+                className="flex items-center gap-1.5 text-xs font-light tracking-wide text-muted-foreground transition-colors hover:text-primary"
+                dir="ltr"
+              >
+                <Phone className="size-3.5 shrink-0 text-primary" weight="duotone" aria-hidden />
+                <span>
+                  <span className="sr-only">{labels.phone}: </span>
+                  +216 {boutique.phone}
+                </span>
+              </a>
+            </li>
+          ) : null}
+          <li>
+            <a
+              href={`mailto:${STORE_EMAIL}`}
+              className="flex items-center gap-1.5 text-xs font-light tracking-wide text-muted-foreground transition-colors hover:text-primary"
+            >
+              <EnvelopeSimple className="size-3.5 shrink-0 text-primary" weight="duotone" aria-hidden />
+              <span>
+                <span className="sr-only">{labels.email}: </span>
+                {STORE_EMAIL}
+              </span>
+            </a>
+          </li>
+        </ul>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
           <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className={actionCls}>
-            <PinIcon />
+            <MapPin className="size-3" weight="bold" aria-hidden />
             {labels.directions}
           </a>
           {boutique.phone ? (
             <a href={phoneHref(boutique.phone)} className={actionCls}>
-              <PhoneIcon />
+              <Phone className="size-3" weight="bold" aria-hidden />
               {labels.call}
             </a>
           ) : null}
           <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={actionCls}>
-            <FacebookIcon />
+            <FacebookLogo className="size-3" weight="fill" aria-hidden />
             FACEBOOK
           </a>
         </div>
@@ -227,13 +149,33 @@ function BoutiqueCard({
   )
 }
 
-function buildTagline(boutiques: Boutique[], labels: Dictionary['boutiques']) {
-  const cities = [...new Set(boutiques.map((boutique) => boutique.city))]
-  if (cities.length === 0) return ''
-  if (cities.length === 1) return labels.taglineOne(cities[0])
-
-  const last = cities[cities.length - 1]
-  return labels.taglineMany(cities.slice(0, -1).join(', '), last)
+/** Anonymous coming-soon storefront — no city, address, or copy from the pending row. */
+function IncomingBoutique({ labels, rtl }: { labels: Dictionary['boutiques']; rtl: boolean }) {
+  return (
+    <article
+      aria-label={labels.comingSoon}
+      className="relative overflow-hidden border border-dashed border-primary/40 bg-secondary/35 px-5 py-4"
+    >
+      <div className="relative flex items-center gap-5">
+        <div className="incoming-facade shrink-0" aria-hidden>
+          <span className="incoming-facade-roof" />
+          <span className="incoming-facade-body">
+            <span className="incoming-facade-window" />
+            <span className="incoming-facade-window" />
+            <span className="incoming-facade-door" />
+            <span className="incoming-facade-window" />
+          </span>
+        </div>
+        <p
+          className={`text-primary ${
+            rtl ? 'text-sm font-medium' : 'text-[11px] font-medium tracking-[0.38em]'
+          }`}
+        >
+          {labels.comingSoon}
+        </p>
+      </div>
+    </article>
+  )
 }
 
 export function BoutiquesSection({ boutiques }: { boutiques: Boutique[] }) {
@@ -241,30 +183,40 @@ export function BoutiquesSection({ boutiques }: { boutiques: Boutique[] }) {
   const { locale, dir } = useLocale()
   const rtl = dir === 'rtl'
   const localized = boutiques.map((boutique) => localizeBoutique(boutique, locale))
+  const open = localized.filter((boutique) => boutique.published)
+  const hasIncoming = localized.some((boutique) => !boutique.published)
+
   if (localized.length === 0) return null
 
+  const labels = dictionary.boutiques
+  const tagline = buildTagline(open, hasIncoming, labels)
+
   return (
-    <section id="boutiques" className="scroll-mt-16 border-t border-border bg-secondary/20 py-12 md:py-14">
+    <section id="boutiques" className="scroll-mt-16 border-t border-border bg-background py-10 md:py-12">
       <div className="mx-auto max-w-6xl px-4">
-        <Reveal className="mb-8 text-center">
-          <SectionEyebrow>{dictionary.boutiques.eyebrow}</SectionEyebrow>
-          <SectionTitle>{dictionary.boutiques.title}</SectionTitle>
-          <p className="mx-auto mt-3 max-w-lg text-sm font-light text-muted-foreground">
-            {buildTagline(localized, dictionary.boutiques)}
-          </p>
+        <Reveal className="mb-6 md:mb-7">
+          <SectionEyebrow>{labels.eyebrow}</SectionEyebrow>
+          <SectionTitle>{labels.title}</SectionTitle>
+          {tagline ? (
+            <p className="mt-2 max-w-lg text-sm font-light leading-relaxed text-muted-foreground">{tagline}</p>
+          ) : null}
         </Reveal>
 
-        <div
-          className={`grid gap-6 ${
-            localized.length === 1 ? 'mx-auto max-w-xl' : 'md:grid-cols-2'
-          }`}
-        >
-          {localized.map((boutique, index) => (
-            <Reveal key={boutique.id} variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 90}>
-              <BoutiqueCard boutique={boutique} labels={dictionary.boutiques} rtl={rtl} />
-            </Reveal>
-          ))}
-        </div>
+        {open.length > 0 ? (
+          <div className="space-y-4">
+            {open.map((boutique, index) => (
+              <Reveal key={boutique.id} variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 80}>
+                <OpenBoutique boutique={boutique} labels={labels} rtl={rtl} />
+              </Reveal>
+            ))}
+          </div>
+        ) : null}
+
+        {hasIncoming ? (
+          <Reveal className={open.length > 0 ? 'mt-5 md:mt-6' : ''} delay={80}>
+            <IncomingBoutique labels={labels} rtl={rtl} />
+          </Reveal>
+        ) : null}
       </div>
     </section>
   )
