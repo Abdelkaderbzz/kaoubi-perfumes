@@ -1,31 +1,9 @@
 'use client'
 
-import { Mars, Snowflake, Sun, Users, Venus, type LucideIcon } from 'lucide-react'
+import { CategoryIcon } from '@/components/category-icon'
 import { useDictionary } from '@/components/locale-provider'
 import { Reveal } from '@/components/reveal'
 import type { StoreCategory } from '@/lib/store-categories'
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  femme: Venus,
-  homme: Mars,
-  unisexe: Users,
-  mixte: Users,
-  sif: Sun,
-  ete: Sun,
-  'parfum-dete': Sun,
-  chta: Snowflake,
-  hiver: Snowflake,
-  'parfum-dhiver': Snowflake,
-}
-
-function resolveIcon(slug: string): LucideIcon {
-  if (CATEGORY_ICONS[slug]) return CATEGORY_ICONS[slug]
-  if (slug.includes('ete') || slug.includes('sif')) return Sun
-  if (slug.includes('hiver') || slug.includes('chta')) return Snowflake
-  if (slug.includes('femme')) return Venus
-  if (slug.includes('homme')) return Mars
-  return Users
-}
 
 export function CategoryPhotos({
   category,
@@ -61,8 +39,6 @@ export function CategoryPhotos({
   const storeCategory = categories.find((item) => item.slug === category)
   if (!storeCategory) return null
 
-  const Icon = resolveIcon(storeCategory.slug)
-
   return (
     <Reveal className="mb-5" variant="fade">
       <div className="overflow-hidden rounded-xl border border-border/60 bg-secondary/60">
@@ -71,7 +47,7 @@ export function CategoryPhotos({
             className="flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-card text-primary shadow-sm sm:size-14"
             aria-hidden
           >
-            <Icon className="size-6 sm:size-7" strokeWidth={1.5} />
+            <CategoryIcon slug={storeCategory.slug} className="size-6 sm:size-7" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-medium tracking-[0.18em] text-primary">

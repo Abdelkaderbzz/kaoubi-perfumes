@@ -8,7 +8,7 @@ import { useRouteTransition } from '@/lib/use-route-transition'
 import type { StoreCategory } from '@/lib/store-categories'
 import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
-import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
+import { CaretDown, MagnifyingGlass, Sliders, X } from '@phosphor-icons/react'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
@@ -193,7 +193,7 @@ export function ProductsClient({
               submitSearch()
             }}
           >
-            <Search
+            <MagnifyingGlass
               className="pointer-events-none absolute start-0 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
@@ -226,15 +226,16 @@ export function ProductsClient({
                 : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
             }`}
           >
-            <SlidersHorizontal className="size-3.5" aria-hidden />
+            <Sliders className="size-3.5" weight="bold" aria-hidden />
             <span>{dictionary.products.refine}</span>
             {activeFilterCount > 0 ? (
               <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">
                 {activeFilterCount}
               </span>
             ) : (
-              <ChevronDown
+              <CaretDown
                 className={`size-3.5 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}
+                weight="bold"
                 aria-hidden
               />
             )}
@@ -353,7 +354,7 @@ export function ProductsClient({
                   className="inline-flex items-center gap-1.5 border border-primary/25 bg-primary/5 py-1 pl-2.5 pr-1.5 text-[11px] font-light text-primary transition-colors hover:border-primary/50 disabled:opacity-60"
                 >
                   {chip.label}
-                  <X className="size-3" aria-hidden />
+                  <X className="size-3" weight="bold" aria-hidden />
                   <span className="sr-only">{dictionary.products.remove}</span>
                 </button>
               ))}

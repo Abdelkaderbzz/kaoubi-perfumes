@@ -8,6 +8,7 @@ import { useDictionary } from '@/components/locale-provider'
 import { FacebookIcon, InstagramIcon, TikTokIcon } from '@/components/instagram-section-static'
 import { FACEBOOK_URL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
 import type { StoreCategory } from '@/lib/store-categories'
+import { Handbag } from '@phosphor-icons/react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -85,11 +86,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
             aria-label={dictionary.nav.cartWithCount(count)}
             className="relative flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-medium tracking-widest text-foreground transition-colors hover:text-primary"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 01-8 0" />
-            </svg>
+            <Handbag size={20} weight="regular" aria-hidden />
             <span className="sr-only">{dictionary.nav.cart}</span>
             {count > 0 && (
               <span className="absolute end-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">

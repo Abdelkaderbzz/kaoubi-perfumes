@@ -18,7 +18,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '6mb',
     },
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', '@phosphor-icons/react'],
   },
   async headers() {
     return [
