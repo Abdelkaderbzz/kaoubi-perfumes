@@ -4,7 +4,7 @@ import { requireAdminId } from '@/lib/admin-auth'
 import { db } from '@/lib/db'
 import { boutiques, orderItems, orders, products } from '@/lib/db/schema'
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { getDeliveryFee } from './settings'
 import {
   ADMIN_PAGE_SIZE,
@@ -80,10 +80,12 @@ async function insertOrderWithItems(data: CreateOrderInput) {
     throw new Error('Ajoutez au moins un article.')
   }
 
-  const deliveryFeeValue = data.orderType === 'delivery' ? await getDeliveryFee() : 0
+  const [deliveryFeeValue, pickup] = await Promise.all([
+    data.orderType === 'delivery' ? getDeliveryFee() : 0,
+    resolvePickupBoutique(data.orderType, data.pickupBoutiqueId),
+  ])
   const subtotal = data.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const totalAmount = subtotal + deliveryFeeValue
-  const pickup = await resolvePickupBoutique(data.orderType, data.pickupBoutiqueId)
 
   const [order] = await db
     .insert(orders)
@@ -203,35 +205,58 @@ export async function getOrdersPaginated(options: {
   return buildPaginatedResult(items, countRow?.count ?? 0, page, pageSize)
 }
 
+const getOrderStatusCountsCached = unstable_cache(
+  async () => {
+    const rows = await db
+      .select({
+        status: orders.status,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(orders)
+      .groupBy(orders.status)
+
+    const counts: Record<string, number> = {
+      pending: 0,
+      confirmed: 0,
+      shipped: 0,
+      delivered: 0,
+      cancelled: 0,
+    }
+
+    for (const row of rows) {
+      counts[row.status] = row.count
+    }
+
+    return counts
+  },
+  ['order-status-counts'],
+  { revalidate: 30, tags: ['orders'] },
+)
+
 export async function getOrderStatusCounts() {
   await requireAdminId()
-
-  const rows = await db
-    .select({
-      status: orders.status,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(orders)
-    .groupBy(orders.status)
-
-  const counts: Record<string, number> = {
-    pending: 0,
-    confirmed: 0,
-    shipped: 0,
-    delivered: 0,
-    cancelled: 0,
-  }
-
-  for (const row of rows) {
-    counts[row.status] = row.count
-  }
-
-  return counts
+  return getOrderStatusCountsCached()
 }
 
 export async function getRecentOrders(limit = 5) {
   await requireAdminId()
-  return db.select().from(orders).orderBy(desc(orders.createdAt)).limit(limit)
+  return unstable_cache(
+    async () =>
+      db
+        .select({
+          id: orders.id,
+          customerName: orders.customerName,
+          orderType: orders.orderType,
+          status: orders.status,
+          totalAmount: orders.totalAmount,
+          createdAt: orders.createdAt,
+        })
+        .from(orders)
+        .orderBy(desc(orders.createdAt))
+        .limit(limit),
+    ['recent-orders', String(limit)],
+    { revalidate: 30, tags: ['orders'] },
+  )()
 }
 
 async function getOrderWithItemsData(id: number) {
@@ -369,32 +394,39 @@ export async function deleteOrder(id: number): Promise<OrderActionResult> {
   }
 }
 
+const getDashboardStatsCached = unstable_cache(
+  async () => {
+    const [[orderStats], [productStats], deliveryFee] = await Promise.all([
+      db
+        .select({
+          totalOrders: sql<number>`count(*)::int`,
+          pendingOrders: sql<number>`count(*) filter (where ${orders.status} = 'pending')::int`,
+          revenue: sql<string>`coalesce(sum(${orders.totalAmount}), 0)`,
+        })
+        .from(orders),
+      db
+        .select({
+          totalProducts: sql<number>`count(*)::int`,
+          inStock: sql<number>`count(*) filter (where ${products.inStock} = true)::int`,
+        })
+        .from(products),
+      getDeliveryFee(),
+    ])
+
+    return {
+      totalOrders: orderStats?.totalOrders ?? 0,
+      pendingOrders: orderStats?.pendingOrders ?? 0,
+      revenue: parseFloat(orderStats?.revenue ?? '0'),
+      totalProducts: productStats?.totalProducts ?? 0,
+      inStockProducts: productStats?.inStock ?? 0,
+      deliveryFee,
+    }
+  },
+  ['dashboard-stats'],
+  { revalidate: 30, tags: ['orders', 'products', 'settings'] },
+)
+
 export async function getDashboardStats() {
   await requireAdminId()
-
-  const [[orderStats], [productStats], deliveryFee] = await Promise.all([
-    db
-      .select({
-        totalOrders: sql<number>`count(*)::int`,
-        pendingOrders: sql<number>`count(*) filter (where ${orders.status} = 'pending')::int`,
-        revenue: sql<string>`coalesce(sum(${orders.totalAmount}), 0)`,
-      })
-      .from(orders),
-    db
-      .select({
-        totalProducts: sql<number>`count(*)::int`,
-        inStock: sql<number>`count(*) filter (where ${products.inStock} = true)::int`,
-      })
-      .from(products),
-    getDeliveryFee(),
-  ])
-
-  return {
-    totalOrders: orderStats?.totalOrders ?? 0,
-    pendingOrders: orderStats?.pendingOrders ?? 0,
-    revenue: parseFloat(orderStats?.revenue ?? '0'),
-    totalProducts: productStats?.totalProducts ?? 0,
-    inStockProducts: productStats?.inStock ?? 0,
-    deliveryFee,
-  }
+  return getDashboardStatsCached()
 }

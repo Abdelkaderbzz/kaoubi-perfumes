@@ -7,6 +7,8 @@ import {
   deleteOrder,
   type OrderWithItems,
 } from '@/app/actions/orders'
+import { getOrderProductCatalog } from '@/app/actions/products'
+import { getDeliveryFee } from '@/app/actions/settings'
 import { useToast } from '@/components/toast-provider'
 import { useConfirm } from '@/components/confirm-provider'
 import { boutiqueLabel, type PickupBoutique } from '@/lib/boutiques'
@@ -14,9 +16,10 @@ import { formatDateFr } from '@/lib/locale'
 import { GOVERNORATE_SELECT_OPTIONS, getGovernorateLabel } from '@/lib/tunisia-governorates'
 import { orderEditSchema, type OrderEditFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouteTransition } from '@/lib/use-route-transition'
+import { usePrefetchHrefs, useRouteTransition } from '@/lib/use-route-transition'
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
+import dynamic from 'next/dynamic'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import {
   AdminBadge,
@@ -44,9 +47,13 @@ import {
   orderStatusMeta,
 } from '../order-status'
 import {
-  AdminOrderCreateModal,
   type CreateOrderProduct,
 } from './admin-order-create-modal'
+
+const AdminOrderCreateModal = dynamic(
+  () => import('./admin-order-create-modal').then((mod) => mod.AdminOrderCreateModal),
+  { ssr: false },
+)
 
 type Order = {
   id: number
@@ -112,8 +119,6 @@ export function AdminOrdersClient({
   search: initialSearch,
   status: initialStatus,
   statusCounts: initialStatusCounts,
-  products,
-  deliveryFee,
   pickupBoutiques,
 }: {
   orders: Order[]
@@ -122,8 +127,6 @@ export function AdminOrdersClient({
   search: string
   status: string
   statusCounts: Record<string, number>
-  products: CreateOrderProduct[]
-  deliveryFee: number
   pickupBoutiques: PickupBoutique[]
 }) {
   const { isPending: isNavigating, push, refresh } = useRouteTransition()
@@ -135,8 +138,18 @@ export function AdminOrdersClient({
   const [loadingOrderId, setLoadingOrderId] = useState<number | null>(null)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [creating, setCreating] = useState(false)
+  const [createCatalog, setCreateCatalog] = useState<{
+    products: CreateOrderProduct[]
+    deliveryFee: number
+  } | null>(null)
   const [searchInput, setSearchInput] = useState(initialSearch)
   const [isPending, startTransition] = useTransition()
+  const catalogPrefetchRef = useRef<Promise<void> | null>(null)
+
+  usePrefetchHrefs([
+    page > 1 ? buildOrdersUrl(initialSearch, initialStatus, page - 1) : '',
+    page * ADMIN_PAGE_SIZE < total ? buildOrdersUrl(initialSearch, initialStatus, page + 1) : '',
+  ])
 
   useEffect(() => {
     setSearchInput(initialSearch)
@@ -146,6 +159,33 @@ export function AdminOrdersClient({
 
   function navigate(nextSearch: string, nextStatus: string, nextPage: number) {
     push(buildOrdersUrl(nextSearch, nextStatus, nextPage))
+  }
+
+  function prefetchCreateCatalog() {
+    if (createCatalog || catalogPrefetchRef.current) return catalogPrefetchRef.current
+
+    catalogPrefetchRef.current = Promise.all([getOrderProductCatalog(), getDeliveryFee()])
+      .then(([products, deliveryFee]) => {
+        setCreateCatalog({ products, deliveryFee })
+      })
+      .catch((error) => {
+        catalogPrefetchRef.current = null
+        throw error
+      })
+
+    return catalogPrefetchRef.current
+  }
+
+  async function openCreate() {
+    setCreating(true)
+    if (createCatalog) return
+
+    try {
+      await prefetchCreateCatalog()
+    } catch {
+      toast.error('Impossible de charger le catalogue produits.')
+      setCreating(false)
+    }
   }
 
   const {
@@ -334,7 +374,9 @@ export function AdminOrdersClient({
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           <AdminButton
-            onClick={() => setCreating(true)}
+            onClick={() => void openCreate()}
+            onPointerEnter={prefetchCreateCatalog}
+            onFocus={prefetchCreateCatalog}
             disabled={isBusy}
             className="inline-flex items-center gap-1.5"
           >
@@ -491,10 +533,19 @@ export function AdminOrdersClient({
         />
       )}
 
-      {creating && (
+      {creating && !createCatalog && (
+        <AdminModal title="Nouvelle commande" onClose={() => setCreating(false)}>
+          <div className="flex items-center justify-center gap-3 py-10 text-sm text-slate-600">
+            <AdminSpinner />
+            Chargement du catalogue...
+          </div>
+        </AdminModal>
+      )}
+
+      {creating && createCatalog && (
         <AdminOrderCreateModal
-          products={products}
-          deliveryFee={deliveryFee}
+          products={createCatalog.products}
+          deliveryFee={createCatalog.deliveryFee}
           pickupBoutiques={pickupBoutiques}
           onClose={() => setCreating(false)}
           onCreated={() => {

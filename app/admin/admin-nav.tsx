@@ -7,18 +7,8 @@ import { getErrorMessage } from '@/lib/get-error-message'
 import { Logo } from '@/components/logo'
 import { useToast } from '@/components/toast-provider'
 import { ExternalLink, Store } from 'lucide-react'
-import { useState } from 'react'
-
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Tableau de bord' },
-  { href: '/admin/products', label: 'Produits' },
-  { href: '/admin/orders', label: 'Commandes' },
-  { href: '/admin/categories', label: 'Categories' },
-  { href: '/admin/boutiques', label: 'Boutiques' },
-  { href: '/admin/hero', label: 'Images hero' },
-  { href: '/admin/banner', label: 'Bannieres' },
-  { href: '/admin/settings', label: 'Livraison' },
-]
+import { useState, type ReactNode } from 'react'
+import { ADMIN_NAV_ITEMS } from './admin-routes'
 
 function isActive(pathname: string, href: string) {
   if (href === '/admin') return pathname === '/admin'
@@ -27,6 +17,34 @@ function isActive(pathname: string, href: string) {
 
 const storeLinkCls =
   'flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-50'
+
+function AdminNavLink({
+  href,
+  className,
+  children,
+}: {
+  href: string
+  className: string
+  children: ReactNode
+}) {
+  const router = useRouter()
+
+  return (
+    <Link
+      href={href}
+      prefetch
+      onPointerEnter={() => {
+        void router.prefetch(href)
+      }}
+      onFocus={() => {
+        void router.prefetch(href)
+      }}
+      className={className}
+    >
+      {children}
+    </Link>
+  )
+}
 
 export function AdminNav({ userEmail }: { userEmail: string }) {
   const pathname = usePathname()
@@ -82,11 +100,10 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
           </div>
         </div>
         <nav className="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2">
-          {NAV_ITEMS.map((item) => (
-            <Link
+          {ADMIN_NAV_ITEMS.map((item) => (
+            <AdminNavLink
               key={item.href}
               href={item.href}
-              prefetch
               className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive(pathname, item.href)
                   ? 'bg-amber-100 text-amber-900'
@@ -94,7 +111,7 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
               }`}
             >
               {item.label}
-            </Link>
+            </AdminNavLink>
           ))}
         </nav>
       </header>
@@ -111,11 +128,10 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map((item) => (
-            <Link
+          {ADMIN_NAV_ITEMS.map((item) => (
+            <AdminNavLink
               key={item.href}
               href={item.href}
-              prefetch
               className={`flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive(pathname, item.href)
                   ? 'bg-amber-100 text-amber-900'
@@ -123,7 +139,7 @@ export function AdminNav({ userEmail }: { userEmail: string }) {
               }`}
             >
               {item.label}
-            </Link>
+            </AdminNavLink>
           ))}
 
           <div className="pt-3">

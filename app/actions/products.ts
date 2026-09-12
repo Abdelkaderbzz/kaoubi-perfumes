@@ -310,17 +310,44 @@ export async function getPublishedProductEntries() {
   return getPublishedProductEntriesCached()
 }
 
+const PRODUCT_OPTION_COLUMNS = {
+  id: products.id,
+  name: products.name,
+  brand: products.brand,
+  category: products.category,
+  published: products.published,
+} as const
+
+const getProductOptionsCached = unstable_cache(
+  async () =>
+    db
+      .select(PRODUCT_OPTION_COLUMNS)
+      .from(products)
+      .orderBy(asc(products.brand), asc(products.name)),
+  ['product-options'],
+  { revalidate: 60, tags: ['products'] },
+)
+
 /** Lightweight catalogue used by the related-products picker in the admin. */
 export async function getProductOptions() {
   await requireAdminId()
+  return getProductOptionsCached()
+}
+
+const ORDER_PRODUCT_CATALOG_COLUMNS = {
+  id: products.id,
+  name: products.name,
+  brand: products.brand,
+  price: products.price,
+  sizes: products.sizes,
+  inStock: products.inStock,
+} as const
+
+/** Compact product list for the admin "new order" modal — not page-capped. */
+export async function getOrderProductCatalog() {
+  await requireAdminId()
   return db
-    .select({
-      id: products.id,
-      name: products.name,
-      brand: products.brand,
-      category: products.category,
-      published: products.published,
-    })
+    .select(ORDER_PRODUCT_CATALOG_COLUMNS)
     .from(products)
     .orderBy(asc(products.brand), asc(products.name))
 }

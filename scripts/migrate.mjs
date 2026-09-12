@@ -195,6 +195,11 @@ const CREATE_TABLES = [
   `CREATE INDEX IF NOT EXISTS "orders_created_at_idx" ON "orders" ("createdAt" DESC)`,
   `CREATE INDEX IF NOT EXISTS "orders_status_idx" ON "orders" ("status")`,
   `CREATE INDEX IF NOT EXISTS "order_items_order_id_idx" ON "order_items" ("orderId")`,
+  `CREATE INDEX IF NOT EXISTS "products_created_at_idx" ON "products" ("createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_category_created_at_idx" ON "products" ("category", "createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_published_created_at_idx" ON "products" ("published", "createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_in_stock_idx" ON "products" ("inStock")`,
+  `CREATE INDEX IF NOT EXISTS "session_user_id_idx" ON "session" ("userId")`,
 ]
 
 const INCREMENTAL_ALTERS = [
@@ -262,6 +267,11 @@ const INCREMENTAL_ALTERS = [
    WHERE "slug" = 'douz-kebili'`,
   `UPDATE "boutiques" SET "published" = false, "pickupEnabled" = false, "updatedAt" = NOW()
    WHERE "slug" = 'moknine-monastir'`,
+  `CREATE INDEX IF NOT EXISTS "products_created_at_idx" ON "products" ("createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_category_created_at_idx" ON "products" ("category", "createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_published_created_at_idx" ON "products" ("published", "createdAt" DESC)`,
+  `CREATE INDEX IF NOT EXISTS "products_in_stock_idx" ON "products" ("inStock")`,
+  `CREATE INDEX IF NOT EXISTS "session_user_id_idx" ON "session" ("userId")`,
   `INSERT INTO "boutiques"
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
    VALUES

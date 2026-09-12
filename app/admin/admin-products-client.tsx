@@ -17,7 +17,7 @@ import { WEAR_MOMENT_OPTIONS, parseWearMoments } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
 import { productSchema, type ProductFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouteTransition } from '@/lib/use-route-transition'
+import { usePrefetchHrefs, useRouteTransition } from '@/lib/use-route-transition'
 import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
@@ -71,6 +71,21 @@ type Category = {
   id: number
   name: string
   slug: string
+}
+
+function buildProductsUrl(
+  search: string,
+  category: string,
+  stock: 'all' | 'in' | 'out',
+  page: number,
+) {
+  const params = new URLSearchParams()
+  if (search.trim()) params.set('search', search.trim())
+  if (category && category !== 'all') params.set('category', category)
+  if (stock !== 'all') params.set('stock', stock)
+  if (page > 1) params.set('page', String(page))
+  const query = params.toString()
+  return query ? `/admin/products?${query}` : '/admin/products'
 }
 
 const colorInputCls =
@@ -129,6 +144,13 @@ export function AdminProductsClient({
 
   const defaultCategory = categories[0]?.slug ?? 'femme'
 
+  usePrefetchHrefs([
+    page > 1 ? buildProductsUrl(initialSearch, initialCategory, initialStock, page - 1) : '',
+    page * ADMIN_PAGE_SIZE < total
+      ? buildProductsUrl(initialSearch, initialCategory, initialStock, page + 1)
+      : '',
+  ])
+
   useEffect(() => {
     setSearchInput(initialSearch)
   }, [initialSearch])
@@ -139,13 +161,7 @@ export function AdminProductsClient({
     nextStock: 'all' | 'in' | 'out',
     nextPage: number,
   ) {
-    const params = new URLSearchParams()
-    if (nextSearch.trim()) params.set('search', nextSearch.trim())
-    if (nextCategory && nextCategory !== 'all') params.set('category', nextCategory)
-    if (nextStock !== 'all') params.set('stock', nextStock)
-    if (nextPage > 1) params.set('page', String(nextPage))
-    const query = params.toString()
-    push(query ? `/admin/products?${query}` : '/admin/products')
+    push(buildProductsUrl(nextSearch, nextCategory, nextStock, nextPage))
   }
 
   const {

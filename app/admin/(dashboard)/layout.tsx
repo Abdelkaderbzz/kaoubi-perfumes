@@ -2,6 +2,7 @@ import { ConfirmProvider } from '@/components/confirm-provider'
 import { getAdminSession } from '@/lib/admin-auth'
 import { redirect } from 'next/navigation'
 import { AdminNav } from '../admin-nav'
+import { AdminRoutePrefetch } from '../admin-route-prefetch'
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getAdminSession()
@@ -9,6 +10,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   return (
     <ConfirmProvider>
+      <AdminRoutePrefetch />
       <div className="h-screen overflow-hidden bg-slate-100 font-sans text-slate-900">
         <div className="flex h-full flex-col lg:flex-row">
           <AdminNav userEmail={session.user.email} />

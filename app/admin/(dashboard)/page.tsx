@@ -9,7 +9,6 @@ import {
 import { formatDateFr } from '@/lib/locale'
 import { formatPriceTnd } from '@/lib/product-price'
 import { orderStatusMeta } from '../order-status'
-import { AdminRoutePrefetch } from '../admin-route-prefetch'
 import Link from 'next/link'
 
 export default async function AdminDashboardPage() {
@@ -19,7 +18,6 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <AdminRoutePrefetch />
       <AdminPageHeader
         eyebrow="ADMINISTRATION"
         title="Tableau de bord"

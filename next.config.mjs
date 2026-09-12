@@ -18,7 +18,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '6mb',
     },
-    optimizePackageImports: ['lucide-react', '@phosphor-icons/react'],
+    optimizePackageImports: ['lucide-react', '@phosphor-icons/react', '@hookform/resolvers', 'zod'],
     staleTimes: {
       dynamic: 30,
       static: 180,
