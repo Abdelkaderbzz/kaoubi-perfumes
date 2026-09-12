@@ -4,7 +4,7 @@ const fr = {
   meta: {
     title: 'Water of Gold | Parfumerie a Sousse',
     description:
-      'Water of Gold est une boutique de parfums a Sousse, Tunisie. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.',
+      'Water of Gold est une parfumerie a Sousse, Moknine et Ksar Helal. Fragrances inspirees des plus grandes marques internationales et parfums de choix, de longue tenue, pour femmes et hommes.',
     productsTitle: 'Boutique de parfums',
     productsDescription:
       'Decouvrez notre selection de parfums femme, homme et mixtes a Sousse. Fragrances de longue tenue inspirees des grandes maisons.',
@@ -24,7 +24,7 @@ const fr = {
   },
   footer: {
     tagline: 'PARFUMERIE · FEMME & HOMME',
-    location: 'SOUSSE, TUNISIE',
+    location: 'Sousse · Moknine · Ksar Helal',
     madeBy: 'Site web cree par',
   },
   hero: {
@@ -227,7 +227,7 @@ const ar: Dictionary = {
   meta: {
     title: 'Water of Gold | عطور بسوسة',
     description:
-      'Water of Gold متجر عطور في سوسة، تونس. عطور مستوحاة من أكبر الدور العالمية، بثبات طويل، للنساء والرجال.',
+      'Water of Gold متجر عطور في سوسة، المكنين وقصر هلال. عطور مستوحاة من أكبر الدور العالمية، بثبات طويل، للنساء والرجال.',
     productsTitle: 'متجر العطور',
     productsDescription:
       'اكتشفوا مجموعتنا من عطور النساء والرجال والمختلطة في سوسة. عطور بثبات طويل مستوحاة من كبرى الدور.',
@@ -247,7 +247,7 @@ const ar: Dictionary = {
   },
   footer: {
     tagline: 'عطور · نساء ورجال',
-    location: 'سوسة، تونس',
+    location: 'سوسة · المكنين · قصر هلال',
     madeBy: 'الموقع من إنجاز',
   },
   hero: {

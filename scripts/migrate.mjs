@@ -257,8 +257,13 @@ const BASELINE_DATA = [
     ('moknine-monastir', 'Water of Gold Moknine', 'Moknine', 'Monastir',
      'Notre adresse a Moknine. La meme selection de fragrances inspirees et de parfums de choix, longue tenue.',
      '/boutiques/interior.webp', 'Interieur de la boutique Water of Gold, presentoirs de parfums',
-     NULL, NULL, 4.7, 72, 'Facebook',
-     'https://www.google.com/maps/dir/?api=1&destination=Moknine%2C+Monastir%2C+Tunisie', 1)
+     'Moknine, Monastir', NULL, 4.7, 72, 'Facebook',
+     'https://www.google.com/maps/dir/?api=1&destination=Moknine%2C+Monastir%2C+Tunisie', 1),
+    ('ksar-helal-monastir', 'Water of Gold Ksar Helal', 'Ksar Helal', 'Monastir',
+     'Notre boutique a Ksar Helal. Toute la collection femme et homme, avec conseil personnalise sur place.',
+     '/hero/boutique-shelves.webp', 'Boutique Water of Gold a Ksar Helal',
+     'Ksar Helal, Monastir', NULL, NULL, NULL, 'Google Maps',
+     'https://www.google.com/maps/dir/?api=1&destination=Ksar+Helal%2C+Monastir%2C+Tunisie', 2)
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "carousel_videos" ("url", "sortOrder") VALUES
     ('https://www.instagram.com/reel/DZ3XNGpsShF/', 0),
@@ -278,7 +283,7 @@ const BASELINE_DATA = [
     )
     SELECT
       'Livraison',
-      'Livraison partout en Tunisie · Retrait en boutique a Sousse et Moknine',
+      'Livraison partout en Tunisie · Retrait en boutique a Sousse, Moknine et Ksar Helal',
       'offer',
       '#c9a44a',
       '#0b0b0b',

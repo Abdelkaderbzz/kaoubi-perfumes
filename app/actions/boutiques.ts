@@ -50,7 +50,7 @@ const getPublishedBoutiquesCached = unstable_cache(
       .from(boutiques)
       .where(eq(boutiques.published, true))
       .orderBy(...orderedBoutiques),
-  ['published-boutiques'],
+  ['published-boutiques-v2'],
   { revalidate: 300, tags: ['boutiques'] },
 )
 
@@ -74,7 +74,7 @@ const getPickupBoutiquesCached = unstable_cache(
       .from(boutiques)
       .where(and(eq(boutiques.published, true), eq(boutiques.pickupEnabled, true)))
       .orderBy(...orderedBoutiques),
-  ['pickup-boutiques'],
+  ['pickup-boutiques-v2'],
   { revalidate: 300, tags: ['boutiques'] },
 )
 

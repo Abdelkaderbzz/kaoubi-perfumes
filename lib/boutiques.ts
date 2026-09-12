@@ -47,12 +47,21 @@ const BOUTIQUE_AR: Record<
     region: 'المنستير',
     description:
       'عنواننا في المكنين. نفس تشكيلة العطور المستوحاة والعطور المختارة، بثبات يدوم.',
+    address: 'المكنين، المنستير',
+  },
+  'ksar-helal-monastir': {
+    city: 'قصر هلال',
+    region: 'المنستير',
+    description:
+      'متجرنا في قصر هلال. كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
+    address: 'قصر هلال، المنستير',
   },
 }
 
 const CITY_AR_EXTRA: Record<string, string> = {
   Moknine: 'المكنين',
   Sahloul: 'سهلول',
+  'Ksar Helal': 'قصر هلال',
 }
 
 function cityInArabic(city: string) {

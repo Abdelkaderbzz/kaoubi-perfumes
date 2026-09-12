@@ -47,6 +47,14 @@ export const DEFAULT_HERO_IMAGES: HeroImageSlot[] = [
   },
 ]
 
+const DEFAULT_HERO_PATHS = new Set(DEFAULT_HERO_IMAGES.map((image) => image.imageUrl))
+
+/** Local collage files shipped in public/hero, or a Cloudinary upload for this project. */
+function isUsableHeroUrl(url: string) {
+  if (DEFAULT_HERO_PATHS.has(url)) return true
+  return url.startsWith('https://res.cloudinary.com/')
+}
+
 export function mergeHeroImages(
   rows: { slot: number; imageUrl: string; alt: string }[],
 ): HeroImageSlot[] {
@@ -54,7 +62,7 @@ export function mergeHeroImages(
 
   return DEFAULT_HERO_IMAGES.map((fallback) => {
     const row = bySlot.get(fallback.slot)
-    if (!row?.imageUrl) return fallback
+    if (!row?.imageUrl || !isUsableHeroUrl(row.imageUrl)) return fallback
     return {
       ...fallback,
       imageUrl: row.imageUrl,
