@@ -105,6 +105,7 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
+ *   published?: boolean
  *   newArrival?: boolean
  *   related: string[]
  *   fragranceNotes?: string[]
@@ -194,6 +195,7 @@ const PRODUCTS = [
     sex: 'femme',
     sizes: sizeVariants('50.000'),
     featured: true,
+    published: false,
     related: relatedOf(FEMME_KEYS, 'alien-mugler'),
   },
   {
@@ -208,6 +210,7 @@ const PRODUCTS = [
     sex: 'femme',
     sizes: sizeVariants('100.000'),
     featured: true,
+    published: false,
     related: relatedOf(FEMME_KEYS, 'aura-rosea'),
   },
   {
@@ -222,6 +225,7 @@ const PRODUCTS = [
     sex: 'femme',
     sizes: sizeVariants('50.000'),
     featured: true,
+    published: false,
     related: relatedOf(FEMME_KEYS, 'black-opium'),
   },
   {
@@ -236,6 +240,7 @@ const PRODUCTS = [
     sex: 'femme',
     sizes: sizeVariants('70.000'),
     featured: true,
+    published: false,
     related: relatedOf(FEMME_KEYS, 'black-opium-glitter'),
   },
   {
@@ -502,6 +507,7 @@ const PRODUCTS = [
     sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
+    published: false,
     related: relatedOf(HOMME_KEYS, 'aqua-di-gio-elixir'),
   },
   {
@@ -516,6 +522,7 @@ const PRODUCTS = [
     sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
+    published: false,
     related: relatedOf(HOMME_KEYS, 'aureus-eros'),
   },
   {
@@ -530,6 +537,7 @@ const PRODUCTS = [
     sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
+    published: false,
     related: relatedOf(HOMME_KEYS, 'bleu-exclusif'),
   },
   {
@@ -592,10 +600,10 @@ const PRODUCTS = [
   },
   {
     key: 'bakhoor-maryam',
-    name: 'بخور مريم',
+    name: 'Bakhoor Maryam',
     brand: 'KAOUBI PERFUMES',
     description:
-      'Bakhoor Maryam (بخور مريم) — Selection Rennée. Encens artisanal بخور المزاريق. Notes chaudes et orientales pour parfumer la maison.',
+      'Bakhoor Maryam — Selection Rennée. Encens artisanal des Mrazig. Notes chaudes et orientales pour parfumer la maison.',
     price: '32.000',
     category: 'bakhoor',
     image: IMG.bakhoorMaryam,
@@ -1140,9 +1148,9 @@ async function upsertProduct(product) {
         "inStock" = true,
         featured = $17,
         "newArrival" = $18,
-        published = true,
+        published = $19,
         "updatedAt" = NOW()
-       WHERE id = $19`,
+       WHERE id = $20`,
       [
         product.description,
         product.price,
@@ -1162,6 +1170,7 @@ async function upsertProduct(product) {
         promoTagTextColor,
         product.featured,
         Boolean(product.newArrival),
+        product.published !== false,
         id,
       ],
     )
@@ -1180,7 +1189,7 @@ async function upsertProduct(product) {
       $1, $2, $3, $4, $5, $6, $7, $8, $9, '[]',
       $10, $11, $12, $13, $14,
       $15, $16, $17, $18,
-      true, $19, $20, true, NOW(), NOW()
+      true, $19, $20, $21, NOW(), NOW()
     )
     RETURNING id`,
     [
@@ -1204,6 +1213,7 @@ async function upsertProduct(product) {
       promoTagTextColor,
       product.featured,
       Boolean(product.newArrival),
+      product.published !== false,
     ],
   )
   return inserted.rows[0].id

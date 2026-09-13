@@ -191,6 +191,7 @@ export async function getStoreProductsPaginated(options: {
       }),
     [
       'store-products-paginated',
+      'v5',
       String(page),
       String(pageSize),
       search,
@@ -238,7 +239,7 @@ const getFeaturedProductsCached = unstable_cache(
       .where(and(eq(products.featured, true), eq(products.published, true)))
       .orderBy(FEATURED_HOME_ORDER, desc(products.createdAt))
       .limit(4),
-  ['featured-products', 'v4'],
+  ['featured-products', 'v8'],
   { revalidate: 120, tags: ['products'] },
 )
 
@@ -254,7 +255,7 @@ const getNewProductsCached = unstable_cache(
       .where(and(eq(products.newArrival, true), eq(products.published, true)))
       .orderBy(desc(products.updatedAt), desc(products.createdAt))
       .limit(8),
-  ['new-products', 'v3'],
+  ['new-products', 'v7'],
   { revalidate: 120, tags: ['products'] },
 )
 
@@ -326,7 +327,7 @@ export async function getProductById(id: number) {
         .limit(1)
       return result[0] ?? null
     },
-    ['product-by-id', 'v2', String(id)],
+    ['product-by-id', 'v7', String(id)],
     { revalidate: 120, tags: ['products', `product-${id}`] },
   )()
 }
@@ -342,7 +343,7 @@ const getPublishedProductEntriesCached = unstable_cache(
       .from(products)
       .where(eq(products.published, true))
       .orderBy(desc(products.updatedAt)),
-  ['published-product-entries', 'v2'],
+  ['published-product-entries', 'v5'],
   { revalidate: 300, tags: ['products'] },
 )
 
@@ -438,7 +439,7 @@ export async function getRelatedProducts(productId: number) {
 
       return [...curated, ...fallback]
     },
-    ['related-products', 'v2', String(productId)],
+    ['related-products', 'v5', String(productId)],
     { revalidate: 120, tags: ['products', `product-${productId}`] },
   )()
 }
