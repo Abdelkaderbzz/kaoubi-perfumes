@@ -151,6 +151,8 @@ export const products = pgTable('products', {
   wearMoments: text('wearMoments').notNull().default('[]'),
   /** Single intensity level slug (see lib/product-intensity.ts), or null. */
   intensity: text('intensity'),
+  /** Single product format/type slug (see lib/product-type.ts), or null. */
+  type: text('type'),
   inStock: boolean('inStock').notNull().default(true),
   featured: boolean('featured').notNull().default(false),
   published: boolean('published').notNull().default(true),

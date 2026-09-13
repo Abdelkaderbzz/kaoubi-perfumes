@@ -155,6 +155,7 @@ const CREATE_TABLES = [
     "composition" text NOT NULL DEFAULT '{"tete":[],"coeur":[],"fond":[]}',
     "wearMoments" text NOT NULL DEFAULT '[]',
     "intensity" text,
+    "type" text,
     "inStock" boolean NOT NULL DEFAULT true,
     "featured" boolean NOT NULL DEFAULT false,
     "published" boolean NOT NULL DEFAULT true,
@@ -212,6 +213,7 @@ const INCREMENTAL_ALTERS = [
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "composition" text NOT NULL DEFAULT '{"tete":[],"coeur":[],"fond":[]}'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "wearMoments" text NOT NULL DEFAULT '[]'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "intensity" text`,
+  `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "type" text`,
   `UPDATE "categories" SET "name" = 'Mixte' WHERE "slug" = 'unisexe' AND "name" = 'Unisexe'`,
   `DELETE FROM "categories" WHERE "slug" IN ('sif', 'chta')`,
   `INSERT INTO "categories" ("name", "slug") VALUES

@@ -3,6 +3,7 @@ import { GOVERNORATE_SLUGS } from '@/lib/tunisia-governorates'
 import { FRAGRANCE_NOTE_OPTIONS } from '@/lib/fragrance-notes'
 import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
+import { PRODUCT_TYPES } from '@/lib/product-type'
 
 const governorateSchema = z.enum(GOVERNORATE_SLUGS as [string, ...string[]])
 
@@ -85,6 +86,9 @@ export const productSchema = z
       .max(WEAR_MOMENT_OPTIONS.length, 'Trop de tags'),
     intensity: z
       .enum(['', ...INTENSITY_LEVELS.map((level) => level.value)] as [string, ...string[]])
+      .optional(),
+    type: z
+      .enum(['', ...PRODUCT_TYPES.map((item) => item.value)] as [string, ...string[]])
       .optional(),
     inStock: z.boolean(),
     featured: z.boolean(),
