@@ -2,6 +2,7 @@
 
 import { useDictionary } from '@/components/locale-provider'
 import { parseWearMoments } from '@/lib/product-wear'
+import { parseFragranceNotes } from '@/lib/fragrance-notes'
 import {
   getIntensityStep,
   INTENSITY_LEVELS,
@@ -78,26 +79,33 @@ function IntensityBar({
 export function FragranceProfile({
   wearMoments,
   intensity,
+  fragranceNotes,
 }: {
   wearMoments?: string | null | undefined
   intensity?: string | null | undefined
+  fragranceNotes?: string | string[] | null | undefined
 }) {
   const dictionary = useDictionary()
   const wearLabels = dictionary.wear as Record<string, string>
   const intensityLabels = dictionary.intensity as Record<string, string>
+  const noteLabels = dictionary.fragranceNotes as Record<string, string>
 
   const moments = parseWearMoments(wearMoments).map(
     (value) => wearLabels[value] ?? value,
   )
+  const notes = (
+    Array.isArray(fragranceNotes) ? fragranceNotes : parseFragranceNotes(fragranceNotes)
+  ).map((value) => noteLabels[value] ?? value)
   const intensityStep = getIntensityStep(intensity)
   const intensityLabel = intensity
     ? intensityLabels[intensity] ?? intensity
     : null
 
-  if (moments.length === 0 && intensityStep <= 0) return null
+  if (moments.length === 0 && intensityStep <= 0 && notes.length === 0) return null
 
   return (
     <div className="flex flex-col gap-5 border-t border-border pt-4">
+      <AttributeRow label={dictionary.product.olfactiveLabel} values={notes} />
       <AttributeRow label={dictionary.product.wearLabel} values={moments} />
       {intensity ? (
         <IntensityBar

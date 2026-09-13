@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { FragranceNoteChips } from '@/components/fragrance-note-chips'
 import { useLocale } from '@/components/locale-provider'
 import { ProductPrice } from '@/components/product-price'
 import { ProductPromoTag } from '@/components/product-promo-tag'
@@ -15,6 +16,7 @@ import {
 import { resolveProductImageUrl } from '@/lib/product-images'
 import { getCategoryLabel } from '@/lib/store-categories'
 import { getProductSexLabel } from '@/lib/product-sex'
+import { parseFragranceNotes } from '@/lib/fragrance-notes'
 
 export type ProductCardProduct = {
   id: number
@@ -25,6 +27,7 @@ export type ProductCardProduct = {
   imageUrl: string | null
   category: string
   sex?: string | null
+  fragranceNotes?: string | null
   inStock: boolean
   sizes?: string | null
   promoTagEnabled?: boolean | null
@@ -36,10 +39,12 @@ export type ProductCardProduct = {
 export function ProductCard({
   product,
   categories,
+  highlightedNotes,
   priority = false,
 }: {
   product: ProductCardProduct
   categories?: { slug: string; name: string }[]
+  highlightedNotes?: string[]
   /** LCP hint for above-the-fold cards (e.g. first showcase row). */
   priority?: boolean
 }) {
@@ -47,6 +52,8 @@ export function ProductCard({
   const categoryLabel = getCategoryLabel(product.category, categories, locale)
   const sexLabels = dictionary.sex as Record<string, string>
   const sexLabel = product.sex ? (sexLabels[product.sex] ?? getProductSexLabel(product.sex)) : null
+  const noteLabels = dictionary.fragranceNotes as Record<string, string>
+  const notes = parseFragranceNotes(product.fragranceNotes)
 
   const variants = useMemo(
     () => parseProductSizeVariants(product.sizes, product.price),
@@ -99,12 +106,12 @@ export function ProductCard({
           </div>
         )}
         <div className="absolute start-2 top-2 flex flex-col items-start gap-1 sm:start-3 sm:top-3">
-          <span className="rounded-md bg-card/95 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-primary backdrop-blur-sm sm:px-2.5 sm:py-1 sm:text-[11px] sm:tracking-widest">
-            {categoryLabel.toUpperCase()}
+          <span className="rounded-md bg-card/95 px-2 py-1 text-[11px] font-semibold leading-none text-primary shadow-sm backdrop-blur-sm sm:px-2.5 sm:py-1.5 sm:text-xs">
+            {categoryLabel}
           </span>
           {sexLabel ? (
-            <span className="rounded-md bg-background/85 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-foreground/70 backdrop-blur-sm sm:px-2.5 sm:py-1 sm:text-[11px] sm:tracking-widest">
-              {sexLabel.toUpperCase()}
+            <span className="rounded-md bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground/75 backdrop-blur-sm sm:text-[11px]">
+              {sexLabel}
             </span>
           ) : null}
         </div>
@@ -116,6 +123,16 @@ export function ProductCard({
             textColor={product.promoTagTextColor}
           />
         </div>
+        {notes.length > 0 ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/70 to-transparent px-2 pb-2 pt-10 opacity-100 translate-y-0 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none sm:px-3 sm:pb-3 [@media(hover:hover)]:translate-y-2 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:translate-y-0 [@media(hover:hover)]:group-focus-within:opacity-100">
+            <FragranceNoteChips
+              notes={notes}
+              labels={noteLabels}
+              highlighted={highlightedNotes}
+              overflowLabel={dictionary.products.notesOverflow}
+            />
+          </div>
+        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col p-2.5 sm:p-3">
@@ -126,6 +143,9 @@ export function ProductCard({
           <h3 className="mt-0.5 line-clamp-2 font-serif text-[13px] leading-snug tracking-wide text-foreground sm:text-sm">
             {product.name}
           </h3>
+          <p className="mt-1 truncate text-[11px] font-medium text-muted-foreground sm:text-xs">
+            {categoryLabel}
+          </p>
         </Link>
 
         <div className="mt-1.5 sm:mt-2">

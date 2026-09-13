@@ -46,8 +46,16 @@ export function StoreListbox({
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
     }
 
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
     document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
   }, [open, options, value])
 
   function choose(next: string) {
@@ -56,10 +64,7 @@ export function StoreListbox({
   }
 
   function move(delta: number) {
-    setActiveIndex((current) => {
-      const next = (current + delta + options.length) % options.length
-      return next
-    })
+    setActiveIndex((current) => (current + delta + options.length) % options.length)
   }
 
   function onTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
@@ -97,16 +102,11 @@ export function StoreListbox({
       setActiveIndex(options.length - 1)
       return
     }
-
-    if (event.key === 'Escape' && open) {
-      event.preventDefault()
-      setOpen(false)
-    }
   }
 
   return (
-    <div ref={rootRef} className={cn('relative inline-flex items-center gap-3', className)}>
-      <span className="text-[11px] font-medium tracking-[0.22em] text-foreground">{label}</span>
+    <div ref={rootRef} className={cn('relative inline-flex items-center gap-2', className)}>
+      <span className="text-[10px] font-light tracking-[0.22em] text-muted-foreground">{label}</span>
       <button
         type="button"
         disabled={disabled}
@@ -117,50 +117,57 @@ export function StoreListbox({
         aria-activedescendant={open ? `${listId}-${active.value}` : undefined}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
-        className="inline-flex min-h-10 items-center gap-2 border-b border-border py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:outline-none disabled:opacity-60"
+        className={cn(
+          'inline-flex min-h-10 items-center gap-2 border border-border/80 bg-transparent py-2 ps-3 pe-3 text-[11px] font-light tracking-wide text-foreground outline-none transition-colors hover:border-primary/40 focus-visible:border-primary disabled:opacity-60',
+          open && 'border-primary text-primary',
+        )}
       >
         <span>{selected?.label}</span>
         <CaretDown
-          className={cn('size-3.5 text-primary transition-transform', open && 'rotate-180')}
+          className={cn(
+            'size-3 text-muted-foreground opacity-70 transition-transform duration-200',
+            open && 'rotate-180 text-primary opacity-100',
+          )}
           weight="bold"
           aria-hidden
         />
       </button>
 
       {open ? (
-        <ul
+        <div
           id={listId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute inset-e-0 top-full z-50 mt-2 min-w-52 border border-border bg-popover py-1 shadow-[0_12px_32px_-18px_rgba(58,34,40,0.45)]"
+          className="absolute inset-e-0 top-[calc(100%+0.55rem)] z-60 min-w-52 w-[min(16rem,70vw)] rounded-xl border border-border/80 bg-card/98 p-2 shadow-[0_18px_40px_-24px_rgba(58,34,40,0.45)]"
         >
           {options.map((option, index) => {
             const isSelected = option.value === value
             const isActive = index === activeIndex
             return (
-              <li key={option.value} role="none">
-                <button
-                  type="button"
-                  id={`${listId}-${option.value}`}
-                  role="option"
-                  aria-selected={isSelected}
-                  disabled={disabled}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  onClick={() => choose(option.value)}
-                  className={cn(
-                    'flex w-full items-center justify-between gap-4 px-3.5 py-2.5 text-start text-sm transition-colors disabled:opacity-60',
-                    isActive || isSelected
-                      ? 'bg-primary/10 text-foreground'
-                      : 'text-foreground/80 hover:bg-primary/5 hover:text-foreground',
-                  )}
-                >
-                  <span className={cn(isSelected && 'font-medium')}>{option.label}</span>
-                  {isSelected ? <Check className="size-3.5 text-primary" weight="bold" aria-hidden /> : null}
-                </button>
-              </li>
+              <button
+                key={option.value}
+                type="button"
+                id={`${listId}-${option.value}`}
+                role="option"
+                aria-selected={isSelected}
+                disabled={disabled}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => choose(option.value)}
+                className={cn(
+                  'flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-start text-sm tracking-wide transition-colors disabled:opacity-60',
+                  isSelected
+                    ? 'bg-secondary/70 font-medium text-foreground'
+                    : isActive
+                      ? 'bg-secondary/50 text-foreground'
+                      : 'text-foreground/80 hover:bg-secondary/50 hover:text-foreground',
+                )}
+              >
+                <span>{option.label}</span>
+                {isSelected ? <Check className="size-3.5 text-primary" weight="bold" aria-hidden /> : null}
+              </button>
             )
           })}
-        </ul>
+        </div>
       ) : null}
     </div>
   )

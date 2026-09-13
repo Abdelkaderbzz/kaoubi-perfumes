@@ -9,6 +9,7 @@ import {
   type ProductSizeVariant,
 } from '@/lib/product-sizes'
 import { resolveProductImageUrl } from '@/lib/product-images'
+import { parseFragranceNotes } from '@/lib/fragrance-notes'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
@@ -19,6 +20,7 @@ type Product = {
   price: string
   compareAtPrice?: string | null
   imageUrl: string | null
+  fragranceNotes?: string | null
 }
 
 export function AddToCartButton({
@@ -48,6 +50,7 @@ export function AddToCartButton({
       quantity: 1,
       price: selectedPrice,
       imageUrl: product.imageUrl ? resolveProductImageUrl(product.imageUrl) : undefined,
+      fragranceNotes: parseFragranceNotes(product.fragranceNotes),
     })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)

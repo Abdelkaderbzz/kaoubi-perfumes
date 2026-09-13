@@ -2,7 +2,7 @@
 
 import { createOrder } from '@/app/actions/orders'
 import { getDeliveryFee } from '@/app/actions/settings'
-import { StoreSelect } from '@/components/store-select'
+import { FragranceNoteChips } from '@/components/fragrance-note-chips'
 import { useCart } from '@/components/cart-context'
 import { useLocale } from '@/components/locale-provider'
 import { Reveal } from '@/components/reveal'
@@ -149,6 +149,15 @@ function CheckoutForm() {
                   </p>
                   <p className="truncate text-sm font-medium text-foreground">{item.productName}</p>
                   <p className="text-[11px] text-muted-foreground">{item.size}</p>
+                  {item.fragranceNotes && item.fragranceNotes.length > 0 ? (
+                    <div className="mt-1.5">
+                      <FragranceNoteChips
+                        notes={item.fragranceNotes}
+                        labels={dictionary.fragranceNotes as Record<string, string>}
+                        overflowLabel={dictionary.products.notesOverflow}
+                      />
+                    </div>
+                  ) : null}
                 </div>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center border border-border">

@@ -144,7 +144,11 @@ const fr = {
     emptySearch: 'AUCUN PRODUIT TROUVE',
     resetFilters: 'Reinitialiser les filtres',
     pageOf: (page: number, totalPages: number, total: number) =>
-      `Page ${page} / ${totalPages} · ${total} produit${total > 1 ? 's' : ''}`,
+      `Page ${page} sur ${totalPages} · ${total} produit${total > 1 ? 's' : ''}`,
+    showingRange: (start: number, end: number, total: number) =>
+      `${start}–${end} sur ${total} produit${total > 1 ? 's' : ''}`,
+    goToPage: (page: number) => `Aller a la page ${page}`,
+    notesOverflow: (count: number) => `… +${count}`,
     previous: 'Precedent',
     next: 'Suivant',
     sort: 'Trier',
@@ -209,6 +213,7 @@ const fr = {
     wearLabel: 'QUAND LE PORTER',
     intensityLabel: 'INTENSITE',
     intensityAria: 'Intensite',
+    olfactiveLabel: 'Profil olfactif',
     composition: 'COMPOSITION',
     layersAria: 'Couches olfactives',
     layers: {
@@ -428,7 +433,11 @@ const ar: Dictionary = {
     emptySearch: 'لا توجد نتائج',
     resetFilters: 'إعادة ضبط الفلاتر',
     pageOf: (page: number, totalPages: number, total: number) =>
-      `صفحة ${page} / ${totalPages} · ${total} منتج`,
+      `صفحة ${page} من ${totalPages} · ${total} منتج`,
+    showingRange: (start: number, end: number, total: number) =>
+      `${start}–${end} من ${total} منتج`,
+    goToPage: (page: number) => `الانتقال إلى الصفحة ${page}`,
+    notesOverflow: (count: number) => `… +${count}`,
     previous: 'السابق',
     next: 'التالي',
     sort: 'ترتيب',
@@ -493,6 +502,7 @@ const ar: Dictionary = {
     wearLabel: 'متى ترتديه',
     intensityLabel: 'الشدة',
     intensityAria: 'الشدة',
+    olfactiveLabel: 'الملف الشمي',
     composition: 'التركيبة',
     layersAria: 'الطبقات العطرية',
     layers: {

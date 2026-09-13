@@ -178,9 +178,9 @@ export default async function ProductDetailPage({
             <h1 className="mt-2 font-serif text-xl tracking-wide text-foreground leading-tight sm:text-2xl md:text-3xl">
               {product.name}
             </h1>
-            <p className="mt-1.5 text-xs font-medium tracking-widest text-foreground/65">
-              {categoryLabel.toUpperCase()}
-              {sexLabel ? ` · ${sexLabel.toUpperCase()}` : ''}
+            <p className="mt-1.5 text-sm font-medium text-foreground/75">
+              {categoryLabel}
+              {sexLabel ? ` · ${sexLabel}` : ''}
             </p>
           </div>
 
@@ -195,6 +195,7 @@ export default async function ProductDetailPage({
           <FragranceProfile
             wearMoments={product.wearMoments}
             intensity={product.intensity}
+            fragranceNotes={product.fragranceNotes}
           />
 
           {!product.inStock ? (

@@ -15,6 +15,7 @@ type Product = {
   imageUrl: string | null
   category: string
   sex?: string | null
+  fragranceNotes?: string | null
   inStock: boolean
   sizes?: string | null
   promoTagEnabled?: boolean | null

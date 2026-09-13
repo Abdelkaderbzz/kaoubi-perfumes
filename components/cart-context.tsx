@@ -10,6 +10,7 @@ export type CartItem = {
   quantity: number
   price: number
   imageUrl?: string
+  fragranceNotes?: string[]
 }
 
 type CartContextType = {
@@ -35,7 +36,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((i) =>
           i.productId === item.productId && i.size === item.size
-            ? { ...i, quantity: i.quantity + item.quantity }
+            ? { ...i, quantity: i.quantity + item.quantity, fragranceNotes: i.fragranceNotes ?? item.fragranceNotes }
             : i
         )
       }

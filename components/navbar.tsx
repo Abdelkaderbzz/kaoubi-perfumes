@@ -10,13 +10,13 @@ import { FACEBOOK_URL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/social-links'
 import type { StoreCategory } from '@/lib/store-categories'
 import { CaretDown, Handbag } from '@phosphor-icons/react'
 import Link from 'next/link'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 const socialIconCls =
   'flex size-9 items-center justify-center rounded-full text-foreground/70 transition-colors hover:bg-primary/5 hover:text-primary'
 
 const desktopLinkCls =
-  'text-[13px] font-medium tracking-[0.16em] text-foreground/80 transition-colors hover:text-primary'
+  'text-[13px] font-medium tracking-[0.12em] text-foreground/80 whitespace-nowrap transition-colors hover:text-primary'
 
 function SocialLinks() {
   return (
@@ -49,6 +49,168 @@ function SocialLinks() {
         <FacebookIcon />
       </a>
     </>
+  )
+}
+
+function DesktopCategoryNav({
+  categories,
+  boutiqueLabel,
+  collectionsLabel,
+  collectionsAria,
+  allBoutiqueLabel,
+  collectionsOpen,
+  collectionsId,
+  onToggleCollections,
+  onNavigate,
+}: {
+  categories: StoreCategory[]
+  boutiqueLabel: string
+  collectionsLabel: string
+  collectionsAria: string
+  allBoutiqueLabel: string
+  collectionsOpen: boolean
+  collectionsId: string
+  onToggleCollections: () => void
+  onNavigate: () => void
+}) {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const sizerRef = useRef<HTMLDivElement>(null)
+  const [visibleCount, setVisibleCount] = useState(categories.length)
+
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    const sizer = sizerRef.current
+    if (!row || !sizer) return
+
+    function measure() {
+      const available = row.clientWidth
+      const boutique = sizer.querySelector<HTMLElement>('[data-nav-boutique]')
+      const more = sizer.querySelector<HTMLElement>('[data-nav-more]')
+      const items = [...sizer.querySelectorAll<HTMLElement>('[data-nav-item]')]
+      if (!boutique) return
+
+      const styles = getComputedStyle(sizer)
+      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 28
+      const moreWidth = more?.offsetWidth ?? 0
+      let used = boutique.offsetWidth
+      let visible = 0
+
+      for (let index = 0; index < items.length; index += 1) {
+        const remainingAfter = items.length - (visible + 1)
+        const reserve = remainingAfter > 0 ? gap + moreWidth : 0
+        const next = used + gap + items[index].offsetWidth
+        if (next + reserve <= available + 1) {
+          used = next
+          visible += 1
+        } else {
+          break
+        }
+      }
+
+      setVisibleCount((current) => (current === visible ? current : visible))
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(row)
+    return () => observer.disconnect()
+  }, [categories, boutiqueLabel, collectionsLabel])
+
+  const visibleCategories = categories.slice(0, visibleCount)
+  const overflowCategories = categories.slice(visibleCount)
+  const showCollections = overflowCategories.length > 0
+
+  return (
+    <div ref={rowRef} className="relative min-w-0 flex-1">
+      <div
+        ref={sizerRef}
+        aria-hidden
+        className="pointer-events-none invisible absolute inset-y-0 start-0 flex items-center gap-7"
+      >
+        <span data-nav-boutique="" className={desktopLinkCls}>
+          {boutiqueLabel}
+        </span>
+        {categories.map((category) => (
+          <span key={category.slug} data-nav-item="" className={desktopLinkCls}>
+            {category.name}
+          </span>
+        ))}
+        <span data-nav-more="" className={`${desktopLinkCls} inline-flex items-center gap-1.5`}>
+          {collectionsLabel}
+          <CaretDown size={12} weight="bold" />
+        </span>
+      </div>
+
+      <div className="flex min-w-0 items-center gap-7 overflow-hidden">
+        <Link href="/products" prefetch onClick={onNavigate} className={desktopLinkCls}>
+          {boutiqueLabel}
+        </Link>
+        {visibleCategories.map((category) => (
+          <Link
+            key={category.slug}
+            href={`/products?category=${category.slug}`}
+            prefetch
+            onClick={onNavigate}
+            className={desktopLinkCls}
+          >
+            {category.name}
+          </Link>
+        ))}
+        {showCollections ? (
+          <button
+            type="button"
+            className={`${desktopLinkCls} inline-flex items-center gap-1.5 ${collectionsOpen ? 'text-primary' : ''}`}
+            aria-expanded={collectionsOpen}
+            aria-controls={collectionsId}
+            aria-haspopup="true"
+            aria-label={collectionsAria}
+            onClick={onToggleCollections}
+          >
+            {collectionsLabel}
+            <CaretDown
+              size={12}
+              weight="bold"
+              aria-hidden
+              className={`opacity-70 transition-transform duration-200 ${collectionsOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+        ) : null}
+      </div>
+
+      {collectionsOpen && showCollections ? (
+        <div
+          id={collectionsId}
+          role="region"
+          aria-label={collectionsLabel}
+          className="absolute start-0 top-[calc(100%+0.55rem)] z-50 w-[min(22rem,70vw)] rounded-xl border border-border/80 bg-card/98 p-2 shadow-[0_18px_40px_-24px_rgba(58,34,40,0.45)]"
+        >
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/products?category=${category.slug}`}
+              prefetch
+              onClick={onNavigate}
+              className="block rounded-md px-3 py-2.5 transition-colors hover:bg-secondary/50"
+            >
+              <p className="font-serif text-[1.02rem] text-foreground">{category.name}</p>
+              {category.tagline ? (
+                <p className="mt-0.5 line-clamp-2 text-xs font-light text-muted-foreground">
+                  {category.tagline}
+                </p>
+              ) : null}
+            </Link>
+          ))}
+          <Link
+            href="/products"
+            prefetch
+            onClick={onNavigate}
+            className="mt-1 block border-t border-border/60 px-3 py-2.5 text-[12px] font-medium tracking-[0.14em] text-foreground/70 hover:text-primary"
+          >
+            {allBoutiqueLabel}
+          </Link>
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -99,79 +261,26 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
       ref={headerRef}
       className="sticky top-0 z-50 border-b border-border/80 bg-card/95 backdrop-blur-md supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2 sm:px-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 sm:px-4">
         <Link href="/" className="flex shrink-0 items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
           <Logo size="sm" priority />
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          <Link href="/products" prefetch onClick={closeMenus} className={desktopLinkCls}>
-            {dictionary.nav.boutique}
-          </Link>
-          {storeCategories.length > 0 ? (
-            <button
-              type="button"
-              className={`${desktopLinkCls} inline-flex items-center gap-1.5 ${collectionsOpen ? 'text-primary' : ''}`}
-              aria-expanded={collectionsOpen}
-              aria-controls={collectionsId}
-              aria-haspopup="true"
-              aria-label={dictionary.nav.collectionsAria}
-              onClick={() => setCollectionsOpen((open) => !open)}
-            >
-              {dictionary.nav.collections}
-              <CaretDown
-                size={12}
-                weight="bold"
-                aria-hidden
-                className={`opacity-70 transition-transform duration-200 ${collectionsOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-          ) : null}
+        <nav className="hidden min-w-0 flex-1 items-center px-4 lg:flex">
+          <DesktopCategoryNav
+            categories={storeCategories}
+            boutiqueLabel={dictionary.nav.boutique}
+            collectionsLabel={dictionary.nav.collections}
+            collectionsAria={dictionary.nav.collectionsAria}
+            allBoutiqueLabel={dictionary.home.allBoutique}
+            collectionsOpen={collectionsOpen}
+            collectionsId={collectionsId}
+            onToggleCollections={() => setCollectionsOpen((open) => !open)}
+            onNavigate={closeMenus}
+          />
         </nav>
 
-        {collectionsOpen && storeCategories.length > 0 ? (
-          <div
-            id={collectionsId}
-            role="region"
-            aria-label={dictionary.nav.collections}
-            className="absolute inset-x-0 top-full hidden border-b border-border/80 bg-card/98 shadow-[0_18px_40px_-24px_rgba(58,34,40,0.45)] lg:block"
-          >
-            <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-7">
-              <div className="grid grid-cols-3 gap-x-3 gap-y-1">
-                {storeCategories.map((category) => (
-                  <Link
-                    key={category.slug}
-                    href={`/products?category=${category.slug}`}
-                    prefetch
-                    onClick={closeMenusAfterNavigate}
-                    className="group rounded-md px-3 py-3 transition-colors hover:bg-secondary/40"
-                  >
-                    <p className="font-serif text-[1.05rem] leading-snug text-foreground transition-colors group-hover:text-primary">
-                      {category.name}
-                    </p>
-                    {category.tagline ? (
-                      <p className="mt-1 line-clamp-2 text-xs font-light leading-relaxed text-muted-foreground">
-                        {category.tagline}
-                      </p>
-                    ) : null}
-                  </Link>
-                ))}
-              </div>
-              <div className="mt-4 border-t border-border/60 pt-4">
-                <Link
-                  href="/products"
-                  prefetch
-                  onClick={closeMenusAfterNavigate}
-                  className="inline-flex text-[12px] font-medium tracking-[0.16em] text-foreground/70 transition-colors hover:text-primary"
-                >
-                  {dictionary.home.allBoutique}
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex items-center gap-0.5 sm:gap-1.5">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
           <div className="hidden items-center gap-0.5 lg:flex">
             <SocialLinks />
           </div>

@@ -754,7 +754,7 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Polo Ralph Lauren Est. 67. Agrumes frais et notes boisees musquees. Sportif et intemporel.',
     price: '60.000',
-    category: 'eau-de-parfum',
+    category: 'parfum',
     image: IMG.poloEst67,
     sex: 'homme',
     sizes: sizeVariants('60.000'),
@@ -768,7 +768,7 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Prada Paradigme. Notes vertes et aromatiques, ambre et bois. Frais, elegant et moderne.',
     price: '75.000',
-    category: 'eau-de-parfum',
+    category: 'parfum',
     image: IMG.pradaParadigme,
     sex: 'homme',
     sizes: sizeVariants('75.000'),
@@ -782,7 +782,7 @@ const PRODUCTS = [
     description:
       'Collection Prestige Kaoud Perfumes. Ambre dore, notes boisees et musquees. Sillage riche, elegant, mixte.',
     price: '80.000',
-    category: 'eau-de-parfum',
+    category: 'parfum',
     image: IMG.kaoudPrestige,
     sex: 'mixte',
     sizes: sizeVariants('80.000'),

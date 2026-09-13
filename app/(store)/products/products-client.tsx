@@ -15,8 +15,9 @@ import {
   PRODUCT_SORTS,
   type ProductSort,
 } from '@/lib/product-sort'
+import { STORE_PAGE_SIZE, storePageItems } from '@/lib/pagination'
 import { StoreListbox } from '@/components/store-listbox'
-import { MagnifyingGlass, Sliders, X } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, MagnifyingGlass, Sliders, X } from '@phosphor-icons/react'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
@@ -32,6 +33,7 @@ type Product = {
   imageUrl: string | null
   category: string
   sex?: string | null
+  fragranceNotes?: string | null
   inStock: boolean
   sizes?: string | null
   promoTagEnabled?: boolean | null
@@ -196,6 +198,20 @@ export function ProductsClient({
       },
     })
   }
+  if (sex) {
+    activeChips.push({
+      key: 'sex',
+      label: sexLabels[sex] ?? sex,
+      onClear: () => syncUrl({ sex: '' }),
+    })
+  }
+  if (intensity) {
+    activeChips.push({
+      key: 'intensity',
+      label: intensityLabels[intensity] ?? intensity,
+      onClear: () => syncUrl({ intensity: '' }),
+    })
+  }
   for (const tag of wear) {
     activeChips.push({
       key: `wear-${tag}`,
@@ -208,20 +224,6 @@ export function ProductsClient({
       key: `note-${tag}`,
       label: noteLabels[tag] ?? tag,
       onClear: () => syncUrl({ notes: notes.filter((value) => value !== tag) }),
-    })
-  }
-  if (intensity) {
-    activeChips.push({
-      key: 'intensity',
-      label: intensityLabels[intensity] ?? intensity,
-      onClear: () => syncUrl({ intensity: '' }),
-    })
-  }
-  if (sex) {
-    activeChips.push({
-      key: 'sex',
-      label: sexLabels[sex] ?? sex,
-      onClear: () => syncUrl({ sex: '' }),
     })
   }
 
@@ -432,8 +434,8 @@ export function ProductsClient({
         ) : null}
 
         <div className="min-w-0 flex-1 space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-light tracking-wide text-muted-foreground">
+          <div className="flex items-center justify-between gap-3">
+            <p className="min-w-0 text-xs font-light tracking-wide text-muted-foreground">
               <span className="text-foreground">{total}</span>
               {total === 1 ? ` ${dictionary.products.perfume}` : ` ${dictionary.products.perfumes}`}
               {category !== 'all'
@@ -442,7 +444,7 @@ export function ProductsClient({
             </p>
 
             <StoreListbox
-              className="self-start sm:self-auto"
+              className="shrink-0"
               label={dictionary.products.sort.toUpperCase()}
               ariaLabel={dictionary.products.sortAria}
               value={sort}
@@ -523,59 +525,27 @@ export function ProductsClient({
                         slug: item.slug,
                         name: item.name,
                       }))}
+                      highlightedNotes={notes}
                       priority={index < 4}
                     />
                   ))}
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-                    <p className="text-sm font-light text-muted-foreground">
-                      {dictionary.products.pageOf(page, totalPages, total)}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        disabled={page <= 1 || isPending}
-                        onClick={() => syncUrl({ page: page - 1 })}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-light tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          aria-hidden
-                          className="rtl:rotate-180"
-                        >
-                          <path d="m15 18-6-6 6-6" />
-                        </svg>
-                        {dictionary.products.previous}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={page >= totalPages || isPending}
-                        onClick={() => syncUrl({ page: page + 1 })}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-light tracking-widest text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        {dictionary.products.next}
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          aria-hidden
-                          className="rtl:rotate-180"
-                        >
-                          <path d="m9 18 6-6-6-6" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                  <StorePagination
+                    page={page}
+                    totalPages={totalPages}
+                    total={total}
+                    pageSize={STORE_PAGE_SIZE}
+                    isPending={isPending}
+                    onPageChange={(nextPage) => syncUrl({ page: nextPage })}
+                    labels={{
+                      showingRange: dictionary.products.showingRange,
+                      goToPage: dictionary.products.goToPage,
+                      previous: dictionary.products.previous,
+                      next: dictionary.products.next,
+                    }}
+                  />
                 )}
               </>
             )}
@@ -583,6 +553,90 @@ export function ProductsClient({
         </div>
       </div>
     </>
+  )
+}
+
+function StorePagination({
+  page,
+  totalPages,
+  total,
+  pageSize,
+  isPending,
+  onPageChange,
+  labels,
+}: {
+  page: number
+  totalPages: number
+  total: number
+  pageSize: number
+  isPending: boolean
+  onPageChange: (page: number) => void
+  labels: {
+    showingRange: (start: number, end: number, total: number) => string
+    goToPage: (page: number) => string
+    previous: string
+    next: string
+  }
+}) {
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1
+  const end = Math.min(page * pageSize, total)
+  const items = storePageItems(page, totalPages)
+
+  return (
+    <nav
+      aria-label="Pagination"
+      className="mt-10 flex flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row sm:justify-between"
+    >
+      <p className="text-sm font-medium text-foreground/80">
+        {labels.showingRange(start, end, total)}
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        <button
+          type="button"
+          disabled={page <= 1 || isPending}
+          onClick={() => onPageChange(page - 1)}
+          className="inline-flex min-h-10 items-center gap-1 rounded-full border border-border px-3 text-xs font-semibold tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <CaretLeft size={14} weight="bold" className="rtl:rotate-180" />
+          {labels.previous}
+        </button>
+        {items.map((item, index) =>
+          item === 'ellipsis' ? (
+            <span
+              key={`ellipsis-${index}`}
+              className="min-w-8 px-1 text-center text-sm font-medium text-muted-foreground"
+            >
+              …
+            </span>
+          ) : (
+            <button
+              key={item}
+              type="button"
+              disabled={isPending}
+              aria-current={item === page ? 'page' : undefined}
+              aria-label={labels.goToPage(item)}
+              onClick={() => onPageChange(item)}
+              className={`min-h-10 min-w-10 rounded-full text-sm font-semibold tabular-nums transition-colors ${
+                item === page
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border text-foreground hover:border-primary hover:text-primary'
+              }`}
+            >
+              {item}
+            </button>
+          ),
+        )}
+        <button
+          type="button"
+          disabled={page >= totalPages || isPending}
+          onClick={() => onPageChange(page + 1)}
+          className="inline-flex min-h-10 items-center gap-1 rounded-full border border-border px-3 text-xs font-semibold tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {labels.next}
+          <CaretRight size={14} weight="bold" className="rtl:rotate-180" />
+        </button>
+      </div>
+    </nav>
   )
 }
 
@@ -639,6 +693,27 @@ function FilterPanel({
 }) {
   return (
     <div className="space-y-5">
+      <FilterGroup label={sexLabel}>
+        {sexOptions.map((item) => (
+          <FilterChip
+            key={item.value}
+            label={item.label}
+            active={sex === item.value}
+            disabled={disabled}
+            onClick={() => onSelectSex(item.value)}
+          />
+        ))}
+      </FilterGroup>
+
+      <IntensitySlider
+        label={intensityLabel}
+        allLabel={intensityAllLabel}
+        ariaLabel={intensityAria}
+        options={intensityOptions}
+        value={intensity}
+        onSelect={onSelectIntensity}
+      />
+
       <FilterGroup label={seasonLabel}>
         {seasonOptions.map((option) => (
           <FilterChip
@@ -671,27 +746,6 @@ function FilterPanel({
             active={notes.includes(option.value)}
             disabled={disabled}
             onClick={() => onToggleNote(option.value)}
-          />
-        ))}
-      </FilterGroup>
-
-      <IntensitySlider
-        label={intensityLabel}
-        allLabel={intensityAllLabel}
-        ariaLabel={intensityAria}
-        options={intensityOptions}
-        value={intensity}
-        onSelect={onSelectIntensity}
-      />
-
-      <FilterGroup label={sexLabel}>
-        {sexOptions.map((item) => (
-          <FilterChip
-            key={item.value}
-            label={item.label}
-            active={sex === item.value}
-            disabled={disabled}
-            onClick={() => onSelectSex(item.value)}
           />
         ))}
       </FilterGroup>
