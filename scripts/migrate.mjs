@@ -291,6 +291,24 @@ const INCREMENTAL_ALTERS = [
      'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
      NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
    ON CONFLICT ("slug") DO NOTHING`,
+  `UPDATE "boutiques" SET
+       "name" = 'KAOUBI PERFUMES Moknine',
+       "description" = 'Notre adresse a Moknine. La meme selection de parfums inspires et de parfums de choix, longue tenue.',
+       "address" = 'Moknine, Monastir',
+       "published" = true,
+       "pickupEnabled" = true,
+       "updatedAt" = NOW()
+   WHERE "slug" = 'moknine-monastir'`,
+  `INSERT INTO "boutiques"
+    ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
+   VALUES
+    ('ksar-helal-monastir', 'KAOUBI PERFUMES Ksar Helal', 'Ksar Helal', 'Monastir',
+     'Notre boutique a Ksar Helal. Toute la collection femme et homme, avec conseil personnalise sur place.',
+     NULL, 'Boutique KAOUBI PERFUMES a Ksar Helal',
+     'Ksar Helal, Monastir', NULL, NULL, NULL, 'Google Maps',
+     'https://www.google.com/maps/dir/?api=1&destination=Ksar+Helal%2C+Monastir%2C+Tunisie',
+     true, true, 2)
+   ON CONFLICT ("slug") DO NOTHING`,
 ]
 
 const BASELINE_DATA = [
@@ -314,7 +332,12 @@ const BASELINE_DATA = [
      'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46', true, true, 0),
     ('moknine-monastir', 'KAOUBI PERFUMES Moknine', 'Moknine', 'Monastir',
      'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
-     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
+     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1),
+    ('ksar-helal-monastir', 'KAOUBI PERFUMES Ksar Helal', 'Ksar Helal', 'Monastir',
+     'Notre boutique a Ksar Helal. Toute la collection femme et homme, avec conseil personnalise sur place.',
+     NULL, 'Boutique KAOUBI PERFUMES a Ksar Helal',
+     'Ksar Helal, Monastir', NULL, NULL, NULL, 'Google Maps',
+     'https://www.google.com/maps/dir/?api=1&destination=Ksar+Helal%2C+Monastir%2C+Tunisie', true, true, 2)
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "carousel_videos" ("url", "sortOrder") VALUES
     ('https://www.instagram.com/reel/DZ3XNGpsShF/', 0),
@@ -334,7 +357,7 @@ const BASELINE_DATA = [
     )
     SELECT
       'Livraison',
-      'Livraison partout en Tunisie · Retrait en boutique a Douz',
+      'Livraison partout en Tunisie · Retrait en boutique a Douz, Moknine et Ksar Helal',
       'offer',
       '#d4af37',
       '#0b0b0b',
