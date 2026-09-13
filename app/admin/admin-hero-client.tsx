@@ -91,8 +91,9 @@ export function AdminHeroClient({ initialImages }: { initialImages: HeroImageSlo
   return (
     <div>
       <p className="mb-6 text-sm text-slate-600">
-        Ces 4 photos forment le diaporama plein ecran de la page d accueil. La premiere est
-        l image principale. Televersez une photo large (JPG, PNG, WEBP ou GIF, 5 Mo max).
+        Ces 4 photos forment le mosaic de la page d accueil: haut gauche, haut droite, bas
+        gauche, bas droite. Televersez une photo carree ou recadrable (JPG, PNG, WEBP ou GIF,
+        5 Mo max).
       </p>
 
       <div className="grid gap-4 md:grid-cols-2">

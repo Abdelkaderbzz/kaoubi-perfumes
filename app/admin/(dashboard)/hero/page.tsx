@@ -10,7 +10,7 @@ export default async function AdminHeroPage() {
       <AdminPageHeader
         eyebrow="PAGE D ACCUEIL"
         title="Images hero"
-        description="Televersez les 4 photos du diaporama plein ecran en haut de la page d accueil."
+        description="Televersez les 4 photos du mosaic en haut de la page d accueil."
       />
       <AdminHeroClient initialImages={images} />
     </div>

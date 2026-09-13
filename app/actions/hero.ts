@@ -23,7 +23,7 @@ async function revalidateHeroPaths() {
 
 const getHeroImagesCached = unstable_cache(
   async () => mergeHeroImages(await listHeroRows()),
-  ['hero-images', 'v10'],
+  ['hero-images', 'v13'],
   { revalidate: 300, tags: ['hero-images'] },
 )
 
