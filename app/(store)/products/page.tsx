@@ -24,6 +24,7 @@ export async function generateMetadata({
     page?: string
     wear?: string
     intensity?: string
+    type?: string
   }>
 }): Promise<Metadata> {
   const params = await searchParams
@@ -38,7 +39,7 @@ export async function generateMetadata({
     ? storeCategories.find((entry) => entry.slug === categorySlug)
     : null
   const page = normalizePage(params.page)
-  const hasThinFilters = Boolean(params.search || params.wear || params.intensity)
+  const hasThinFilters = Boolean(params.search || params.wear || params.intensity || params.type)
 
   const title = category
     ? dictionary.meta.categoryTitle(category.name)
@@ -83,6 +84,7 @@ export default async function ProductsPage({
     page?: string
     wear?: string
     intensity?: string
+    type?: string
   }>
 }) {
   const params = await searchParams
@@ -94,6 +96,7 @@ export default async function ProductsPage({
   const page = normalizePage(params.page)
   const wear = params.wear?.split(',').map((tag) => tag.trim()).filter(Boolean) ?? []
   const intensity = params.intensity?.trim() ?? ''
+  const type = params.type?.trim() ?? ''
 
   const [{ dictionary, locale }, productPage, categories] = await Promise.all([
     getRequestDictionary(),
@@ -104,6 +107,7 @@ export default async function ProductsPage({
       category,
       wear,
       intensity,
+      type,
     }),
     getCategories(),
   ])
@@ -149,6 +153,7 @@ export default async function ProductsPage({
         category={category}
         wear={wear}
         intensity={intensity}
+        type={type}
         storeCategories={storeCategories}
       />
     </div>

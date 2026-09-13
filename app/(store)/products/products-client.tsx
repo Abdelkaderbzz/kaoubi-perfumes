@@ -8,6 +8,7 @@ import { useRouteTransition } from '@/lib/use-route-transition'
 import type { StoreCategory } from '@/lib/store-categories'
 import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
+import { PRODUCT_TYPES } from '@/lib/product-type'
 import { CaretDown, MagnifyingGlass, Sliders, X } from '@phosphor-icons/react'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
@@ -40,6 +41,7 @@ export function ProductsClient({
   category,
   wear,
   intensity,
+  type,
   storeCategories,
 }: {
   products: Product[]
@@ -50,15 +52,17 @@ export function ProductsClient({
   category: string
   wear: string[]
   intensity: string
+  type: string
   storeCategories: StoreCategory[]
 }) {
   const pathname = usePathname()
   const dictionary = useDictionary()
   const wearLabels = dictionary.wear as Record<string, string>
   const intensityLabels = dictionary.intensity as Record<string, string>
+  const typeLabels = dictionary.productType as Record<string, string>
   const { isPending, push } = useRouteTransition()
   const [search, setSearch] = useState(initialSearch)
-  const hasSecondaryFilters = wear.length > 0 || Boolean(intensity)
+  const hasSecondaryFilters = wear.length > 0 || Boolean(intensity) || Boolean(type)
   const [filtersOpen, setFiltersOpen] = useState(hasSecondaryFilters)
 
   useEffect(() => {
@@ -94,18 +98,24 @@ export function ProductsClient({
     ...level,
     label: intensityLabels[level.value] ?? level.label,
   }))
+  const typeOptions = PRODUCT_TYPES.map((item) => ({
+    ...item,
+    label: typeLabels[item.value] ?? item.label,
+  }))
 
   function syncUrl(overrides: {
     search?: string
     category?: string
     wear?: string[]
     intensity?: string
+    type?: string
     page?: number
   }) {
     const nextSearch = overrides.search ?? search
     const nextCategory = overrides.category ?? category
     const nextWear = overrides.wear ?? wear
     const nextIntensity = overrides.intensity ?? intensity
+    const nextType = overrides.type ?? type
     const nextPage = overrides.page ?? 1
 
     const params = new URLSearchParams()
@@ -113,6 +123,7 @@ export function ProductsClient({
     if (nextCategory !== 'all') params.set('category', nextCategory)
     if (nextWear.length > 0) params.set('wear', nextWear.join(','))
     if (nextIntensity) params.set('intensity', nextIntensity)
+    if (nextType) params.set('type', nextType)
     if (nextPage > 1) params.set('page', String(nextPage))
 
     const query = params.toString()
@@ -144,6 +155,13 @@ export function ProductsClient({
       onClear: () => syncUrl({ intensity: '' }),
     })
   }
+  if (type) {
+    activeChips.push({
+      key: 'type',
+      label: typeLabels[type] ?? type,
+      onClear: () => syncUrl({ type: '' }),
+    })
+  }
 
   function selectCategory(value: string) {
     if (value === category || isPending) return
@@ -161,15 +179,20 @@ export function ProductsClient({
     syncUrl({ intensity: intensity === value ? '' : value })
   }
 
+  function selectType(value: string) {
+    if (isPending) return
+    syncUrl({ type: type === value ? '' : value })
+  }
+
   function clearSecondaryFilters() {
     if (isPending) return
-    syncUrl({ wear: [], intensity: '' })
+    syncUrl({ wear: [], intensity: '', type: '' })
   }
 
   function clearAllFilters() {
     if (isPending) return
     setSearch('')
-    syncUrl({ search: '', wear: [], intensity: '' })
+    syncUrl({ search: '', wear: [], intensity: '', type: '' })
   }
 
   function submitSearch() {
@@ -177,7 +200,7 @@ export function ProductsClient({
     syncUrl({ search })
   }
 
-  const activeFilterCount = wear.length + (intensity ? 1 : 0)
+  const activeFilterCount = wear.length + (intensity ? 1 : 0) + (type ? 1 : 0)
 
   return (
     <>
@@ -313,6 +336,18 @@ export function ProductsClient({
                     active={intensity === level.value}
                     disabled={isPending}
                     onClick={() => selectIntensity(level.value)}
+                  />
+                ))}
+              </FilterGroup>
+
+              <FilterGroup label={dictionary.products.type}>
+                {typeOptions.map((item) => (
+                  <FilterChip
+                    key={item.value}
+                    label={item.label}
+                    active={type === item.value}
+                    disabled={isPending}
+                    onClick={() => selectType(item.value)}
                   />
                 ))}
               </FilterGroup>
