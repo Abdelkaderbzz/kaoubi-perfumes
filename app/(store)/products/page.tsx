@@ -9,6 +9,7 @@ import {
   collectionJsonLd,
   languageAlternates,
 } from '@/lib/seo'
+import { DEFAULT_PRODUCT_SORT, parseProductSort } from '@/lib/product-sort'
 import { canonicalCategorySlug, mergeStoreCategories } from '@/lib/store-categories'
 import type { Metadata } from 'next'
 import { ProductsClient } from './products-client'
@@ -23,8 +24,10 @@ export async function generateMetadata({
     category?: string
     page?: string
     wear?: string
+    notes?: string
     intensity?: string
-    type?: string
+    sex?: string
+    sort?: string
   }>
 }): Promise<Metadata> {
   const params = await searchParams
@@ -39,7 +42,14 @@ export async function generateMetadata({
     ? storeCategories.find((entry) => entry.slug === categorySlug)
     : null
   const page = normalizePage(params.page)
-  const hasThinFilters = Boolean(params.search || params.wear || params.intensity || params.type)
+  const hasThinFilters = Boolean(
+    params.search ||
+      params.wear ||
+      params.notes ||
+      params.intensity ||
+      params.sex ||
+      (params.sort && parseProductSort(params.sort) !== DEFAULT_PRODUCT_SORT),
+  )
 
   const title = category
     ? dictionary.meta.categoryTitle(category.name)
@@ -83,8 +93,10 @@ export default async function ProductsPage({
     category?: string
     page?: string
     wear?: string
+    notes?: string
     intensity?: string
-    type?: string
+    sex?: string
+    sort?: string
   }>
 }) {
   const params = await searchParams
@@ -95,8 +107,10 @@ export default async function ProductsPage({
   const search = params.search?.trim() ?? ''
   const page = normalizePage(params.page)
   const wear = params.wear?.split(',').map((tag) => tag.trim()).filter(Boolean) ?? []
+  const notes = params.notes?.split(',').map((tag) => tag.trim()).filter(Boolean) ?? []
   const intensity = params.intensity?.trim() ?? ''
-  const type = params.type?.trim() ?? ''
+  const sex = params.sex?.trim() ?? ''
+  const sort = parseProductSort(params.sort)
 
   const [{ dictionary, locale }, productPage, categories] = await Promise.all([
     getRequestDictionary(),
@@ -106,8 +120,10 @@ export default async function ProductsPage({
       search,
       category,
       wear,
+      notes,
       intensity,
-      type,
+      sex,
+      sort,
     }),
     getCategories(),
   ])
@@ -125,7 +141,7 @@ export default async function ProductsPage({
   const collectionCanonical = catalogPath(categorySlug, page)
 
   return (
-    <div className="mx-auto max-w-6xl px-3 py-5 sm:px-4 sm:py-8">
+    <div className="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-8">
       <JsonLd
         data={[
           collectionJsonLd({
@@ -152,8 +168,10 @@ export default async function ProductsPage({
         search={search}
         category={category}
         wear={wear}
+        notes={notes}
         intensity={intensity}
-        type={type}
+        sex={sex}
+        sort={sort}
         storeCategories={storeCategories}
       />
     </div>

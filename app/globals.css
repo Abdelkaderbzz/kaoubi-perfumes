@@ -654,46 +654,37 @@ html.storefront.dark .hero-tile {
   animation-play-state: paused;
 }
 
-.incoming-facade {
-  display: flex;
-  width: 4.25rem;
-  flex-direction: column;
-  align-items: center;
-  color: var(--primary);
+/* Store filters: hide native range chrome so the custom intensity track can show. */
+.intensity-range {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.incoming-facade-roof {
-  display: block;
-  width: 100%;
-  height: 0;
-  border-inline: 0.7rem solid transparent;
-  border-bottom: 0.55rem solid currentColor;
-  opacity: 0.7;
+.intensity-range::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 100%;
 }
 
-.incoming-facade-body {
-  display: grid;
-  width: 3.35rem;
-  grid-template-columns: 1fr 0.7fr 1fr;
-  gap: 0.18rem;
-  border: 1px solid currentColor;
-  padding: 0.28rem 0.22rem 0.18rem;
-  opacity: 0.85;
+.intensity-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0;
 }
 
-.incoming-facade-window {
-  display: block;
-  height: 0.7rem;
-  border: 1px solid currentColor;
-  opacity: 0.7;
+.intensity-range::-moz-range-track {
+  background: transparent;
+  border: 0;
+  height: 100%;
 }
 
-.incoming-facade-door {
-  display: block;
-  height: 0.95rem;
-  align-self: end;
-  border: 1px solid currentColor;
-  background: color-mix(in oklab, var(--primary) 18%, transparent);
+.intensity-range::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0;
+  border: 0;
+  background: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
