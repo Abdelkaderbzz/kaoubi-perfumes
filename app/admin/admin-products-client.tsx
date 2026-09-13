@@ -15,6 +15,7 @@ import {
 } from '@/lib/perfume-composition'
 import { WEAR_MOMENT_OPTIONS, parseWearMoments } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
+import { PRODUCT_TYPES } from '@/lib/product-type'
 import { productSchema, type ProductFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePrefetchHrefs, useRouteTransition } from '@/lib/use-route-transition'
@@ -58,6 +59,7 @@ type Product = {
   composition?: string | null
   wearMoments: string
   intensity: string | null
+  type: string | null
   inStock: boolean
   featured: boolean
   published: boolean
@@ -105,6 +107,7 @@ const EMPTY_FORM: ProductFormValues = {
   composition: { ...EMPTY_COMPOSITION, tete: [], coeur: [], fond: [] },
   wearMoments: [],
   intensity: '',
+  type: '',
   inStock: true,
   featured: false,
   published: true,
@@ -221,6 +224,7 @@ export function AdminProductsClient({
       composition: parsePerfumeComposition(product.composition),
       wearMoments: parseWearMoments(product.wearMoments),
       intensity: product.intensity ?? '',
+      type: product.type ?? '',
       inStock: product.inStock,
       featured: product.featured,
       published: product.published ?? true,
@@ -254,6 +258,7 @@ export function AdminProductsClient({
           composition: form.composition,
           wearMoments: form.wearMoments,
           intensity: form.intensity || null,
+          type: form.type || null,
           inStock: form.inStock,
           featured: form.featured,
           published: form.published,
@@ -689,6 +694,25 @@ export function AdminProductsClient({
                 )}
               />
               <AdminFieldError message={errors.intensity?.message} />
+            </div>
+
+            <div>
+              <label className={adminLabelCls}>TYPE DE PRODUIT</label>
+              <Controller
+                control={control}
+                name="type"
+                render={({ field }) => (
+                  <AdminSelect
+                    value={field.value || 'none'}
+                    onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
+                    items={[
+                      { value: 'none', label: 'Non defini' },
+                      ...PRODUCT_TYPES.map((item) => ({ value: item.value, label: item.label })),
+                    ]}
+                  />
+                )}
+              />
+              <AdminFieldError message={errors.type?.message} />
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-4">

@@ -54,6 +54,7 @@ type ProductListOptions = {
   category?: string
   wear?: string[]
   intensity?: string
+  type?: string
   inStock?: 'all' | 'in' | 'out'
   publishedOnly?: boolean
 }
@@ -92,6 +93,11 @@ function buildProductConditions(options: ProductListOptions) {
   const intensity = options.intensity?.trim()
   if (intensity) {
     conditions.push(eq(products.intensity, intensity))
+  }
+
+  const type = options.type?.trim()
+  if (type) {
+    conditions.push(eq(products.type, type))
   }
 
   if (options.inStock === 'in') {
@@ -146,6 +152,7 @@ export async function getStoreProductsPaginated(options: {
   category?: string
   wear?: string[]
   intensity?: string
+  type?: string
 } = {}) {
   const page = normalizePage(options.page)
   const pageSize = normalizePageSize(options.pageSize, STORE_PAGE_SIZE)
@@ -153,6 +160,7 @@ export async function getStoreProductsPaginated(options: {
   const category = options.category?.trim() || 'all'
   const wear = [...(options.wear ?? [])].filter(Boolean).sort()
   const intensity = options.intensity?.trim() ?? ''
+  const type = options.type?.trim() ?? ''
 
   return unstable_cache(
     async () =>
@@ -163,9 +171,19 @@ export async function getStoreProductsPaginated(options: {
         category,
         wear,
         intensity,
+        type,
         publishedOnly: true,
       }),
-    ['store-products-paginated', String(page), String(pageSize), search, category, wear.join(','), intensity],
+    [
+      'store-products-paginated',
+      String(page),
+      String(pageSize),
+      search,
+      category,
+      wear.join(','),
+      intensity,
+      type,
+    ],
     { revalidate: 60, tags: ['products'] },
   )()
 }
@@ -422,6 +440,7 @@ export async function addProduct(data: {
   composition?: PerfumeComposition
   wearMoments?: string[]
   intensity?: string | null
+  type?: string | null
   inStock: boolean
   featured: boolean
   published: boolean
@@ -455,6 +474,7 @@ export async function addProduct(data: {
     ),
     wearMoments: serializeWearMoments(data.wearMoments ?? []),
     intensity: data.intensity?.trim() || null,
+    type: data.type?.trim() || null,
     inStock: data.inStock,
     featured: data.featured,
     published: data.published,
@@ -486,6 +506,7 @@ export async function updateProduct(
     composition?: PerfumeComposition
     wearMoments?: string[]
     intensity?: string | null
+    type?: string | null
     inStock?: boolean
     featured?: boolean
     published?: boolean
@@ -526,6 +547,9 @@ export async function updateProduct(
   }
   if ('intensity' in data) {
     updateData.intensity = data.intensity?.trim() || null
+  }
+  if ('type' in data) {
+    updateData.type = data.type?.trim() || null
   }
   if (data.images) {
     const imageData = normalizeProductImages(data.images)
