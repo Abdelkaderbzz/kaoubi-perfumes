@@ -13,18 +13,16 @@ function uniqueCities(boutiques: Boutique[]) {
   return [...new Set(boutiques.map((boutique) => boutique.city).filter(Boolean))]
 }
 
-function buildTagline(open: Boutique[], hasIncoming: boolean, labels: Dictionary['boutiques']) {
+function buildTagline(open: Boutique[], labels: Dictionary['boutiques']) {
   const openCities = uniqueCities(open)
-  const parts: string[] = []
 
-  if (openCities.length === 1) parts.push(labels.taglineOne(openCities[0]))
-  else if (openCities.length > 1) {
+  if (openCities.length === 1) return labels.taglineOne(openCities[0])
+  if (openCities.length > 1) {
     const last = openCities[openCities.length - 1]
-    parts.push(labels.taglineMany(openCities.slice(0, -1).join(', '), last))
+    return labels.taglineMany(openCities.slice(0, -1).join(', '), last)
   }
 
-  if (hasIncoming) parts.push(labels.comingSoonLine)
-  return parts.join(' ')
+  return ''
 }
 
 function OpenBoutique({
@@ -116,47 +114,18 @@ function OpenBoutique({
   )
 }
 
-/** Anonymous coming-soon storefront — no city, address, or copy from the pending row. */
-function IncomingBoutique({ labels, rtl }: { labels: Dictionary['boutiques']; rtl: boolean }) {
-  return (
-    <article
-      aria-label={labels.comingSoon}
-      className="relative overflow-hidden border border-dashed border-primary/40 bg-secondary/35 px-5 py-4"
-    >
-      <div className="relative flex items-center gap-5">
-        <div className="incoming-facade shrink-0" aria-hidden>
-          <span className="incoming-facade-roof" />
-          <span className="incoming-facade-body">
-            <span className="incoming-facade-window" />
-            <span className="incoming-facade-window" />
-            <span className="incoming-facade-door" />
-            <span className="incoming-facade-window" />
-          </span>
-        </div>
-        <p
-          className={`text-primary ${
-            rtl ? 'text-sm font-medium' : 'text-[11px] font-medium tracking-[0.38em]'
-          }`}
-        >
-          {labels.comingSoon}
-        </p>
-      </div>
-    </article>
-  )
-}
-
 export function BoutiquesSection({ boutiques }: { boutiques: Boutique[] }) {
   const dictionary = useDictionary()
   const { locale, dir } = useLocale()
   const rtl = dir === 'rtl'
-  const localized = boutiques.map((boutique) => localizeBoutique(boutique, locale))
-  const open = localized.filter((boutique) => boutique.published)
-  const hasIncoming = localized.some((boutique) => !boutique.published)
+  const open = boutiques
+    .filter((boutique) => boutique.published)
+    .map((boutique) => localizeBoutique(boutique, locale))
 
-  if (localized.length === 0) return null
+  if (open.length === 0) return null
 
   const labels = dictionary.boutiques
-  const tagline = buildTagline(open, hasIncoming, labels)
+  const tagline = buildTagline(open, labels)
 
   return (
     <section id="boutiques" className="scroll-mt-16 border-t border-border bg-background py-10 md:py-12">
@@ -169,21 +138,13 @@ export function BoutiquesSection({ boutiques }: { boutiques: Boutique[] }) {
           ) : null}
         </Reveal>
 
-        {open.length > 0 ? (
-          <div className="space-y-4">
-            {open.map((boutique, index) => (
-              <Reveal key={boutique.id} variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 80}>
-                <OpenBoutique boutique={boutique} labels={labels} rtl={rtl} />
-              </Reveal>
-            ))}
-          </div>
-        ) : null}
-
-        {hasIncoming ? (
-          <Reveal className={open.length > 0 ? 'mt-5 md:mt-6' : ''} delay={80}>
-            <IncomingBoutique labels={labels} rtl={rtl} />
-          </Reveal>
-        ) : null}
+        <div className="space-y-4">
+          {open.map((boutique, index) => (
+            <Reveal key={boutique.id} variant={index % 2 === 0 ? 'left' : 'right'} delay={index * 80}>
+              <OpenBoutique boutique={boutique} labels={labels} rtl={rtl} />
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   )

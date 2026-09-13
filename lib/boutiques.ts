@@ -18,7 +18,7 @@ export type Boutique = {
   ratingSource: string
   directionsUrl: string
   pickupEnabled: boolean
-  /** Open on the storefront. Unpublished shops render as coming soon. */
+  /** Open on the storefront. Unpublished shops stay in admin only. */
   published: boolean
 }
 
@@ -47,16 +47,8 @@ const BOUTIQUE_AR: Record<
   'moknine-monastir': {
     city: 'المكنين',
     region: 'المنستير',
-    description:
-      'عنواننا في المكنين. نفس تشكيلة العطور المستوحاة والعطور المختارة، بثبات يدوم.',
-    address: 'المكنين، المنستير',
-  },
-  'ksar-helal-monastir': {
-    city: 'قصر هلال',
-    region: 'المنستير',
-    description:
-      'متجرنا في قصر هلال. كامل المجموعة للنساء والرجال، مع نصيحة ومرافقة شخصية على عين المكان.',
-    address: 'قصر هلال، المنستير',
+    description: '',
+    address: null,
   },
 }
 
@@ -68,7 +60,6 @@ const CITY_AR_EXTRA: Record<string, string> = {
   Moknine: 'المكنين',
   Monastir: 'المنستير',
   Sahloul: 'سهلول',
-  'Ksar Helal': 'قصر هلال',
 }
 
 function cityInArabic(city: string) {
