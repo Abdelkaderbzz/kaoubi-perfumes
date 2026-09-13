@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { getPublishedProductEntries } from '@/app/actions/products'
 import { getCategories } from '@/app/actions/categories'
+import { catalogPath, toAbsoluteUrl } from '@/lib/seo'
 import { getSiteUrl } from '@/lib/site'
 
 export const revalidate = 300
@@ -31,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ])
 
     const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
-      url: `${siteUrl}/products?category=${encodeURIComponent(category.slug)}`,
+      url: `${siteUrl}${catalogPath(category.slug)}`,
       lastModified,
       changeFrequency: 'weekly',
       priority: 0.7,
@@ -42,6 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: product.updatedAt ?? lastModified,
       changeFrequency: 'weekly',
       priority: 0.8,
+      images: product.imageUrl ? [toAbsoluteUrl(product.imageUrl)] : undefined,
     }))
 
     return [...staticRoutes, ...categoryRoutes, ...productRoutes]

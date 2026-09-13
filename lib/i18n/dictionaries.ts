@@ -2,15 +2,24 @@ import type { Locale } from './config'
 
 const fr = {
   meta: {
-    title: 'KAOUBI PERFUMES | Parfumerie a Douz',
+    title: 'KAOUBI PERFUMES | Parfumerie a Douz, Kébili',
     description:
-      'KAOUBI PERFUMES est une boutique a Douz, Kébili, Tunisie. Parfums, soins MRAZIG et bakhoor traditionnel, pour femmes et hommes.',
-    productsTitle: 'Boutique KAOUBI PERFUMES',
+      'Parfumerie a Douz, Kébili. Parfums femme et homme, soins MRAZIG et bakhoor traditionnel. Commandez en ligne, livraison en Tunisie ou retrait en boutique.',
+    productsTitle: 'Boutique en ligne',
     productsDescription:
-      'Parfums femme et homme, cremes et gels MRAZIG, bakhoor traditionnel a Douz.',
-    productTitle: (brand: string, name: string) => `${brand} ${name}`,
+      'Parfums femme et homme, cremes et gels MRAZIG, bakhoor traditionnel. Boutique KAOUBI PERFUMES a Douz, livraison partout en Tunisie.',
+    categoryTitle: (name: string) => `${name} a Douz`,
+    categoryDescription: (name: string, tagline: string) =>
+      `${tagline}. Collection ${name} chez KAOUBI PERFUMES a Douz, Kébili. Livraison en Tunisie et retrait en boutique.`,
+    productTitle: (brand: string, name: string) =>
+      /kaoubi/i.test(brand) || name.toLowerCase().includes(brand.toLowerCase())
+        ? name
+        : `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — ${category} disponible chez KAOUBI PERFUMES a Douz, Tunisie.`,
+      `${brand} ${name} — ${category} chez KAOUBI PERFUMES a Douz. Livraison en Tunisie, paiement a la livraison.`,
+    notFoundTitle: 'Page introuvable',
+    notFoundDescription: "Cette page n'existe pas ou n'est plus disponible.",
+    notFoundCta: 'Retour a la boutique',
   },
   nav: {
     boutique: 'BOUTIQUE',
@@ -35,11 +44,11 @@ const fr = {
     shop: 'Boutique',
   },
   hero: {
-    eyebrow: 'Douz, Tunisie',
+    eyebrow: 'Maison de parfum · Douz',
     title: 'KAOUBI PERFUMES',
     tagline: '',
-    copy: 'Parfums de longue tenue, soins MRAZIG et bakhoor traditionnel. Une maison a Douz.',
-    discover: 'Decouvrir la boutique',
+    copy: 'Parfums inspires des grandes maisons, de longue tenue, pour femmes et hommes.',
+    discover: 'Decouvrir',
     women: 'Femme',
     men: 'Homme',
     galleryLabel: 'Vues de la boutique',
@@ -63,6 +72,8 @@ const fr = {
   categories: {
     femme: { name: 'Femme', tagline: 'Fragrances feminines de longue tenue' },
     homme: { name: 'Homme', tagline: 'Fragrances masculines de longue tenue' },
+    mixte: { name: 'Mixte', tagline: 'Fragrances pour elle et lui' },
+    enfant: { name: 'Enfant', tagline: 'Fragrances douces pour enfants' },
     unisexe: { name: 'Mixte', tagline: 'Fragrances pour elle et lui' },
     soins: { name: 'Soins', tagline: 'Cremes, gels et cosmetiques MRAZIG' },
     bakhoor: { name: 'Bakhoor', tagline: 'Encens Mrazig traditionnel' },
@@ -96,7 +107,7 @@ const fr = {
   instagram: {
     eyebrow: 'INSTAGRAM',
     copy: 'Coulisses, nouveautes et inspirations parfumees a Douz.',
-    follow: 'SUIVRE @kaoubi.perfumes',
+    follow: 'SUIVRE @kaoubi_perfumes',
   },
   banner: {
     news: 'NOUVEAUTE',
@@ -244,15 +255,24 @@ export type Dictionary = DeepStringify<typeof fr>
 
 const ar: Dictionary = {
   meta: {
-    title: 'KAOUBI PERFUMES | عطور بدوز',
+    title: 'KAOUBI PERFUMES | عطور بدوز، قبلي',
     description:
-      'KAOUBI PERFUMES متجر في دوز، قبلي، تونس. عطور، عناية MRAZIG، وبخور مرازيق تقليدي للنساء والرجال.',
-    productsTitle: 'متجر KAOUBI PERFUMES',
+      'دار عطور في دوز، قبلي. عطور للنساء والرجال، عناية MRAZIG، وبخور تقليدي. اطلب عبر الإنترنت مع التوصيل في تونس أو الاستلام من المتجر.',
+    productsTitle: 'المتجر الإلكتروني',
     productsDescription:
-      'عطور للنساء والرجال، كريمات وجل MRAZIG، وبخور تقليدي في دوز.',
-    productTitle: (brand: string, name: string) => `${brand} ${name}`,
+      'عطور للنساء والرجال، كريمات وجل MRAZIG، وبخور تقليدي. متجر KAOUBI PERFUMES في دوز، توصيل في كامل تونس.',
+    categoryTitle: (name: string) => `${name} في دوز`,
+    categoryDescription: (name: string, tagline: string) =>
+      `${tagline}. مجموعة ${name} لدى KAOUBI PERFUMES في دوز، قبلي. توصيل في تونس واستلام من المتجر.`,
+    productTitle: (brand: string, name: string) =>
+      /kaoubi/i.test(brand) || name.toLowerCase().includes(brand.toLowerCase())
+        ? name
+        : `${brand} ${name}`,
     productDescription: (brand: string, name: string, category: string) =>
-      `${brand} ${name} — ${category} متوفر لدى KAOUBI PERFUMES في دوز، تونس.`,
+      `${brand} ${name} — ${category} لدى KAOUBI PERFUMES في دوز. توصيل في تونس والدفع عند الاستلام.`,
+    notFoundTitle: 'الصفحة غير موجودة',
+    notFoundDescription: 'هذه الصفحة غير موجودة أو لم تعد متاحة.',
+    notFoundCta: 'العودة إلى المتجر',
   },
   nav: {
     boutique: 'المتجر',
@@ -277,11 +297,11 @@ const ar: Dictionary = {
     shop: 'المتجر',
   },
   hero: {
-    eyebrow: 'دوز، تونس',
+    eyebrow: 'دار عطور · دوز',
     title: 'كعوبي للعطور',
-    tagline: 'ريحة تبقى في الذاكرة ✨',
-    copy: 'عطور بثبات قوي، وبخور تقليدي أصيل من قلب دوز. اختار ريحتك وخلي حضورك يحكي عليك.',
-    discover: 'اكتشف المتجر',
+    tagline: '',
+    copy: 'عطور مستوحاة من كبرى الدور، بثبات قوي، للنساء والرجال.',
+    discover: 'اكتشف',
     women: 'نساء',
     men: 'رجال',
     galleryLabel: 'صور المتجر',
@@ -302,6 +322,8 @@ const ar: Dictionary = {
   categories: {
     femme: { name: 'نساء', tagline: 'عطور نسائية بثبات طويل' },
     homme: { name: 'رجال', tagline: 'عطور رجالية بثبات طويل' },
+    mixte: { name: 'للجنسين', tagline: 'عطور تناسب الجميع' },
+    enfant: { name: 'أطفال', tagline: 'عطور لطيفة للأطفال' },
     unisexe: { name: 'للجنسين', tagline: 'عطور تناسب الجميع' },
     soins: { name: 'عناية', tagline: 'كريمات وجل ومستحضرات MRAZIG' },
     bakhoor: { name: 'بخور', tagline: 'بخور المرازيق التقليدي' },
@@ -335,7 +357,7 @@ const ar: Dictionary = {
   instagram: {
     eyebrow: 'إنستغرام',
     copy: 'كواليس، جديد، وإلهام عطري من دوز.',
-    follow: 'متابعة @kaoubi.perfumes',
+    follow: 'متابعة @kaoubi_perfumes',
   },
   banner: {
     news: 'جديد',
@@ -474,5 +496,5 @@ const ar: Dictionary = {
 const dictionaries: Record<Locale, Dictionary> = { fr: fr as Dictionary, ar }
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale] ?? dictionaries.ar
+  return dictionaries[locale] ?? dictionaries.fr
 }

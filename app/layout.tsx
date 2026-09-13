@@ -13,6 +13,7 @@ import {
   getOgLocale,
 } from '@/lib/i18n'
 import { getRequestLocale } from '@/lib/i18n/server'
+import { languageAlternates } from '@/lib/seo'
 import { getSiteUrl } from '@/lib/site'
 import './globals.css'
 
@@ -60,30 +61,30 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: 'KAOUBI PERFUMES' }],
     creator: 'KAOUBI PERFUMES',
     publisher: 'KAOUBI PERFUMES',
+    category: 'shopping',
     keywords: [
       'parfum',
       'parfumerie',
+      'parfum Tunisie',
+      'parfumerie Douz',
       'Douz',
       'Kébili',
       'Tunisie',
       'KAOUBI PERFUMES',
       'Kaoubi',
+      'parfum femme',
+      'parfum homme',
+      'bakhoor',
+      'MRAZIG',
       'عطور',
+      'عطور تونس',
       'دوز',
       'قبلي',
       'تونس',
-      'parfum femme',
-      'parfum homme',
     ],
     alternates: {
       canonical: '/',
-      languages: {
-        'x-default': '/',
-        'fr-TN': '/',
-        fr: '/',
-        'ar-TN': '/',
-        ar: '/',
-      },
+      languages: languageAlternates('/'),
     },
     openGraph: {
       type: 'website',
@@ -93,11 +94,20 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: 'KAOUBI PERFUMES',
       title: siteTitle,
       description: siteDescription,
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: siteTitle,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: siteTitle,
       description: siteDescription,
+      images: ['/opengraph-image'],
     },
     robots: {
       index: true,
@@ -130,7 +140,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   colorScheme: 'light',
-  themeColor: '#f6edea',
+  themeColor: '#f6e2e7',
 }
 
 export default async function RootLayout({

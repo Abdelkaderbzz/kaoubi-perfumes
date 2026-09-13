@@ -1,7 +1,7 @@
-export const locales = ['ar', 'fr'] as const
+export const locales = ['fr', 'ar'] as const
 export type Locale = (typeof locales)[number]
 
-export const defaultLocale: Locale = 'ar'
+export const defaultLocale: Locale = 'fr'
 
 export const LOCALE_COOKIE = 'kaoubi-locale'
 

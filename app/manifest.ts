@@ -5,12 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'KAOUBI PERFUMES',
     short_name: 'KAOUBI',
     description:
-      'KAOUBI PERFUMES متجر عطور في دوز، قبلي، تونس. عطور بثبات طويل للنساء والرجال.',
+      'Parfumerie a Douz, Kébili. Parfums femme et homme, soins MRAZIG et bakhoor traditionnel. Livraison en Tunisie.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f6edea',
+    background_color: '#f6e2e7',
     theme_color: '#b08a32',
-    lang: 'ar',
+    lang: 'fr',
     icons: [
       {
         src: '/logo-mark.png',
