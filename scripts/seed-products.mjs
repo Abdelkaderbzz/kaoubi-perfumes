@@ -20,7 +20,8 @@ const pool = new Pool({ connectionString: DATABASE_URL })
 const CATEGORIES = [
   { name: 'Femme', slug: 'femme' },
   { name: 'Homme', slug: 'homme' },
-  { name: 'Mixte', slug: 'unisexe' },
+  { name: 'Mixte', slug: 'mixte' },
+  { name: 'Enfant', slug: 'enfant' },
   { name: 'Soins', slug: 'soins' },
   { name: 'Bakhoor', slug: 'bakhoor' },
 ]
@@ -50,6 +51,27 @@ const IMG = {
   gelNettoyant: '/products/gel-nettoyant-v2.webp',
   cremeMains: '/products/creme-mains.webp',
   bakhoorMrazig: '/products/bakhoor-mrazig.webp',
+  signature: '/products/signature.webp',
+  bakhoorMaryam: '/products/bakhoor-maryam.webp',
+  fleurDeChine: '/products/fleur-de-chine.webp',
+  roseNacree: '/products/rose-nacree.webp',
+  bodyShimmer: '/products/body-shimmer.webp',
+  vanillezVous: '/products/vanillez-vous.webp',
+  imaginationLv: '/products/imagination-lv.jpg',
+  leMaleElixir: '/products/le-male-elixir.jpg',
+  lavendarineEdp: '/products/lavendarine-edp.jpg',
+  stealerTimes: '/products/stealer-times.jpg',
+  dgSummerVibes: '/products/dg-summer-vibes.jpg',
+  lavendarineBodyMist: '/products/lavendarine-body-mist.jpg',
+  mkhamariaLavendarine: '/products/mkhamaria-lavendarine.jpg',
+  mekhassriaFaceToner: '/products/mekhassria-face-toner-cream.jpg',
+  mekhassriaFaceTonerJar: '/products/mekhassria-face-toner-cream-jar.jpg',
+  mekhassriaFaceTonerLifestyle: '/products/mekhassria-face-toner-cream-lifestyle.jpg',
+  oudyEauDeLigne: '/products/oudy-eau-de-ligne.jpg',
+  poloEst67: '/products/polo-est-67.jpg',
+  sweetyEauDeLigne: '/products/sweety-eau-de-ligne.jpg',
+  kaoudPrestige: '/products/kaoud-prestige.jpg',
+  pradaParadigme: '/products/prada-paradigme.jpg',
 }
 
 const NOTE = {
@@ -74,7 +96,7 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   description: string
  *   price: string
  *   compareAtPrice?: string | null
- *   category: 'femme' | 'homme' | 'unisexe' | 'soins' | 'bakhoor'
+ *   category: 'femme' | 'homme' | 'mixte' | 'enfant' | 'soins' | 'bakhoor'
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
@@ -112,6 +134,9 @@ const FEMME_KEYS = [
   'black-opium-glitter',
   'belle-fortuna',
   'bamboo-gucci',
+  'signature',
+  'rose-nacree',
+  'vanillez-vous',
 ]
 
 const HOMME_KEYS = [
@@ -133,6 +158,7 @@ const MIXTE_KEYS = [
   'baccarat-rouge-540',
   'bois-imperial',
   'bois-lumiere',
+  'fleur-de-chine',
 ]
 
 function relatedOf(keys, key) {
@@ -220,6 +246,54 @@ const PRODUCTS = [
     featured: true,
     related: relatedOf(FEMME_KEYS, 'bamboo-gucci'),
   },
+  {
+    key: 'signature',
+    name: 'Signature',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Eau de parfum signature KAOUBI. Flacon rond, jus rose et label or. Floral elegant, de longue tenue.',
+    price: '55.000',
+    category: 'femme',
+    image: IMG.signature,
+    sizes: [
+      { size: '50ml', price: '55.000' },
+      { size: '100ml', price: '85.000' },
+    ],
+    featured: true,
+    related: relatedOf(FEMME_KEYS, 'signature'),
+  },
+  {
+    key: 'rose-nacree',
+    name: 'Rose Nacrée',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Eau de parfum nacree. Jus rose irise, label or et calligraphie. Floral-oriental, sillage lumineux.',
+    price: '60.000',
+    category: 'femme',
+    image: IMG.roseNacree,
+    sizes: [
+      { size: '50ml', price: '60.000' },
+      { size: '100ml', price: '90.000' },
+    ],
+    featured: true,
+    related: relatedOf(FEMME_KEYS, 'rose-nacree'),
+  },
+  {
+    key: 'vanillez-vous',
+    name: 'Body Mist Vanillez Vous',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Brume pour le corps Vanillez Vous. Vanille gourmande et chaleureuse. Legere, sucree, pour le quotidien.',
+    price: '25.000',
+    category: 'femme',
+    image: IMG.vanillezVous,
+    sizes: [
+      { size: '50ml', price: '25.000' },
+      { size: '100ml', price: '38.000' },
+    ],
+    featured: true,
+    related: relatedOf(FEMME_KEYS, 'vanillez-vous'),
+  },
   // —— Mixte (promotions) ——
   {
     key: 'alexandria-ii',
@@ -229,7 +303,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Xerjoff Alexandria II. Oriental luxueux, rose, bois precieux et vanille. Tenue exceptionnelle.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.alexandriaIi,
     sizes: sizeVariants('70.000'),
     featured: true,
@@ -243,7 +317,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Houbigant Ambre des Abysses. Ambre profond, boise et envelopant. Mixte, sillage noble.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.ambreDesAbysses,
     sizes: sizeVariants('70.000'),
     featured: true,
@@ -257,7 +331,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Montale Arabians Tonka. Oriental gourmand, tonka et epices, sillage fort.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.arabesqueTonka,
     sizes: sizeVariants('70.000'),
     featured: true,
@@ -271,7 +345,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Armani Privé Bleu Lazuli. Boise-aromatique de prestige, sillage raffine.',
     price: '50.000',
     ...promoFields('70.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.bleuLazuli,
     sizes: sizeVariants('50.000'),
     featured: true,
@@ -285,7 +359,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Guerlain Cuir Beluga. Cuir doux, vanille et ambre. Chaleureux et luxueux.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.belugaSupreme,
     sizes: sizeVariants('70.000'),
     featured: true,
@@ -299,7 +373,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Maison Francis Kurkdjian Baccarat Rouge 540. Safran, ambre et bois mineral.',
     price: '60.000',
     ...promoFields('80.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.baccarat,
     sizes: sizeVariants('60.000'),
     featured: true,
@@ -313,7 +387,7 @@ const PRODUCTS = [
       'Fragrance inspiree de Essential Parfums Bois Imperial. Boise-aromatique, poivre et vetiver.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.boisImperial,
     sizes: sizeVariants('70.000'),
     featured: true,
@@ -327,11 +401,27 @@ const PRODUCTS = [
       'Fragrance inspiree de Mancera Cedrat Boise. Agrumes, bois et musc. Lumineux, frais et tenace.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'unisexe',
+    category: 'mixte',
     image: IMG.boisLumiere,
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'bois-lumiere'),
+  },
+  {
+    key: 'fleur-de-chine',
+    name: 'Fleur de Chine',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      "Parfum d'ambiance Fleur de Chine. Brume d'interieur florale, notes de fleurs de cerisier. Idéal pour la maison.",
+    price: '28.000',
+    category: 'mixte',
+    image: IMG.fleurDeChine,
+    sizes: [
+      { size: '200ml', price: '28.000' },
+      { size: '400ml', price: '42.000' },
+    ],
+    featured: true,
+    related: relatedOf(MIXTE_KEYS, 'fleur-de-chine'),
   },
   // —— Homme ——
   {
@@ -437,7 +527,7 @@ const PRODUCTS = [
     image: IMG.cremeMains,
     sizes: [{ size: '50 g', price: '28.000' }],
     featured: true,
-    related: ['gel-nettoyant-mrazig'],
+    related: ['gel-nettoyant-mrazig', 'body-shimmer'],
   },
   {
     key: 'gel-nettoyant-mrazig',
@@ -450,7 +540,23 @@ const PRODUCTS = [
     image: IMG.gelNettoyant,
     sizes: [{ size: '150 ml', price: '25.000' }],
     featured: true,
-    related: ['creme-mains-mrazig'],
+    related: ['creme-mains-mrazig', 'body-shimmer'],
+  },
+  {
+    key: 'body-shimmer',
+    name: 'Body Shimmer',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Brume corporelle pailletee. Huile scintillante doree, label holographique. Eclat sur la peau, sillage delicieux.',
+    price: '35.000',
+    category: 'soins',
+    image: IMG.bodyShimmer,
+    sizes: [
+      { size: '100ml', price: '35.000' },
+      { size: '150ml', price: '48.000' },
+    ],
+    featured: true,
+    related: ['creme-mains-mrazig', 'gel-nettoyant-mrazig', 'vanillez-vous'],
   },
   {
     key: 'bakhoor-mrazig',
@@ -463,14 +569,206 @@ const PRODUCTS = [
     image: IMG.bakhoorMrazig,
     sizes: [{ size: 'Pot', price: '20.000' }],
     featured: true,
-    related: [],
+    related: ['bakhoor-maryam'],
+  },
+  {
+    key: 'bakhoor-maryam',
+    name: 'بخور مريم',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Bakhoor Maryam (بخور مريم) — Selection Rennée. Encens artisanal بخور المزاريق. Notes chaudes et orientales pour parfumer la maison.',
+    price: '32.000',
+    category: 'bakhoor',
+    image: IMG.bakhoorMaryam,
+    sizes: [
+      { size: '50g', price: '32.000' },
+      { size: '100g', price: '55.000' },
+    ],
+    featured: true,
+    related: ['bakhoor-mrazig'],
+  },
+  // —— Nouveautes ——
+  {
+    key: 'imagination-lv',
+    name: 'Imagination L.V',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Fragrance inspiree de Louis Vuitton Imagination. Agrumes petillants, notes boisees et musquees. Sillage frais et raffine.',
+    price: '65.000',
+    category: 'homme',
+    image: IMG.imaginationLv,
+    sizes: sizeVariants('65.000'),
+    featured: false,
+    related: ['le-male-elixir', 'stealer-times', 'bleu-chanel'],
+  },
+  {
+    key: 'le-male-elixir',
+    name: 'Le Mâle Elixir – JPG',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Fragrance inspiree de Jean Paul Gaultier Le Male Elixir. Lavande, vanille et fenugrec. Intense, chaude et envoûtante.',
+    price: '68.000',
+    category: 'homme',
+    image: IMG.leMaleElixir,
+    sizes: sizeVariants('68.000'),
+    featured: false,
+    related: ['imagination-lv', 'stealer-times', 'azure-line'],
+  },
+  {
+    key: 'stealer-times',
+    name: 'Stealer Times',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Ambre doree et notes boisees chaudes. Sillage capiteux et longue tenue, pour affirmer sa presence.',
+    price: '55.000',
+    category: 'homme',
+    image: IMG.stealerTimes,
+    sizes: sizeVariants('55.000'),
+    featured: false,
+    related: ['imagination-lv', 'le-male-elixir', 'amyris-homme'],
+  },
+  {
+    key: 'dg-summer-vibes',
+    name: 'D&G Summer Vibes',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Fragrance inspiree de Dolce & Gabbana Light Blue. Agrumes solaires et fleurs blanches. Legere, fraiche, esprit vacances.',
+    price: '58.000',
+    category: 'femme',
+    image: IMG.dgSummerVibes,
+    sizes: sizeVariants('58.000'),
+    featured: false,
+    related: ['aura-rosea', 'bamboo-gucci', 'belle-fortuna'],
+  },
+  {
+    key: 'lavendarine-edp',
+    name: 'Lavendarine',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Eau de parfum Lavendarine. Lavande fine et notes gourmandes douces. Apaisante, elegante et facile a porter au quotidien.',
+    price: '50.000',
+    category: 'mixte',
+    image: IMG.lavendarineEdp,
+    sizes: [{ size: '50 ml', price: '50.000' }],
+    featured: false,
+    related: ['lavendarine-body-mist', 'mkhamaria-lavendarine'],
+  },
+  {
+    key: 'lavendarine-body-mist',
+    name: 'Body Mist Lavendarine',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Brume corporelle Lavendarine, pailletee et parfumee a la lavande. Rafraichit et parfume la peau tout au long de la journee.',
+    price: '35.000',
+    category: 'soins',
+    image: IMG.lavendarineBodyMist,
+    sizes: [{ size: '50 ml', price: '35.000' }],
+    featured: false,
+    related: ['lavendarine-edp', 'mkhamaria-lavendarine'],
+  },
+  {
+    key: 'mkhamaria-lavendarine',
+    name: 'Mkhamaria Lavendarine',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Gommage corporel Mkhamaria a la lavande, texture pailletee et nourrissante. Exfolie en douceur et parfume la peau. 50 g.',
+    price: '38.000',
+    category: 'soins',
+    image: IMG.mkhamariaLavendarine,
+    sizes: [{ size: '50 gr', price: '38.000' }],
+    featured: false,
+    related: ['lavendarine-edp', 'lavendarine-body-mist'],
+  },
+  {
+    key: 'mekhassria-face-toner',
+    name: 'مخصرية – Face Toner Cream',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Creme tonique visage Mekhassria. Texture doree et fondante qui tonifie, hydrate et illumine le teint. 50 g.',
+    price: '42.000',
+    category: 'soins',
+    image: IMG.mekhassriaFaceToner,
+    images: [
+      IMG.mekhassriaFaceToner,
+      IMG.mekhassriaFaceTonerJar,
+      IMG.mekhassriaFaceTonerLifestyle,
+    ],
+    sizes: [{ size: '50 gr', price: '42.000' }],
+    featured: false,
+    related: ['mkhamaria-lavendarine', 'lavendarine-body-mist'],
+  },
+  {
+    key: 'oudy-eau-de-ligne',
+    name: 'Oudy – Eau de Ligne',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Brume de linge Oudy. Notes boisees et ambrees d\'oud, parfume durablement le linge et la maison. 250 ml.',
+    price: '30.000',
+    category: 'soins',
+    image: IMG.oudyEauDeLigne,
+    sizes: [{ size: '250 ml', price: '30.000' }],
+    featured: false,
+    related: ['sweety-eau-de-ligne', 'mekhassria-face-toner'],
+  },
+  {
+    key: 'sweety-eau-de-ligne',
+    name: 'Sweety – Eau de Ligne',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Brume de linge Sweety. Fleurs douces et notes gourmandes, parfume durablement le linge et la maison. 250 ml.',
+    price: '30.000',
+    category: 'soins',
+    image: IMG.sweetyEauDeLigne,
+    sizes: [{ size: '250 ml', price: '30.000' }],
+    featured: false,
+    related: ['oudy-eau-de-ligne', 'mekhassria-face-toner'],
+  },
+  {
+    key: 'polo-est-67',
+    name: 'Polo Est. 67',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Fragrance inspiree de Polo Ralph Lauren Est. 67. Agrumes frais et notes boisees musquees. Sportif et intemporel.',
+    price: '60.000',
+    category: 'homme',
+    image: IMG.poloEst67,
+    sizes: sizeVariants('60.000'),
+    featured: false,
+    related: ['prada-paradigme', 'imagination-lv', 'le-male-elixir'],
+  },
+  {
+    key: 'prada-paradigme',
+    name: 'Prada Paradigme',
+    brand: 'KAOUBI PERFUMES',
+    description:
+      'Fragrance inspiree de Prada Paradigme. Notes vertes et aromatiques, ambre et bois. Frais, elegant et moderne.',
+    price: '75.000',
+    category: 'homme',
+    image: IMG.pradaParadigme,
+    sizes: sizeVariants('75.000'),
+    featured: false,
+    related: ['polo-est-67', 'imagination-lv', 'azure-line'],
+  },
+  {
+    key: 'kaoud-prestige',
+    name: 'Kaoud Prestige',
+    brand: 'KAOUD PERFUMES',
+    description:
+      'Collection Prestige Kaoud Perfumes. Ambre dore, notes boisees et musquees. Sillage riche, elegant, mixte.',
+    price: '80.000',
+    category: 'mixte',
+    image: IMG.kaoudPrestige,
+    sizes: sizeVariants('80.000'),
+    featured: false,
+    related: ['baccarat-rouge-540', 'alexandria-ii', 'ambre-des-abysses'],
   },
 ]
 
 const FEATURED_KEYS = new Set([
-  'bakhoor-mrazig',
-  'creme-mains-mrazig',
-  'gel-nettoyant-mrazig',
+  'lavendarine-edp',
+  'lavendarine-body-mist',
+  'mkhamaria-lavendarine',
+  'mekhassria-face-toner',
 ])
 
 /** Olfactive extras keyed by product.key. */
@@ -685,6 +983,56 @@ const OLFACTIVE = {
       fond: [NOTE.cedre, n('Musc')],
     },
   },
+  signature: {
+    fragranceNotes: ['floral', 'powdery', 'musky'],
+    wearMoments: ['jour', 'printemps'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote, n('Pêche')],
+      coeur: [NOTE.jasmin, n('Rose')],
+      fond: [n('Musc blanc'), NOTE.vanille],
+    },
+  },
+  'rose-nacree': {
+    fragranceNotes: ['floral', 'oriental', 'sweet'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'forte',
+    composition: {
+      tete: [NOTE.bergamote, n('Litchi')],
+      coeur: [n('Rose'), NOTE.jasmin],
+      fond: [NOTE.ambre, NOTE.vanille],
+    },
+  },
+  'vanillez-vous': {
+    fragranceNotes: ['gourmand', 'vanilla', 'sweet'],
+    wearMoments: ['jour', 'ete'],
+    intensity: 'moderee',
+    composition: {
+      tete: [n('Vanille')],
+      coeur: [NOTE.vanille, n('Tonka')],
+      fond: [NOTE.ambre, n('Musc')],
+    },
+  },
+  'fleur-de-chine': {
+    fragranceNotes: ['floral', 'fruity', 'fresh-spicy'],
+    wearMoments: ['jour', 'printemps', 'ete'],
+    intensity: 'moderee',
+    composition: {
+      tete: [n('Fleur de cerisier')],
+      coeur: [NOTE.jasmin, n('Pivoine')],
+      fond: [n('Musc blanc')],
+    },
+  },
+  'body-shimmer': {
+    fragranceNotes: ['gourmand', 'vanilla', 'oriental'],
+    wearMoments: ['jour', 'nuit'],
+    intensity: 'moyenne',
+    composition: {
+      tete: [NOTE.bergamote],
+      coeur: [NOTE.vanille, n('Ambre')],
+      fond: [NOTE.ambre, NOTE.cedre],
+    },
+  },
 }
 
 async function ensureCategories() {
@@ -699,7 +1047,9 @@ async function ensureCategories() {
 }
 
 async function upsertProduct(product) {
-  const images = JSON.stringify([product.image])
+  const images = JSON.stringify(
+    product.images && product.images.length > 0 ? product.images : [product.image],
+  )
   const sizes = JSON.stringify(product.sizes)
   const fragranceNotes = JSON.stringify(product.fragranceNotes ?? [])
   const wearMoments = JSON.stringify(product.wearMoments ?? [])

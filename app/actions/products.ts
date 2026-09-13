@@ -25,6 +25,7 @@ import {
   type PerfumeComposition,
 } from '@/lib/perfume-composition'
 import { serializeWearMoments } from '@/lib/product-wear'
+import { categoryFilterSlugs } from '@/lib/store-categories'
 import { and, asc, desc, eq, ilike, inArray, isNotNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 
@@ -77,7 +78,10 @@ function buildProductConditions(options: ProductListOptions) {
 
   const category = options.category?.trim()
   if (category && category !== 'all') {
-    conditions.push(eq(products.category, category))
+    const slugs = categoryFilterSlugs(category)
+    conditions.push(
+      slugs.length === 1 ? eq(products.category, slugs[0]) : inArray(products.category, slugs),
+    )
   }
 
   const wear = options.wear?.filter(Boolean) ?? []
@@ -184,9 +188,10 @@ export async function getAdminProducts() {
 }
 
 const FEATURED_HOME_ORDER = sql`CASE ${products.name}
-  WHEN 'بخور المرازيق التقليدي' THEN 1
-  WHEN 'Crème à mains nourrissante' THEN 2
-  WHEN 'Gel nettoyant sans huile' THEN 3
+  WHEN 'Lavendarine' THEN 1
+  WHEN 'Body Mist Lavendarine' THEN 2
+  WHEN 'Mkhamaria Lavendarine' THEN 3
+  WHEN 'مخصرية – Face Toner Cream' THEN 4
   ELSE 99
 END`
 
@@ -198,7 +203,7 @@ const getFeaturedProductsCached = unstable_cache(
       .where(and(eq(products.featured, true), eq(products.published, true)))
       .orderBy(FEATURED_HOME_ORDER, desc(products.createdAt))
       .limit(4),
-  ['featured-products', 'v3'],
+  ['featured-products', 'v4'],
   { revalidate: 120, tags: ['products'] },
 )
 
@@ -297,11 +302,12 @@ const getPublishedProductEntriesCached = unstable_cache(
       .select({
         id: products.id,
         updatedAt: products.updatedAt,
+        imageUrl: products.imageUrl,
       })
       .from(products)
       .where(eq(products.published, true))
       .orderBy(desc(products.updatedAt)),
-  ['published-product-entries'],
+  ['published-product-entries', 'v2'],
   { revalidate: 300, tags: ['products'] },
 )
 

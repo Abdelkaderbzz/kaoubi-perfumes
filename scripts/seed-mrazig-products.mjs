@@ -29,7 +29,7 @@ const PRODUCTS = [
     category: 'soins',
     image: '/products/creme-mains.webp',
     sizes: [{ size: '50 g', price: '28.000' }],
-    featured: true,
+    featured: false,
   },
   {
     name: 'Gel nettoyant sans huile',
@@ -40,7 +40,7 @@ const PRODUCTS = [
     category: 'soins',
     image: '/products/gel-nettoyant-v2.webp',
     sizes: [{ size: '150 ml', price: '25.000' }],
-    featured: true,
+    featured: false,
   },
   {
     name: 'بخور المرازيق التقليدي',
@@ -51,7 +51,7 @@ const PRODUCTS = [
     category: 'bakhoor',
     image: '/products/bakhoor-mrazig.webp',
     sizes: [{ size: 'Pot', price: '20.000' }],
-    featured: true,
+    featured: false,
   },
 ]
 
