@@ -21,6 +21,18 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     image: '/categories/homme.webp',
   },
   {
+    slug: 'mixte',
+    name: 'Mixte',
+    tagline: 'Fragrances pour elle et lui',
+    image: '/products/baccarat-rouge-540.webp',
+  },
+  {
+    slug: 'enfant',
+    name: 'Enfant',
+    tagline: 'Fragrances douces pour enfants',
+    image: '/hero/boutique-cosmetic.webp',
+  },
+  {
     slug: 'soins',
     name: 'Soins',
     tagline: 'Cremes, gels et cosmetiques MRAZIG',
@@ -37,12 +49,30 @@ export const STORE_CATEGORIES: StoreCategory[] = [
 /** Seasonal collections that should not appear in nav, homepage, or filters. */
 export const HIDDEN_CATEGORY_SLUGS = new Set(['sif', 'chta'])
 
+/** Older slugs that should resolve to a current store category. */
+export const CATEGORY_SLUG_ALIASES: Record<string, string> = {
+  unisexe: 'mixte',
+  unisex: 'mixte',
+}
+
+export function canonicalCategorySlug(slug: string) {
+  return CATEGORY_SLUG_ALIASES[slug] ?? slug
+}
+
+export function categoryFilterSlugs(slug: string) {
+  const canonical = canonicalCategorySlug(slug)
+  const aliases = Object.entries(CATEGORY_SLUG_ALIASES)
+    .filter(([, target]) => target === canonical)
+    .map(([alias]) => alias)
+  return [canonical, ...aliases]
+}
+
 /** @deprecated Prefer getHeroImages() from app/actions/hero — kept for showcase gallery refs. */
 export const HERO_IMAGES = [
-  { src: '/hero/boutique-stand.webp', alt: 'Boutique KAOUBI PERFUMES' },
   { src: '/hero/boutique-counter-v2.webp', alt: 'Comptoir KAOUBI PERFUMES' },
   { src: '/hero/boutique-arches.png', alt: 'Rayonnages de la boutique KAOUBI PERFUMES' },
   { src: '/hero/boutique-signature.webp', alt: 'Mur logo de la boutique KAOUBI PERFUMES' },
+  { src: '/hero/boutique-cosmetic.webp', alt: 'Univers cosmetique KAOUBI PERFUMES' },
 ]
 
 export type ShowcaseImage = {
@@ -65,7 +95,7 @@ export function getShowcaseByCategory(category: string) {
 }
 
 export function getCategoryBySlug(slug: string) {
-  return STORE_CATEGORIES.find((c) => c.slug === slug)
+  return STORE_CATEGORIES.find((c) => c.slug === canonicalCategorySlug(slug))
 }
 
 export type DbCategory = {
@@ -75,13 +105,13 @@ export type DbCategory = {
 }
 
 /** Ready-made translation for a known slug
- *  (femme/homme/unisexe/soins/bakhoor), or undefined for a custom
+ *  (femme/homme/mixte/enfant/soins/bakhoor), or undefined for a custom
  *  category an admin added — those just render whatever the admin typed. */
 function localizedCategoryText(slug: string, locale: Locale) {
   const table = getDictionary(locale).categories as
     | Record<string, { name: string; tagline: string } | undefined>
     | undefined
-  return table?.[slug]
+  return table?.[canonicalCategorySlug(slug)] ?? table?.[slug]
 }
 
 /** Category names/taglines are admin-edited DB text, so in French (the
@@ -92,10 +122,12 @@ export function mergeStoreCategories(
   dbCategories: DbCategory[],
   locale: Locale = defaultLocale,
 ): StoreCategory[] {
-  const dbBySlug = new Map(dbCategories.map((category) => [category.slug, category]))
+  const dbBySlug = new Map(
+    dbCategories.map((category) => [canonicalCategorySlug(category.slug), category]),
+  )
   const arabic = locale === 'ar'
 
-  const fromDefaults = STORE_CATEGORIES.map((category) => {
+  return STORE_CATEGORIES.map((category) => {
     const fromDb = dbBySlug.get(category.slug)
     const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
     return {
@@ -105,25 +137,6 @@ export function mergeStoreCategories(
       image: fromDb?.bannerUrl ?? category.image,
     }
   })
-
-  const extras = dbCategories
-    .filter(
-      (category) =>
-        !HIDDEN_CATEGORY_SLUGS.has(category.slug) &&
-        !STORE_CATEGORIES.some((item) => item.slug === category.slug),
-    )
-    .map((category) => {
-      const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
-      const frDefault = localizedCategoryText(category.slug, 'fr')
-      return {
-        slug: category.slug,
-        name: translated?.name ?? category.name,
-        tagline: translated?.tagline ?? frDefault?.tagline ?? category.name,
-        image: category.bannerUrl ?? '',
-      }
-    })
-
-  return [...fromDefaults, ...extras]
 }
 
 export function getMergedCategoryBySlug(
@@ -131,7 +144,8 @@ export function getMergedCategoryBySlug(
   dbCategories: DbCategory[],
   locale: Locale = defaultLocale,
 ) {
-  return mergeStoreCategories(dbCategories, locale).find((category) => category.slug === slug)
+  const canonical = canonicalCategorySlug(slug)
+  return mergeStoreCategories(dbCategories, locale).find((category) => category.slug === canonical)
 }
 
 export function getCategoryLabel(
@@ -143,7 +157,8 @@ export function getCategoryLabel(
     const translated = localizedCategoryText(slug, 'ar')
     if (translated) return translated.name
   }
-  const fromDb = categories?.find((c) => c.slug === slug)
+  const canonical = canonicalCategorySlug(slug)
+  const fromDb = categories?.find((c) => canonicalCategorySlug(c.slug) === canonical)
   if (fromDb) return fromDb.name
-  return getCategoryBySlug(slug)?.name ?? slug
+  return getCategoryBySlug(canonical)?.name ?? slug
 }

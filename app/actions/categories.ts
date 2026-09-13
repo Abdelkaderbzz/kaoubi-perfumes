@@ -55,7 +55,7 @@ const getCategoriesCached = unstable_cache(
       .from(categories)
       .where(notInArray(categories.slug, [...HIDDEN_CATEGORY_SLUGS]))
       .orderBy(asc(categories.name)),
-  ['categories-list-v3'],
+  ['categories-list-v4'],
   { revalidate: 300, tags: ['categories'] },
 )
 

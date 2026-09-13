@@ -214,6 +214,13 @@ const INCREMENTAL_ALTERS = [
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "intensity" text`,
   `UPDATE "categories" SET "name" = 'Mixte' WHERE "slug" = 'unisexe' AND "name" = 'Unisexe'`,
   `DELETE FROM "categories" WHERE "slug" IN ('sif', 'chta')`,
+  `INSERT INTO "categories" ("name", "slug") VALUES
+    ('Mixte', 'mixte'),
+    ('Enfant', 'enfant')
+   ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+  `UPDATE "products" SET "category" = 'mixte', "updatedAt" = NOW()
+   WHERE "category" IN ('unisexe', 'unisex')`,
+  `DELETE FROM "categories" WHERE "slug" IN ('unisexe', 'unisex')`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagEnabled" boolean NOT NULL DEFAULT false`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagLabel" text NOT NULL DEFAULT 'Promotion'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagBgColor" text NOT NULL DEFAULT '#c81e1e'`,
@@ -272,6 +279,11 @@ const INCREMENTAL_ALTERS = [
   `CREATE INDEX IF NOT EXISTS "products_published_created_at_idx" ON "products" ("published", "createdAt" DESC)`,
   `CREATE INDEX IF NOT EXISTS "products_in_stock_idx" ON "products" ("inStock")`,
   `CREATE INDEX IF NOT EXISTS "session_user_id_idx" ON "session" ("userId")`,
+  `DELETE FROM "hero_images"
+   WHERE "imageUrl" IN ('/hero/boutique-stand.webp', '/hero/boutique-logo-wall.webp')`,
+  `INSERT INTO "hero_images" ("slot", "imageUrl", "alt") VALUES
+    (3, '/hero/boutique-cosmetic.webp', 'Univers cosmetique de la boutique KAOUBI PERFUMES')
+   ON CONFLICT ("slot") DO NOTHING`,
   `INSERT INTO "boutiques"
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
    VALUES
@@ -287,7 +299,8 @@ const BASELINE_DATA = [
   `INSERT INTO "categories" ("name", "slug") VALUES
     ('Femme', 'femme'),
     ('Homme', 'homme'),
-    ('Mixte', 'unisexe'),
+    ('Mixte', 'mixte'),
+    ('Enfant', 'enfant'),
     ('Soins', 'soins'),
     ('Bakhoor', 'bakhoor')
    ON CONFLICT ("slug") DO NOTHING`,
@@ -310,10 +323,10 @@ const BASELINE_DATA = [
     ('https://www.instagram.com/reel/DZvMI4OsOJd/', 3)
    ON CONFLICT ("url") DO NOTHING`,
   `INSERT INTO "hero_images" ("slot", "imageUrl", "alt") VALUES
-    (0, '/hero/boutique-stand.webp', 'KAOUBI PERFUMES au salon, equipe et produits'),
-    (1, '/hero/boutique-counter-v2.webp', 'Comptoir Chanel de la boutique KAOUBI PERFUMES a Douz'),
-    (2, '/hero/boutique-arches.png', 'Rayonnages roses de la boutique KAOUBI PERFUMES'),
-    (3, '/hero/boutique-signature.webp', 'Mur logo KAOUBI PERFUMES, flacons dorees et brumes a Douz')
+    (0, '/hero/boutique-counter-v2.webp', 'Comptoir Chanel de la boutique KAOUBI PERFUMES a Douz'),
+    (1, '/hero/boutique-arches.png', 'Rayonnages roses de la boutique KAOUBI PERFUMES'),
+    (2, '/hero/boutique-signature.webp', 'Mur logo KAOUBI PERFUMES, flacons dorees et brumes a Douz'),
+    (3, '/hero/boutique-cosmetic.webp', 'Univers cosmetique de la boutique KAOUBI PERFUMES')
    ON CONFLICT ("slot") DO NOTHING`,
   `INSERT INTO "banners" (
       "name", "message", "variant", "backgroundColor", "textColor", "fontSize",
