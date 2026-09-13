@@ -66,7 +66,7 @@ export function ProductCard({
         {product.imageUrl ? (
           <Image
             src={resolveProductImageUrl(product.imageUrl)}
-            alt={`${product.brand} ${product.name}`}
+            alt={`${product.brand} ${product.name} — ${categoryLabel}`}
             fill
             priority={priority}
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"

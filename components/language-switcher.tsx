@@ -51,8 +51,8 @@ const OPTIONS: {
   code: string
   Flag: typeof FranceFlag
 }[] = [
-  { value: 'ar', label: 'العربية', code: 'AR', Flag: SaudiFlag },
   { value: 'fr', label: 'Français', code: 'FR', Flag: FranceFlag },
+  { value: 'ar', label: 'العربية', code: 'AR', Flag: SaudiFlag },
 ]
 
 export function LanguageSwitcher({ className = '' }: { className?: string }) {

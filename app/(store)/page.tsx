@@ -20,7 +20,7 @@ import {
 import { Reveal } from '@/components/reveal'
 import { TestimonialsSection } from '@/components/testimonials-section'
 import { getRequestDictionary } from '@/lib/i18n/server'
-import { organizationJsonLd, perfumeStoreJsonLd } from '@/lib/seo'
+import { organizationJsonLd, perfumeStoreJsonLd, websiteJsonLd } from '@/lib/seo'
 import { mergeStoreCategories } from '@/lib/store-categories'
 import type { Dictionary } from '@/lib/i18n'
 import { Suspense } from 'react'
@@ -106,7 +106,11 @@ export default async function HomePage() {
   return (
     <div>
       <JsonLd
-        data={[organizationJsonLd(), perfumeStoreJsonLd(boutiques.filter((boutique) => boutique.published))]}
+        data={[
+          websiteJsonLd(),
+          organizationJsonLd(),
+          perfumeStoreJsonLd(boutiques.filter((boutique) => boutique.published)),
+        ]}
       />
 
       <HeroSection images={heroImages} />

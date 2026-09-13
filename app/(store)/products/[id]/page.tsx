@@ -12,7 +12,7 @@ import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 import { getRequestDictionary } from '@/lib/i18n/server'
 import { parseProductImages } from '@/lib/product-images'
 import { parseProductSizeVariants } from '@/lib/product-sizes'
-import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo'
+import { breadcrumbJsonLd, catalogPath, languageAlternates, productJsonLd } from '@/lib/seo'
 import { getCategoryLabel } from '@/lib/store-categories'
 import { AddToCartButton } from './add-to-cart-button'
 import type { Metadata } from 'next'
@@ -37,9 +37,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params
   const productId = Number(id)
-  if (!Number.isFinite(productId)) {
-    return { title: 'Produit' }
-  }
+  if (!Number.isFinite(productId)) notFound()
 
   const [{ dictionary, locale }, product, categories] = await Promise.all([
     getRequestDictionary(),
@@ -47,9 +45,7 @@ export async function generateMetadata({
     getCategories(),
   ])
 
-  if (!product) {
-    return { title: 'Produit' }
-  }
+  if (!product) notFound()
 
   const categoryLabel = getCategoryLabel(product.category, categories, locale)
   const title = dictionary.meta.productTitle(product.brand, product.name)
@@ -62,28 +58,34 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: [product.brand, product.name, categoryLabel, 'KAOUBI PERFUMES', 'Douz'],
     alternates: {
       canonical,
-      languages: {
-        'x-default': canonical,
-        'fr-TN': canonical,
-        fr: canonical,
-        'ar-TN': canonical,
-        ar: canonical,
-      },
+      languages: languageAlternates(canonical),
     },
     openGraph: {
       type: 'website',
       title,
       description,
       url: canonical,
-      images: images.length > 0 ? images.map((url) => ({ url })) : undefined,
+      images:
+        images.length > 0
+          ? images.map((url) => ({ url, alt: `${product.brand} ${product.name}` }))
+          : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
       images: images[0] ? [images[0]] : undefined,
+    },
+    other: {
+      'product:brand': product.brand,
+      'product:availability': product.inStock ? 'in stock' : 'out of stock',
+      'product:condition': 'new',
+      'product:retailer_item_id': String(product.id),
+      'product:price:amount': product.price,
+      'product:price:currency': 'TND',
     },
   }
 }
@@ -115,6 +117,10 @@ export default async function ProductDetailPage({
           breadcrumbJsonLd([
             { name: dictionary.product.home, path: '/' },
             { name: dictionary.product.boutique, path: '/products' },
+            {
+              name: categoryLabel,
+              path: catalogPath(product.category),
+            },
             { name: product.name, path: `/products/${product.id}` },
           ]),
         ]}
@@ -131,6 +137,14 @@ export default async function ProductDetailPage({
           <span className="shrink-0">/</span>
           <Link href="/products" prefetch className="shrink-0 hover:text-primary transition-colors">
             {dictionary.product.boutique}
+          </Link>
+          <span className="shrink-0">/</span>
+          <Link
+            href={catalogPath(product.category)}
+            prefetch
+            className="shrink-0 hover:text-primary transition-colors"
+          >
+            {categoryLabel.toUpperCase()}
           </Link>
           <span className="shrink-0">/</span>
           <span className="truncate text-foreground">{product.name.toUpperCase()}</span>

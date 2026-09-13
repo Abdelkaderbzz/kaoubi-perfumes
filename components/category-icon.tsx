@@ -1,4 +1,5 @@
 import {
+  Baby,
   Compass,
   Drop,
   Fire,
@@ -13,6 +14,7 @@ const CATEGORY_ICONS: Record<string, Icon> = {
   homme: Compass,
   unisexe: UsersThree,
   mixte: UsersThree,
+  enfant: Baby,
   soins: Drop,
   bakhoor: Fire,
 }
@@ -21,6 +23,7 @@ function resolveIcon(slug: string): Icon {
   if (CATEGORY_ICONS[slug]) return CATEGORY_ICONS[slug]
   if (slug.includes('femme')) return FlowerLotus
   if (slug.includes('homme')) return Compass
+  if (slug.includes('enfant') || slug.includes('child') || slug.includes('kids')) return Baby
   if (slug.includes('soin')) return Drop
   if (slug.includes('bakhoor') || slug.includes('encens')) return Fire
   return UsersThree

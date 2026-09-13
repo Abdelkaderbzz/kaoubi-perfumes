@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
         <AdminQuickLink
           href="/admin/hero"
           title="Images hero"
-          description="Modifier les 4 photos du diaporama d accueil."
+          description="Modifier les 4 photos du mosaic d accueil."
         />
         <AdminQuickLink
           href="/admin/banner"

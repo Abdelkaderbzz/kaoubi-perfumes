@@ -1,17 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { EnvelopeSimple, FacebookLogo, MapPin, Phone } from '@phosphor-icons/react'
+import { MapPin, Phone } from '@phosphor-icons/react'
 import { useDictionary, useLocale } from '@/components/locale-provider'
 import { localizeBoutique, phoneHref, type Boutique } from '@/lib/boutiques'
-import { FACEBOOK_URL } from '@/lib/social-links'
-import { STORE_EMAIL, STORE_MAPS_URL } from '@/lib/contact'
+import { STORE_MAPS_URL } from '@/lib/contact'
 import { Reveal } from '@/components/reveal'
 import { SectionEyebrow, SectionTitle } from '@/components/section-heading'
 import type { Dictionary } from '@/lib/i18n'
-
-const actionCls =
-  'inline-flex items-center gap-1.5 border-b border-border pb-0.5 text-[10px] font-medium tracking-[0.16em] text-muted-foreground transition-colors hover:border-primary hover:text-primary'
 
 function uniqueCities(boutiques: Boutique[]) {
   return [...new Set(boutiques.map((boutique) => boutique.city).filter(Boolean))]
@@ -114,36 +110,7 @@ function OpenBoutique({
               </a>
             </li>
           ) : null}
-          <li>
-            <a
-              href={`mailto:${STORE_EMAIL}`}
-              className="flex items-center gap-1.5 text-xs font-light tracking-wide text-muted-foreground transition-colors hover:text-primary"
-            >
-              <EnvelopeSimple className="size-3.5 shrink-0 text-primary" weight="duotone" aria-hidden />
-              <span>
-                <span className="sr-only">{labels.email}: </span>
-                {STORE_EMAIL}
-              </span>
-            </a>
-          </li>
         </ul>
-
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className={actionCls}>
-            <MapPin className="size-3" weight="bold" aria-hidden />
-            {labels.directions}
-          </a>
-          {boutique.phone ? (
-            <a href={phoneHref(boutique.phone)} className={actionCls}>
-              <Phone className="size-3" weight="bold" aria-hidden />
-              {labels.call}
-            </a>
-          ) : null}
-          <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className={actionCls}>
-            <FacebookLogo className="size-3" weight="fill" aria-hidden />
-            FACEBOOK
-          </a>
-        </div>
       </div>
     </article>
   )

@@ -30,13 +30,13 @@ import {
 import type { StoreCategory } from '@/lib/store-categories'
 
 const plaqueLink =
-  'text-[#f3e4cc] transition-colors hover:text-[#e0c15a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a44a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#160d10]'
+  'text-secondary-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary'
 
 const actionCls =
-  'inline-flex min-h-12 w-full items-center justify-center gap-2.5 border border-[#c9a44a]/45 bg-[#160d10] px-4 text-sm text-[#f3e4cc] transition-colors hover:border-[#e0c15a] hover:bg-[#e0c15a]/10 hover:text-[#e0c15a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a44a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#160d10] sm:text-[13px]'
+  'inline-flex min-h-12 w-full items-center justify-center gap-2.5 border border-primary/50 bg-card px-4 text-sm text-secondary-foreground transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary sm:text-[13px]'
 
 const socialCls =
-  'flex size-11 items-center justify-center border border-[#c9a44a]/45 text-[#e0c15a] transition-colors hover:border-[#e0c15a] hover:bg-[#e0c15a] hover:text-[#160d10] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a44a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#160d10]'
+  'flex size-11 items-center justify-center border border-primary/45 text-accent transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary'
 
 export function SiteFooter({
   locale,
@@ -67,19 +67,19 @@ export function SiteFooter({
         <Reveal>
           <div className="site-footer-plaque px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12">
             <div className="flex flex-col items-center gap-5 text-center md:flex-row md:items-center md:gap-6 md:text-start">
-              <Logo size="md" className="border border-[#c9a44a]/30" />
+              <Logo size="md" className="border border-primary/30" />
               <div>
                 <p
-                  className={`font-serif text-[#f3e4cc] ${
+                  className={`font-serif text-secondary-foreground ${
                     rtl ? 'text-2xl font-medium tracking-normal' : 'text-2xl font-light tracking-[0.18em]'
                   }`}
                 >
                   {dictionary.hero.title}
                 </p>
-                <p className={`mt-1.5 text-[#cbb89a] ${rtl ? 'text-sm' : 'text-xs tracking-wide'}`}>
+                <p className={`mt-1.5 text-secondary-foreground/65 ${rtl ? 'text-sm' : 'text-xs tracking-wide'}`}>
                   {dictionary.footer.tagline}
                 </p>
-                <p className={`mt-0.5 text-[#e0c15a] ${rtl ? 'text-sm' : 'text-[11px] tracking-[0.22em]'}`}>
+                <p className={`mt-0.5 text-accent ${rtl ? 'text-sm' : 'text-[11px] tracking-[0.22em]'}`}>
                   {dictionary.footer.location}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export function SiteFooter({
                     <Link
                       href={item.href}
                       prefetch
-                      className={`font-serif text-[#f3e4cc] transition-colors hover:text-[#e0c15a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a44a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#160d10] ${
+                      className={`font-serif text-secondary-foreground transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary ${
                         rtl ? 'text-xl font-medium tracking-normal' : 'text-lg font-light tracking-wide'
                       }`}
                     >
@@ -111,7 +111,7 @@ export function SiteFooter({
                   rel="noopener noreferrer"
                   className={`${plaqueLink} inline-flex items-start gap-3 text-sm leading-relaxed`}
                 >
-                  <MapPinIcon className="mt-0.5 shrink-0 text-[#e0c15a]" />
+                  <MapPinIcon className="mt-0.5 shrink-0 text-accent" />
                   <span>{address}</span>
                 </a>
                 <a
@@ -119,7 +119,7 @@ export function SiteFooter({
                   className={`${plaqueLink} inline-flex items-center gap-3 text-sm`}
                   dir="ltr"
                 >
-                  <PhoneIcon className="shrink-0 text-[#e0c15a]" />
+                  <PhoneIcon className="shrink-0 text-accent" />
                   {phoneDisplay}
                 </a>
                 <a
@@ -127,7 +127,7 @@ export function SiteFooter({
                   className={`${plaqueLink} inline-flex items-center gap-3 text-sm break-all`}
                   dir="ltr"
                 >
-                  <EnvelopeIcon className="shrink-0 text-[#e0c15a]" />
+                  <EnvelopeIcon className="shrink-0 text-accent" />
                   {STORE_EMAIL}
                 </a>
               </address>
@@ -149,7 +149,7 @@ export function SiteFooter({
             </div>
 
             <div className="site-footer-rule mt-8 flex flex-col items-center gap-4 pt-7 sm:flex-row sm:justify-between">
-              <p className={`text-[#cbb89a] ${rtl ? 'text-sm' : 'text-[11px] tracking-[0.22em]'}`}>
+              <p className={`text-secondary-foreground/65 ${rtl ? 'text-sm' : 'text-[11px] tracking-[0.22em]'}`}>
                 {dictionary.footer.follow}
               </p>
               <nav aria-label={dictionary.footer.follow} className="flex items-center gap-2.5">
@@ -186,7 +186,7 @@ export function SiteFooter({
         </Reveal>
 
         <p
-          className={`mt-6 flex flex-col items-center justify-between gap-2 text-[#cbb89a] sm:flex-row ${
+          className={`mt-6 flex flex-col items-center justify-between gap-2 text-secondary-foreground/65 sm:flex-row ${
             rtl ? 'text-sm' : 'text-[11px] tracking-wide'
           }`}
         >
@@ -197,7 +197,7 @@ export function SiteFooter({
               href="https://www.revixa.agency/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#e0c15a] transition-colors hover:text-[#f3e4cc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a44a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#160d10]"
+              className="text-accent transition-colors hover:text-secondary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary"
             >
               Revixa Agency
             </a>
