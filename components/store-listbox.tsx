@@ -46,7 +46,7 @@ export function StoreListbox({
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
     }
 
-    function onKeyDown(event: KeyboardEvent) {
+    function onKeyDown(event: globalThis.KeyboardEvent) {
       if (event.key === 'Escape') setOpen(false)
     }
 

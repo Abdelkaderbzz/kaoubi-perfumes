@@ -28,11 +28,11 @@ export function FragranceNoteChips({
   const [hiddenCount, setHiddenCount] = useState(0)
 
   useLayoutEffect(() => {
-    const visible = visibleRef.current
-    const sizer = sizerRef.current
-    if (!visible || !sizer) return
-
     function measure() {
+      const visible = visibleRef.current
+      const sizer = sizerRef.current
+      if (!visible || !sizer) return
+
       const chips = [...sizer.querySelectorAll<HTMLElement>('[data-chip]')]
       const more = sizer.querySelector<HTMLElement>('[data-more]')
       if (chips.length === 0) return
@@ -60,6 +60,8 @@ export function FragranceNoteChips({
     }
 
     measure()
+    const visible = visibleRef.current
+    if (!visible) return
     const observer = new ResizeObserver(measure)
     observer.observe(visible)
     return () => observer.disconnect()

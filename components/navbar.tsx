@@ -78,11 +78,11 @@ function DesktopCategoryNav({
   const [visibleCount, setVisibleCount] = useState(categories.length)
 
   useLayoutEffect(() => {
-    const row = rowRef.current
-    const sizer = sizerRef.current
-    if (!row || !sizer) return
-
     function measure() {
+      const row = rowRef.current
+      const sizer = sizerRef.current
+      if (!row || !sizer) return
+
       const available = row.clientWidth
       const boutique = sizer.querySelector<HTMLElement>('[data-nav-boutique]')
       const more = sizer.querySelector<HTMLElement>('[data-nav-more]')
@@ -111,6 +111,8 @@ function DesktopCategoryNav({
     }
 
     measure()
+    const row = rowRef.current
+    if (!row) return
     const observer = new ResizeObserver(measure)
     observer.observe(row)
     return () => observer.disconnect()
