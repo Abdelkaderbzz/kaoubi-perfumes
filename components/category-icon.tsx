@@ -1,19 +1,25 @@
 import {
   Baby,
-  Compass,
+  Cloud,
   Drop,
   Fire,
+  Flask,
   FlowerLotus,
+  Jar,
+  Sparkle,
+  SprayBottle,
   UsersThree,
   type Icon,
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 const CATEGORY_ICONS: Record<string, Icon> = {
-  femme: FlowerLotus,
-  homme: Compass,
-  unisexe: UsersThree,
-  mixte: UsersThree,
+  parfum: Flask,
+  'eau-de-parfum': FlowerLotus,
+  'eau-de-ligne': SprayBottle,
+  'body-mist': Cloud,
+  'body-shimmer': Sparkle,
+  mkhamaria: Jar,
   enfant: Baby,
   soins: Drop,
   bakhoor: Fire,
@@ -21,8 +27,11 @@ const CATEGORY_ICONS: Record<string, Icon> = {
 
 function resolveIcon(slug: string): Icon {
   if (CATEGORY_ICONS[slug]) return CATEGORY_ICONS[slug]
-  if (slug.includes('femme')) return FlowerLotus
-  if (slug.includes('homme')) return Compass
+  if (slug.includes('parfum')) return Flask
+  if (slug.includes('ligne')) return SprayBottle
+  if (slug.includes('mist')) return Cloud
+  if (slug.includes('shimmer')) return Sparkle
+  if (slug.includes('mkhamaria')) return Jar
   if (slug.includes('enfant') || slug.includes('child') || slug.includes('kids')) return Baby
   if (slug.includes('soin')) return Drop
   if (slug.includes('bakhoor') || slug.includes('encens')) return Fire

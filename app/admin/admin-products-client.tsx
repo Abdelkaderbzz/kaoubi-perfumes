@@ -7,7 +7,7 @@ import { getErrorMessage } from '@/lib/get-error-message'
 import { getPrimaryImage, parseProductImages } from '@/lib/product-images'
 import { parseRelatedProductIds } from '@/lib/product-relations'
 import { formatPriceTnd, getDiscountPercent, parsePrice } from '@/lib/product-price'
-import { parseProductSizeVariants } from '@/lib/product-sizes'
+import { dummyPerfumeSizeVariants, parseProductSizeVariants } from '@/lib/product-sizes'
 import { FRAGRANCE_NOTE_OPTIONS, parseFragranceNotes } from '@/lib/fragrance-notes'
 import {
   EMPTY_COMPOSITION,
@@ -15,7 +15,7 @@ import {
 } from '@/lib/perfume-composition'
 import { WEAR_MOMENT_OPTIONS, parseWearMoments } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
-import { PRODUCT_TYPES } from '@/lib/product-type'
+import { PRODUCT_SEX_OPTIONS, getProductSexLabel } from '@/lib/product-sex'
 import { productSchema, type ProductFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePrefetchHrefs, useRouteTransition } from '@/lib/use-route-transition'
@@ -59,9 +59,10 @@ type Product = {
   composition?: string | null
   wearMoments: string
   intensity: string | null
-  type: string | null
+  sex: string | null
   inStock: boolean
   featured: boolean
+  newArrival: boolean
   published: boolean
   promoTagEnabled?: boolean
   promoTagLabel?: string
@@ -97,19 +98,20 @@ const EMPTY_FORM: ProductFormValues = {
   name: '',
   brand: '',
   description: '',
-  price: '',
+  price: '50.000',
   compareAtPrice: '',
-  category: 'femme',
+  category: 'eau-de-parfum',
   images: [],
-  sizeVariants: [],
+  sizeVariants: dummyPerfumeSizeVariants('50.000'),
   relatedProductIds: [],
   fragranceNotes: [],
   composition: { ...EMPTY_COMPOSITION, tete: [], coeur: [], fond: [] },
   wearMoments: [],
   intensity: '',
-  type: '',
+  sex: '',
   inStock: true,
   featured: false,
+  newArrival: false,
   published: true,
   promoTagEnabled: false,
   promoTagLabel: 'Promotion',
@@ -145,7 +147,7 @@ export function AdminProductsClient({
   const [isPending, startTransition] = useTransition()
   const isBusy = isPending || isNavigating
 
-  const defaultCategory = categories[0]?.slug ?? 'femme'
+  const defaultCategory = categories[0]?.slug ?? 'eau-de-parfum'
 
   usePrefetchHrefs([
     page > 1 ? buildProductsUrl(initialSearch, initialCategory, initialStock, page - 1) : '',
@@ -224,9 +226,10 @@ export function AdminProductsClient({
       composition: parsePerfumeComposition(product.composition),
       wearMoments: parseWearMoments(product.wearMoments),
       intensity: product.intensity ?? '',
-      type: product.type ?? '',
+      sex: product.sex ?? '',
       inStock: product.inStock,
       featured: product.featured,
+      newArrival: product.newArrival ?? false,
       published: product.published ?? true,
       promoTagEnabled: product.promoTagEnabled ?? false,
       promoTagLabel: product.promoTagLabel || 'Promotion',
@@ -258,9 +261,10 @@ export function AdminProductsClient({
           composition: form.composition,
           wearMoments: form.wearMoments,
           intensity: form.intensity || null,
-          type: form.type || null,
+          sex: form.sex || null,
           inStock: form.inStock,
           featured: form.featured,
+          newArrival: form.newArrival,
           published: form.published,
           promoTagEnabled: form.promoTagEnabled,
           promoTagLabel: form.promoTagLabel.trim() || 'Promotion',
@@ -364,7 +368,7 @@ export function AdminProductsClient({
         <AdminTable loading={isBusy} loadingLabel={isNavigating ? 'Chargement des produits...' : 'Mise a jour...'}>
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                {['Image', 'Nom', 'Marque', 'Categorie', 'Prix', 'Stock', 'Statut', 'Actions'].map((h) => (
+                {['Image', 'Nom', 'Marque', 'Categorie', 'Sexe', 'Prix', 'Stock', 'Statut', 'Actions'].map((h) => (
                   <th key={h} className={adminTableHeadCls}>
                     {h}
                   </th>
@@ -398,6 +402,7 @@ export function AdminProductsClient({
                     <p className="font-medium text-slate-900">{p.name}</p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {p.featured && <AdminBadge tone="info">Mis en avant</AdminBadge>}
+                      {p.newArrival && <AdminBadge tone="info">Nouveauté</AdminBadge>}
                       {p.promoTagEnabled && (
                         <AdminBadge tone="danger">{p.promoTagLabel || 'Promotion'}</AdminBadge>
                       )}
@@ -405,6 +410,7 @@ export function AdminProductsClient({
                   </td>
                   <td className={adminTableMutedCls}>{p.brand}</td>
                   <td className={adminTableMutedCls}>{categoryLabel(p.category)}</td>
+                  <td className={adminTableMutedCls}>{getProductSexLabel(p.sex) ?? '—'}</td>
                   <td className={adminTableCellCls}>
                     <p className="font-semibold text-slate-900">
                       {formatPriceTnd(parseFloat(p.price))} TND
@@ -533,7 +539,7 @@ export function AdminProductsClient({
                     <div className="min-w-0 flex-1">
                       <input
                         type="text"
-                        placeholder="Taille (45x45, Unique...)"
+                        placeholder="Taille (10ml, 30ml...)"
                         className={adminInputWithError(!!errors.sizeVariants?.[index]?.size)}
                         {...register(`sizeVariants.${index}.size`)}
                       />
@@ -697,22 +703,22 @@ export function AdminProductsClient({
             </div>
 
             <div>
-              <label className={adminLabelCls}>TYPE DE PRODUIT</label>
+              <label className={adminLabelCls}>SEXE</label>
               <Controller
                 control={control}
-                name="type"
+                name="sex"
                 render={({ field }) => (
                   <AdminSelect
                     value={field.value || 'none'}
                     onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
                     items={[
                       { value: 'none', label: 'Non defini' },
-                      ...PRODUCT_TYPES.map((item) => ({ value: item.value, label: item.label })),
+                      ...PRODUCT_SEX_OPTIONS.map((item) => ({ value: item.value, label: item.label })),
                     ]}
                   />
                 )}
               />
-              <AdminFieldError message={errors.type?.message} />
+              <AdminFieldError message={errors.sex?.message} />
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-4">
@@ -810,7 +816,7 @@ export function AdminProductsClient({
               </p>
             </div>
 
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
                 <input type="checkbox" className="accent-amber-700" {...register('inStock')} />
                 En stock
@@ -819,7 +825,14 @@ export function AdminProductsClient({
                 <input type="checkbox" className="accent-amber-700" {...register('featured')} />
                 Mis en avant
               </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                <input type="checkbox" className="accent-amber-700" {...register('newArrival')} />
+                Nouveauté
+              </label>
             </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Mis en avant = Coups de cœur. Nouveauté = section NOUVEAUTÉS (8 produits max).
+            </p>
 
             <AdminButton type="submit" disabled={isPending} className="w-full">
               {isPending ? 'Enregistrement...' : editingProduct ? 'Enregistrer' : 'Ajouter'}

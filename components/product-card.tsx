@@ -8,12 +8,13 @@ import { ProductPrice } from '@/components/product-price'
 import { ProductPromoTag } from '@/components/product-promo-tag'
 import { formatPriceTnd } from '@/lib/product-price'
 import {
-  DEFAULT_SIZE,
   getVariantPrice,
   parseProductSizeVariants,
+  resolveDefaultSize,
 } from '@/lib/product-sizes'
 import { resolveProductImageUrl } from '@/lib/product-images'
 import { getCategoryLabel } from '@/lib/store-categories'
+import { getProductSexLabel } from '@/lib/product-sex'
 
 export type ProductCardProduct = {
   id: number
@@ -23,6 +24,7 @@ export type ProductCardProduct = {
   compareAtPrice?: string | null
   imageUrl: string | null
   category: string
+  sex?: string | null
   inStock: boolean
   sizes?: string | null
   promoTagEnabled?: boolean | null
@@ -43,13 +45,15 @@ export function ProductCard({
 }) {
   const { locale, dictionary } = useLocale()
   const categoryLabel = getCategoryLabel(product.category, categories, locale)
+  const sexLabels = dictionary.sex as Record<string, string>
+  const sexLabel = product.sex ? (sexLabels[product.sex] ?? getProductSexLabel(product.sex)) : null
 
   const variants = useMemo(
     () => parseProductSizeVariants(product.sizes, product.price),
     [product.sizes, product.price],
   )
 
-  const [selectedSize, setSelectedSize] = useState(variants[0]?.size ?? DEFAULT_SIZE)
+  const [selectedSize, setSelectedSize] = useState(resolveDefaultSize(variants))
 
   const selectedPrice = useMemo(
     () => getVariantPrice(variants, selectedSize, product.price),
@@ -94,10 +98,15 @@ export function ProductCard({
             </span>
           </div>
         )}
-        <div className="absolute start-2 top-2 sm:start-3 sm:top-3">
+        <div className="absolute start-2 top-2 flex flex-col items-start gap-1 sm:start-3 sm:top-3">
           <span className="rounded-md bg-card/95 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-primary backdrop-blur-sm sm:px-2.5 sm:py-1 sm:text-[11px] sm:tracking-widest">
             {categoryLabel.toUpperCase()}
           </span>
+          {sexLabel ? (
+            <span className="rounded-md bg-background/85 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-foreground/70 backdrop-blur-sm sm:px-2.5 sm:py-1 sm:text-[11px] sm:tracking-widest">
+              {sexLabel.toUpperCase()}
+            </span>
+          ) : null}
         </div>
         <div className="absolute end-2 top-2 sm:end-3 sm:top-3">
           <ProductPromoTag

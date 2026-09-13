@@ -9,22 +9,40 @@ export type StoreCategory = {
 
 export const STORE_CATEGORIES: StoreCategory[] = [
   {
-    slug: 'femme',
-    name: 'Femme',
-    tagline: 'Fragrances feminines de longue tenue',
-    image: '/categories/femme.webp',
+    slug: 'parfum',
+    name: 'Parfum',
+    tagline: 'Extrait de parfum, concentration et tenue maximales',
+    image: '/products/bleu-chanel.webp',
   },
   {
-    slug: 'homme',
-    name: 'Homme',
-    tagline: 'Fragrances masculines de longue tenue',
-    image: '/categories/homme.webp',
-  },
-  {
-    slug: 'mixte',
-    name: 'Mixte',
-    tagline: 'Fragrances pour elle et lui',
+    slug: 'eau-de-parfum',
+    name: 'Eau de Parfum',
+    tagline: 'Nos fragrances signature, pour elle et pour lui',
     image: '/products/baccarat-rouge-540.webp',
+  },
+  {
+    slug: 'eau-de-ligne',
+    name: 'Eau de Ligne',
+    tagline: 'Brume de linge et de maison',
+    image: '/products/oudy-eau-de-ligne.jpg',
+  },
+  {
+    slug: 'body-mist',
+    name: 'Body Mist',
+    tagline: 'Brume corporelle legere',
+    image: '/products/lavendarine-body-mist.jpg',
+  },
+  {
+    slug: 'body-shimmer',
+    name: 'Body Shimmer',
+    tagline: 'Brume corporelle scintillante',
+    image: '/products/body-shimmer.webp',
+  },
+  {
+    slug: 'mkhamaria',
+    name: 'Mkhamaria',
+    tagline: 'Soin exfoliant et parfume pour le corps',
+    image: '/products/mkhamaria-lavendarine.jpg',
   },
   {
     slug: 'enfant',
@@ -36,24 +54,23 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     slug: 'soins',
     name: 'Soins',
     tagline: 'Cremes, gels et cosmetiques MRAZIG',
-    image: '/products/creme-mains.webp',
+    image: '/products/gel-nettoyant-v2.webp',
   },
   {
     slug: 'bakhoor',
     name: 'Bakhoor',
     tagline: 'Encens Mrazig traditionnel',
-    image: '/products/bakhoor-mrazig.webp',
+    image: '/products/bakhoor-maryam.webp',
   },
 ]
 
 /** Seasonal collections that should not appear in nav, homepage, or filters. */
 export const HIDDEN_CATEGORY_SLUGS = new Set(['sif', 'chta'])
 
-/** Older slugs that should resolve to a current store category. */
-export const CATEGORY_SLUG_ALIASES: Record<string, string> = {
-  unisexe: 'mixte',
-  unisex: 'mixte',
-}
+/** Older slugs that should resolve to a current store category. Kept empty
+ *  for now — categories used to double as gender (femme/homme/mixte), which
+ *  moved to the separate `sex` field instead of aliasing to a category. */
+export const CATEGORY_SLUG_ALIASES: Record<string, string> = {}
 
 export function canonicalCategorySlug(slug: string) {
   return CATEGORY_SLUG_ALIASES[slug] ?? slug

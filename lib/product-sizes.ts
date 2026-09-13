@@ -5,6 +5,23 @@ export type ProductSizeVariant = {
 
 const DEFAULT_SIZE = 'Unique'
 
+export const PERFUME_SIZES = ['10ml', '30ml', '50ml', '100ml'] as const
+const PERFUME_SIZE_RATIOS = [0.35, 0.7, 1, 1.6] as const
+
+function formatTnd(value: number): string {
+  return value.toFixed(3)
+}
+
+/** Dummy bottle prices scaled from the 50ml price. */
+export function dummyPerfumeSizeVariants(price50ml: string | number): ProductSizeVariant[] {
+  const parsed = typeof price50ml === 'number' ? price50ml : parseFloat(price50ml)
+  const base = Number.isFinite(parsed) && parsed > 0 ? parsed : 50
+  return PERFUME_SIZES.map((size, index) => ({
+    size,
+    price: formatTnd(Math.round(base * PERFUME_SIZE_RATIOS[index])),
+  }))
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -93,8 +110,13 @@ export function getListingPrice(
   return typeof basePrice === 'number' ? basePrice.toFixed(3) : String(basePrice)
 }
 
+export function resolveDefaultSize(variants: ProductSizeVariant[]): string {
+  const preferred = variants.find((variant) => /^50\s*ml$/i.test(variant.size))
+  return preferred?.size ?? variants[0]?.size ?? DEFAULT_SIZE
+}
+
 export function resolveCartSize(variants: ProductSizeVariant[]): string {
-  return variants[0]?.size ?? DEFAULT_SIZE
+  return resolveDefaultSize(variants)
 }
 
 export { DEFAULT_SIZE }

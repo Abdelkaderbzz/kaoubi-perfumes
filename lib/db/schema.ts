@@ -104,7 +104,7 @@ export const boutiques = pgTable('boutiques', {
   directionsUrl: text('directionsUrl').notNull().default(''),
   /** Offered as a pickup point at checkout. */
   pickupEnabled: boolean('pickupEnabled').notNull().default(true),
-  /** Open boutique on the homepage. Unpublished shops still appear as coming soon. */
+  /** Open boutique on the homepage. Unpublished shops stay in admin only. */
   published: boolean('published').notNull().default(true),
   sortOrder: integer('sortOrder').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
@@ -151,10 +151,12 @@ export const products = pgTable('products', {
   wearMoments: text('wearMoments').notNull().default('[]'),
   /** Single intensity level slug (see lib/product-intensity.ts), or null. */
   intensity: text('intensity'),
-  /** Single product format/type slug (see lib/product-type.ts), or null. */
-  type: text('type'),
+  /** Who it's for: homme/femme/mixte (see lib/product-sex.ts), or null when not applicable. */
+  sex: text('sex'),
   inStock: boolean('inStock').notNull().default(true),
   featured: boolean('featured').notNull().default(false),
+  /** Curated for the homepage NOUVEAUTÉS section. */
+  newArrival: boolean('newArrival').notNull().default(false),
   published: boolean('published').notNull().default(true),
   /** Optional storefront promo badge (e.g. "Promotion"). */
   promoTagEnabled: boolean('promoTagEnabled').notNull().default(false),

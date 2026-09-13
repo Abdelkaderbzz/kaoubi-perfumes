@@ -21,17 +21,6 @@ const CATEGORIES = [
 
 const PRODUCTS = [
   {
-    name: 'Crème à mains nourrissante',
-    brand: 'MRAZIG',
-    description:
-      'كريم مرطب ومغذي لليدين. Creme a mains au beurre de cacao, huile d\'amande douce, huile de pepins de raisin, HE orange et HE clou de girofle. Nourrit et protege les mains. 50 g.',
-    price: '28.000',
-    category: 'soins',
-    image: '/products/creme-mains.webp',
-    sizes: [{ size: '50 g', price: '28.000' }],
-    featured: false,
-  },
-  {
     name: 'Gel nettoyant sans huile',
     brand: 'MRAZIG',
     description:
@@ -40,17 +29,6 @@ const PRODUCTS = [
     category: 'soins',
     image: '/products/gel-nettoyant-v2.webp',
     sizes: [{ size: '150 ml', price: '25.000' }],
-    featured: false,
-  },
-  {
-    name: 'بخور المرازيق التقليدي',
-    brand: 'MRAZIG',
-    description:
-      'Bakhoor Mrazig traditionnel (بخور مريير). Encens artisanal aux notes chaudes et orientales, pour parfumer la maison.',
-    price: '20.000',
-    category: 'bakhoor',
-    image: '/products/bakhoor-mrazig.webp',
-    sizes: [{ size: 'Pot', price: '20.000' }],
     featured: false,
   },
 ]

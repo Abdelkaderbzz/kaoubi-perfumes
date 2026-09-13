@@ -3,7 +3,7 @@ import { GOVERNORATE_SLUGS } from '@/lib/tunisia-governorates'
 import { FRAGRANCE_NOTE_OPTIONS } from '@/lib/fragrance-notes'
 import { WEAR_MOMENT_OPTIONS } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
-import { PRODUCT_TYPES } from '@/lib/product-type'
+import { PRODUCT_SEX_OPTIONS } from '@/lib/product-sex'
 
 const governorateSchema = z.enum(GOVERNORATE_SLUGS as [string, ...string[]])
 
@@ -40,7 +40,16 @@ export const productSchema = z
         { message: 'Ancien prix invalide' },
       ),
     category: z.string().min(1, 'Categorie requise'),
-    images: z.array(z.string().url('URL invalide')).max(5, 'Maximum 5 images par produit'),
+    images: z
+      .array(
+        z
+          .string()
+          .min(1, 'URL invalide')
+          .refine((value) => value.startsWith('/') || /^https?:\/\//.test(value), {
+            message: 'URL invalide',
+          }),
+      )
+      .max(5, 'Maximum 5 images par produit'),
     sizeVariants: z
       .array(
         z.object({
@@ -87,11 +96,12 @@ export const productSchema = z
     intensity: z
       .enum(['', ...INTENSITY_LEVELS.map((level) => level.value)] as [string, ...string[]])
       .optional(),
-    type: z
-      .enum(['', ...PRODUCT_TYPES.map((item) => item.value)] as [string, ...string[]])
+    sex: z
+      .enum(['', ...PRODUCT_SEX_OPTIONS.map((item) => item.value)] as [string, ...string[]])
       .optional(),
     inStock: z.boolean(),
     featured: z.boolean(),
+    newArrival: z.boolean(),
     published: z.boolean(),
     promoTagEnabled: z.boolean(),
     promoTagLabel: z.string().max(40, 'Libelle trop long'),

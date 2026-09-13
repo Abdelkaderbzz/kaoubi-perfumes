@@ -17,14 +17,21 @@ if (!DATABASE_URL) {
 
 const pool = new Pool({ connectionString: DATABASE_URL })
 
+// Categories describe product format; audience (homme/femme/mixte) lives in
+// the separate `sex` field on each product instead.
 const CATEGORIES = [
-  { name: 'Femme', slug: 'femme' },
-  { name: 'Homme', slug: 'homme' },
-  { name: 'Mixte', slug: 'mixte' },
+  { name: 'Parfum', slug: 'parfum' },
+  { name: 'Eau de Parfum', slug: 'eau-de-parfum' },
+  { name: 'Eau de Ligne', slug: 'eau-de-ligne' },
+  { name: 'Body Mist', slug: 'body-mist' },
+  { name: 'Body Shimmer', slug: 'body-shimmer' },
+  { name: 'Mkhamaria', slug: 'mkhamaria' },
   { name: 'Enfant', slug: 'enfant' },
   { name: 'Soins', slug: 'soins' },
   { name: 'Bakhoor', slug: 'bakhoor' },
 ]
+
+const STALE_CATEGORY_SLUGS = ['femme', 'homme', 'mixte']
 
 const IMG = {
   allureSport: '/products/allure-sport.webp',
@@ -49,8 +56,6 @@ const IMG = {
   boisImperial: '/products/bois-imperial.webp',
   boisLumiere: '/products/bois-lumiere.webp',
   gelNettoyant: '/products/gel-nettoyant-v2.webp',
-  cremeMains: '/products/creme-mains.webp',
-  bakhoorMrazig: '/products/bakhoor-mrazig.webp',
   signature: '/products/signature.webp',
   bakhoorMaryam: '/products/bakhoor-maryam.webp',
   fleurDeChine: '/products/fleur-de-chine.webp',
@@ -96,15 +101,16 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   description: string
  *   price: string
  *   compareAtPrice?: string | null
- *   category: 'femme' | 'homme' | 'mixte' | 'enfant' | 'soins' | 'bakhoor'
+ *   category: 'parfum' | 'eau-de-parfum' | 'eau-de-ligne' | 'body-mist' | 'body-shimmer' | 'mkhamaria' | 'enfant' | 'soins' | 'bakhoor'
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
+ *   newArrival?: boolean
  *   related: string[]
  *   fragranceNotes?: string[]
  *   wearMoments?: string[]
  *   intensity?: string
- *   type?: string
+ *   sex?: 'homme' | 'femme' | 'mixte'
  *   composition?: { tete: { name: string, imageUrl: string }[], coeur: { name: string, imageUrl: string }[], fond: { name: string, imageUrl: string }[] }
  *   promoTagEnabled?: boolean
  *   promoTagLabel?: string
@@ -120,11 +126,18 @@ function promoFields(compareAtPrice, label = 'Promotion') {
   }
 }
 
-/** Same price for 50ml and 100ml (store listing). */
-function sizeVariants(price) {
+function tnd(value) {
+  return Number(value).toFixed(3)
+}
+
+/** Dummy prices for 10ml / 30ml / 50ml / 100ml, scaled from the 50ml price. */
+function sizeVariants(price50) {
+  const base = parseFloat(price50)
   return [
-    { size: '50ml', price },
-    { size: '100ml', price },
+    { size: '10ml', price: tnd(Math.round(base * 0.35)) },
+    { size: '30ml', price: tnd(Math.round(base * 0.7)) },
+    { size: '50ml', price: tnd(Math.round(base)) },
+    { size: '100ml', price: tnd(Math.round(base * 1.6)) },
   ]
 }
 
@@ -176,9 +189,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Mugler Alien. Jasmin, ambre et bois. Capiteuse, mysterieuse, sillage iconique.',
     price: '50.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.alienMugler,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('50.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'alien-mugler'),
@@ -190,9 +203,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Gucci Guilty. Floral-fruite, rose et patchouli. Moderne et envoûtante.',
     price: '100.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.auraRosea,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('100.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'aura-rosea'),
@@ -204,9 +217,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de YSL Black Opium. Cafe, vanille et poire blanche. Gourmande, addictive, pour la nuit.',
     price: '50.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.blackOpium,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('50.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'black-opium'),
@@ -218,9 +231,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de YSL Black Opium Glitter. Edition scintillante, cafe et vanille, sillage festif.',
     price: '70.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.blackOpiumGlitter,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'black-opium-glitter'),
@@ -232,9 +245,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Chanel Chance. Pamplemousse, jasmin et musc blanc. Fraiche et poudree.',
     price: '70.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.belleFortuna,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'belle-fortuna'),
@@ -246,9 +259,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Gucci Bamboo. Floral-boise, bergamote et santal. Elegant et contemporain.',
     price: '65.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.bambooGucci,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('65.000'),
     featured: true,
     related: relatedOf(FEMME_KEYS, 'bamboo-gucci'),
@@ -260,10 +273,12 @@ const PRODUCTS = [
     description:
       'Eau de parfum signature KAOUBI. Flacon rond, jus rose et label or. Floral elegant, de longue tenue.',
     price: '55.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.signature,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: [
+      { size: '10ml', price: '20.000' },
+      { size: '30ml', price: '38.000' },
       { size: '50ml', price: '55.000' },
       { size: '100ml', price: '85.000' },
     ],
@@ -277,10 +292,12 @@ const PRODUCTS = [
     description:
       'Eau de parfum nacree. Jus rose irise, label or et calligraphie. Floral-oriental, sillage lumineux.',
     price: '60.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.roseNacree,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: [
+      { size: '10ml', price: '22.000' },
+      { size: '30ml', price: '42.000' },
       { size: '50ml', price: '60.000' },
       { size: '100ml', price: '90.000' },
     ],
@@ -294,10 +311,12 @@ const PRODUCTS = [
     description:
       'Brume pour le corps Vanillez Vous. Vanille gourmande et chaleureuse. Legere, sucree, pour le quotidien.',
     price: '25.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.vanillezVous,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: [
+      { size: '10ml', price: '12.000' },
+      { size: '30ml', price: '18.000' },
       { size: '50ml', price: '25.000' },
       { size: '100ml', price: '38.000' },
     ],
@@ -313,9 +332,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Xerjoff Alexandria II. Oriental luxueux, rose, bois precieux et vanille. Tenue exceptionnelle.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.alexandriaIi,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'alexandria-ii'),
@@ -328,9 +347,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Houbigant Ambre des Abysses. Ambre profond, boise et envelopant. Mixte, sillage noble.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.ambreDesAbysses,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'ambre-des-abysses'),
@@ -343,9 +362,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Montale Arabians Tonka. Oriental gourmand, tonka et epices, sillage fort.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.arabesqueTonka,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'arabesque-tonka'),
@@ -358,9 +377,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Armani Privé Bleu Lazuli. Boise-aromatique de prestige, sillage raffine.',
     price: '50.000',
     ...promoFields('70.000'),
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.bleuLazuli,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('50.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'bleu-lazuli'),
@@ -373,9 +392,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Guerlain Cuir Beluga. Cuir doux, vanille et ambre. Chaleureux et luxueux.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'parfum',
     image: IMG.belugaSupreme,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'beluga-supreme'),
@@ -388,9 +407,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Maison Francis Kurkdjian Baccarat Rouge 540. Safran, ambre et bois mineral.',
     price: '60.000',
     ...promoFields('80.000'),
-    category: 'mixte',
+    category: 'parfum',
     image: IMG.baccarat,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('60.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'baccarat-rouge-540'),
@@ -403,9 +422,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Essential Parfums Bois Imperial. Boise-aromatique, poivre et vetiver.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'parfum',
     image: IMG.boisImperial,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'bois-imperial'),
@@ -418,9 +437,9 @@ const PRODUCTS = [
       'Fragrance inspiree de Mancera Cedrat Boise. Agrumes, bois et musc. Lumineux, frais et tenace.',
     price: '70.000',
     ...promoFields('90.000'),
-    category: 'mixte',
+    category: 'parfum',
     image: IMG.boisLumiere,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(MIXTE_KEYS, 'bois-lumiere'),
@@ -432,9 +451,9 @@ const PRODUCTS = [
     description:
       "Parfum d'ambiance Fleur de Chine. Brume d'interieur florale, notes de fleurs de cerisier. Idéal pour la maison.",
     price: '28.000',
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.fleurDeChine,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: [
       { size: '200ml', price: '28.000' },
       { size: '400ml', price: '42.000' },
@@ -450,9 +469,9 @@ const PRODUCTS = [
     description:
       "Fragrance inspiree de Chanel Allure Homme Sport. Frais, dynamique, notes d'agrumes et de bois.",
     price: '50.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.allureSport,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('50.000'),
     featured: true,
     related: relatedOf(HOMME_KEYS, 'allure-sport'),
@@ -464,9 +483,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Maison Francis Kurkdjian Amyris Homme. Boise-ambre, elegant et sophistique.',
     price: '50.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.amyrisHomme,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('50.000'),
     featured: true,
     related: relatedOf(HOMME_KEYS, 'amyris-homme'),
@@ -478,9 +497,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Giorgio Armani Acqua di Gio Elixir. Marine intense, profonde et moderne.',
     price: '70.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.aquaDiGio,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(HOMME_KEYS, 'aqua-di-gio-elixir'),
@@ -492,9 +511,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Versace Eros Parfum. Menthe, vanille et bois, frais-sucre et audacieux.',
     price: '70.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.aureusEros,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(HOMME_KEYS, 'aureus-eros'),
@@ -506,9 +525,9 @@ const PRODUCTS = [
     description:
       "Fragrance inspiree de Bleu de Chanel L'Exclusif. Boise intense, profondeur et elegance nocturne.",
     price: '70.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.bleuExclusif,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: true,
     related: relatedOf(HOMME_KEYS, 'bleu-exclusif'),
@@ -520,9 +539,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Bleu de Chanel. Agrumes, gingembre et bois de gaiac. Frais-boise, polyvalent.',
     price: '60.000',
-    category: 'homme',
+    category: 'parfum',
     image: IMG.bleuChanel,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('60.000'),
     featured: false,
     related: relatedOf(HOMME_KEYS, 'bleu-chanel'),
@@ -534,27 +553,14 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Azzaro Chrome. Aquatique, frais et propre. Ideal au quotidien.',
     price: '70.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.azureLine,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('70.000'),
     featured: false,
     related: relatedOf(HOMME_KEYS, 'azure-line'),
   },
   // —— Soins & bakhoor MRAZIG ——
-  {
-    key: 'creme-mains-mrazig',
-    name: 'Crème à mains nourrissante',
-    brand: 'MRAZIG',
-    description:
-      'كريم مرطب ومغذي لليدين. Creme a mains au beurre de cacao, huile d\'amande douce, huile de pepins de raisin, HE orange et HE clou de girofle. Nourrit et protege les mains. 50 g.',
-    price: '28.000',
-    category: 'soins',
-    image: IMG.cremeMains,
-    sizes: [{ size: '50 g', price: '28.000' }],
-    featured: true,
-    related: ['gel-nettoyant-mrazig', 'body-shimmer'],
-  },
   {
     key: 'gel-nettoyant-mrazig',
     name: 'Gel nettoyant sans huile',
@@ -566,7 +572,7 @@ const PRODUCTS = [
     image: IMG.gelNettoyant,
     sizes: [{ size: '150 ml', price: '25.000' }],
     featured: true,
-    related: ['creme-mains-mrazig', 'body-shimmer'],
+    related: ['body-shimmer'],
   },
   {
     key: 'body-shimmer',
@@ -575,28 +581,14 @@ const PRODUCTS = [
     description:
       'Brume corporelle pailletee. Huile scintillante doree, label holographique. Eclat sur la peau, sillage delicieux.',
     price: '35.000',
-    category: 'soins',
+    category: 'body-shimmer',
     image: IMG.bodyShimmer,
-    type: 'body-shimmer',
     sizes: [
       { size: '100ml', price: '35.000' },
       { size: '150ml', price: '48.000' },
     ],
     featured: true,
-    related: ['creme-mains-mrazig', 'gel-nettoyant-mrazig', 'vanillez-vous'],
-  },
-  {
-    key: 'bakhoor-mrazig',
-    name: 'بخور المرازيق التقليدي',
-    brand: 'MRAZIG',
-    description:
-      'Bakhoor Mrazig traditionnel (بخور مريير). Encens artisanal aux notes chaudes et orientales, pour parfumer la maison.',
-    price: '20.000',
-    category: 'bakhoor',
-    image: IMG.bakhoorMrazig,
-    sizes: [{ size: 'Pot', price: '20.000' }],
-    featured: true,
-    related: ['bakhoor-maryam'],
+    related: ['gel-nettoyant-mrazig', 'vanillez-vous'],
   },
   {
     key: 'bakhoor-maryam',
@@ -612,7 +604,7 @@ const PRODUCTS = [
       { size: '100g', price: '55.000' },
     ],
     featured: true,
-    related: ['bakhoor-mrazig'],
+    related: [],
   },
   // —— Nouveautes ——
   {
@@ -622,9 +614,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Louis Vuitton Imagination. Agrumes petillants, notes boisees et musquees. Sillage frais et raffine.',
     price: '65.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.imaginationLv,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('65.000'),
     featured: false,
     related: ['le-male-elixir', 'stealer-times', 'bleu-chanel'],
@@ -636,9 +628,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Jean Paul Gaultier Le Male Elixir. Lavande, vanille et fenugrec. Intense, chaude et envoûtante.',
     price: '68.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.leMaleElixir,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('68.000'),
     featured: false,
     related: ['imagination-lv', 'stealer-times', 'azure-line'],
@@ -650,9 +642,9 @@ const PRODUCTS = [
     description:
       'Ambre doree et notes boisees chaudes. Sillage capiteux et longue tenue, pour affirmer sa presence.',
     price: '55.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.stealerTimes,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('55.000'),
     featured: false,
     related: ['imagination-lv', 'le-male-elixir', 'amyris-homme'],
@@ -664,9 +656,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Dolce & Gabbana Light Blue. Agrumes solaires et fleurs blanches. Legere, fraiche, esprit vacances.',
     price: '58.000',
-    category: 'femme',
+    category: 'eau-de-parfum',
     image: IMG.dgSummerVibes,
-    type: 'eau-de-parfum',
+    sex: 'femme',
     sizes: sizeVariants('58.000'),
     featured: false,
     related: ['aura-rosea', 'bamboo-gucci', 'belle-fortuna'],
@@ -678,10 +670,10 @@ const PRODUCTS = [
     description:
       'Eau de parfum Lavendarine. Lavande fine et notes gourmandes douces. Apaisante, elegante et facile a porter au quotidien.',
     price: '50.000',
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.lavendarineEdp,
-    type: 'eau-de-parfum',
-    sizes: [{ size: '50 ml', price: '50.000' }],
+    sex: 'mixte',
+    sizes: sizeVariants('50.000'),
     featured: false,
     related: ['lavendarine-body-mist', 'mkhamaria-lavendarine'],
   },
@@ -692,9 +684,8 @@ const PRODUCTS = [
     description:
       'Brume corporelle Lavendarine, pailletee et parfumee a la lavande. Rafraichit et parfume la peau tout au long de la journee.',
     price: '35.000',
-    category: 'soins',
+    category: 'body-mist',
     image: IMG.lavendarineBodyMist,
-    type: 'body-mist',
     sizes: [{ size: '50 ml', price: '35.000' }],
     featured: false,
     related: ['lavendarine-edp', 'mkhamaria-lavendarine'],
@@ -706,21 +697,20 @@ const PRODUCTS = [
     description:
       'Gommage corporel Mkhamaria a la lavande, texture pailletee et nourrissante. Exfolie en douceur et parfume la peau. 50 g.',
     price: '38.000',
-    category: 'soins',
+    category: 'mkhamaria',
     image: IMG.mkhamariaLavendarine,
-    type: 'mkhamaria',
     sizes: [{ size: '50 gr', price: '38.000' }],
     featured: false,
     related: ['lavendarine-edp', 'lavendarine-body-mist'],
   },
   {
-    key: 'mekhassria-face-toner',
-    name: 'مخصرية – Face Toner Cream',
+    key: 'mkhamaria',
+    name: 'Mkhamaria',
     brand: 'KAOUBI PERFUMES',
     description:
-      'Creme tonique visage Mekhassria. Texture doree et fondante qui tonifie, hydrate et illumine le teint. 50 g.',
+      'Face toner cream. Texture doree et fondante qui tonifie, hydrate et illumine le teint. 50 g.',
     price: '42.000',
-    category: 'soins',
+    category: 'mkhamaria',
     image: IMG.mekhassriaFaceToner,
     images: [
       IMG.mekhassriaFaceToner,
@@ -738,12 +728,11 @@ const PRODUCTS = [
     description:
       'Brume de linge Oudy. Notes boisees et ambrees d\'oud, parfume durablement le linge et la maison. 250 ml.',
     price: '30.000',
-    category: 'soins',
+    category: 'eau-de-ligne',
     image: IMG.oudyEauDeLigne,
-    type: 'eau-de-ligne',
     sizes: [{ size: '250 ml', price: '30.000' }],
     featured: false,
-    related: ['sweety-eau-de-ligne', 'mekhassria-face-toner'],
+    related: ['sweety-eau-de-ligne', 'mkhamaria'],
   },
   {
     key: 'sweety-eau-de-ligne',
@@ -752,12 +741,11 @@ const PRODUCTS = [
     description:
       'Brume de linge Sweety. Fleurs douces et notes gourmandes, parfume durablement le linge et la maison. 250 ml.',
     price: '30.000',
-    category: 'soins',
+    category: 'eau-de-ligne',
     image: IMG.sweetyEauDeLigne,
-    type: 'eau-de-ligne',
     sizes: [{ size: '250 ml', price: '30.000' }],
     featured: false,
-    related: ['oudy-eau-de-ligne', 'mekhassria-face-toner'],
+    related: ['oudy-eau-de-ligne', 'mkhamaria'],
   },
   {
     key: 'polo-est-67',
@@ -766,9 +754,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Polo Ralph Lauren Est. 67. Agrumes frais et notes boisees musquees. Sportif et intemporel.',
     price: '60.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.poloEst67,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('60.000'),
     featured: false,
     related: ['prada-paradigme', 'imagination-lv', 'le-male-elixir'],
@@ -780,9 +768,9 @@ const PRODUCTS = [
     description:
       'Fragrance inspiree de Prada Paradigme. Notes vertes et aromatiques, ambre et bois. Frais, elegant et moderne.',
     price: '75.000',
-    category: 'homme',
+    category: 'eau-de-parfum',
     image: IMG.pradaParadigme,
-    type: 'eau-de-parfum',
+    sex: 'homme',
     sizes: sizeVariants('75.000'),
     featured: false,
     related: ['polo-est-67', 'imagination-lv', 'azure-line'],
@@ -794,9 +782,9 @@ const PRODUCTS = [
     description:
       'Collection Prestige Kaoud Perfumes. Ambre dore, notes boisees et musquees. Sillage riche, elegant, mixte.',
     price: '80.000',
-    category: 'mixte',
+    category: 'eau-de-parfum',
     image: IMG.kaoudPrestige,
-    type: 'eau-de-parfum',
+    sex: 'mixte',
     sizes: sizeVariants('80.000'),
     featured: false,
     related: ['baccarat-rouge-540', 'alexandria-ii', 'ambre-des-abysses'],
@@ -807,7 +795,18 @@ const FEATURED_KEYS = new Set([
   'lavendarine-edp',
   'lavendarine-body-mist',
   'mkhamaria-lavendarine',
-  'mekhassria-face-toner',
+  'mkhamaria',
+])
+
+const NEW_ARRIVAL_KEYS = new Set([
+  'imagination-lv',
+  'le-male-elixir',
+  'stealer-times',
+  'dg-summer-vibes',
+  'lavendarine-edp',
+  'lavendarine-body-mist',
+  'mkhamaria-lavendarine',
+  'mkhamaria',
 ])
 
 /** Olfactive extras keyed by product.key. */
@@ -1085,6 +1084,18 @@ async function ensureCategories() {
   }
 }
 
+/** Femme/Homme/Mixte used to be categories; now that meaning lives in the
+ *  `sex` column, drop the old category rows once no product still points
+ *  at them (products are remapped to the new categories earlier in seed()). */
+async function removeStaleCategories() {
+  await pool.query(
+    `DELETE FROM categories
+     WHERE slug = ANY($1::text[])
+       AND NOT EXISTS (SELECT 1 FROM products WHERE products.category = categories.slug)`,
+    [STALE_CATEGORY_SLUGS],
+  )
+}
+
 async function upsertProduct(product) {
   const images = JSON.stringify(
     product.images && product.images.length > 0 ? product.images : [product.image],
@@ -1093,7 +1104,7 @@ async function upsertProduct(product) {
   const fragranceNotes = JSON.stringify(product.fragranceNotes ?? [])
   const wearMoments = JSON.stringify(product.wearMoments ?? [])
   const intensity = product.intensity ?? null
-  const type = product.type ?? null
+  const sex = product.sex ?? null
   const composition = JSON.stringify(
     product.composition ?? { tete: [], coeur: [], fond: [] },
   )
@@ -1120,7 +1131,7 @@ async function upsertProduct(product) {
         "fragranceNotes" = $8,
         "wearMoments" = $9,
         intensity = $10,
-        type = $11,
+        sex = $11,
         composition = $12,
         "promoTagEnabled" = $13,
         "promoTagLabel" = $14,
@@ -1128,9 +1139,10 @@ async function upsertProduct(product) {
         "promoTagTextColor" = $16,
         "inStock" = true,
         featured = $17,
+        "newArrival" = $18,
         published = true,
         "updatedAt" = NOW()
-       WHERE id = $18`,
+       WHERE id = $19`,
       [
         product.description,
         product.price,
@@ -1142,13 +1154,14 @@ async function upsertProduct(product) {
         fragranceNotes,
         wearMoments,
         intensity,
-        type,
+        sex,
         composition,
         promoTagEnabled,
         promoTagLabel,
         promoTagBgColor,
         promoTagTextColor,
         product.featured,
+        Boolean(product.newArrival),
         id,
       ],
     )
@@ -1159,15 +1172,15 @@ async function upsertProduct(product) {
     `INSERT INTO products (
       name, brand, description, price, "compareAtPrice", category,
       "imageUrl", images, sizes, "relatedProductIds",
-      "fragranceNotes", "wearMoments", intensity, type, composition,
+      "fragranceNotes", "wearMoments", intensity, sex, composition,
       "promoTagEnabled", "promoTagLabel", "promoTagBgColor", "promoTagTextColor",
-      "inStock", featured, published,
+      "inStock", featured, "newArrival", published,
       "createdAt", "updatedAt"
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, '[]',
       $10, $11, $12, $13, $14,
       $15, $16, $17, $18,
-      true, $19, true, NOW(), NOW()
+      true, $19, $20, true, NOW(), NOW()
     )
     RETURNING id`,
     [
@@ -1183,13 +1196,14 @@ async function upsertProduct(product) {
       fragranceNotes,
       wearMoments,
       intensity,
-      type,
+      sex,
       composition,
       promoTagEnabled,
       promoTagLabel,
       promoTagBgColor,
       promoTagTextColor,
       product.featured,
+      Boolean(product.newArrival),
     ],
   )
   return inserted.rows[0].id
@@ -1238,6 +1252,7 @@ async function seed() {
       ...product,
       ...(OLFACTIVE[product.key] ?? {}),
       featured: FEATURED_KEYS.has(product.key),
+      newArrival: NEW_ARRIVAL_KEYS.has(product.key),
       image: product.image,
     })
     idsByKey.set(product.key, id)
@@ -1281,6 +1296,7 @@ async function seed() {
   }
 
   await relinkMissingProductImages()
+  await removeStaleCategories()
 
   console.log(`Seeded ${PRODUCTS.length} perfumes with ready photos.`)
   const byCategory = await pool.query(

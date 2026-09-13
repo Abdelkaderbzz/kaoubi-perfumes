@@ -14,6 +14,7 @@ type Product = {
   compareAtPrice?: string | null
   imageUrl: string | null
   category: string
+  sex?: string | null
   inStock: boolean
   sizes?: string | null
   promoTagEnabled?: boolean | null

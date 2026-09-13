@@ -25,6 +25,7 @@ import {
   type PerfumeComposition,
 } from '@/lib/perfume-composition'
 import { serializeWearMoments } from '@/lib/product-wear'
+import { parseProductSort, productSortOrder, type ProductSort } from '@/lib/product-sort'
 import { categoryFilterSlugs } from '@/lib/store-categories'
 import { and, asc, desc, eq, ilike, inArray, isNotNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
@@ -53,10 +54,12 @@ type ProductListOptions = {
   search?: string
   category?: string
   wear?: string[]
+  notes?: string[]
   intensity?: string
-  type?: string
+  sex?: string
   inStock?: 'all' | 'in' | 'out'
   publishedOnly?: boolean
+  sort?: ProductSort
 }
 
 function buildProductConditions(options: ProductListOptions) {
@@ -90,14 +93,19 @@ function buildProductConditions(options: ProductListOptions) {
     conditions.push(or(...wear.map((tag) => ilike(products.wearMoments, `%"${tag}"%`)))!)
   }
 
+  const notes = options.notes?.filter(Boolean) ?? []
+  if (notes.length > 0) {
+    conditions.push(or(...notes.map((tag) => ilike(products.fragranceNotes, `%"${tag}"%`)))!)
+  }
+
   const intensity = options.intensity?.trim()
   if (intensity) {
     conditions.push(eq(products.intensity, intensity))
   }
 
-  const type = options.type?.trim()
-  if (type) {
-    conditions.push(eq(products.type, type))
+  const sex = options.sex?.trim()
+  if (sex) {
+    conditions.push(eq(products.sex, sex))
   }
 
   if (options.inStock === 'in') {
@@ -115,6 +123,7 @@ async function queryProductsPaginated(options: ProductListOptions): Promise<Pagi
   const offset = paginationOffset(page, pageSize)
   const conditions = buildProductConditions(options)
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+  const orderBy = productSortOrder(parseProductSort(options.sort))
 
   const [countRow, items] = await Promise.all([
     db
@@ -126,7 +135,7 @@ async function queryProductsPaginated(options: ProductListOptions): Promise<Pagi
       .select()
       .from(products)
       .where(whereClause)
-      .orderBy(desc(products.createdAt))
+      .orderBy(...orderBy)
       .limit(pageSize)
       .offset(offset),
   ])
@@ -151,16 +160,20 @@ export async function getStoreProductsPaginated(options: {
   search?: string
   category?: string
   wear?: string[]
+  notes?: string[]
   intensity?: string
-  type?: string
+  sex?: string
+  sort?: ProductSort
 } = {}) {
   const page = normalizePage(options.page)
   const pageSize = normalizePageSize(options.pageSize, STORE_PAGE_SIZE)
   const search = options.search?.trim() ?? ''
   const category = options.category?.trim() || 'all'
   const wear = [...(options.wear ?? [])].filter(Boolean).sort()
+  const notes = [...(options.notes ?? [])].filter(Boolean).sort()
   const intensity = options.intensity?.trim() ?? ''
-  const type = options.type?.trim() ?? ''
+  const sex = options.sex?.trim() ?? ''
+  const sort = parseProductSort(options.sort)
 
   return unstable_cache(
     async () =>
@@ -170,8 +183,10 @@ export async function getStoreProductsPaginated(options: {
         search,
         category,
         wear,
+        notes,
         intensity,
-        type,
+        sex,
+        sort,
         publishedOnly: true,
       }),
     [
@@ -181,8 +196,10 @@ export async function getStoreProductsPaginated(options: {
       search,
       category,
       wear.join(','),
+      notes.join(','),
       intensity,
-      type,
+      sex,
+      sort,
     ],
     { revalidate: 60, tags: ['products'] },
   )()
@@ -209,7 +226,7 @@ const FEATURED_HOME_ORDER = sql`CASE ${products.name}
   WHEN 'Lavendarine' THEN 1
   WHEN 'Body Mist Lavendarine' THEN 2
   WHEN 'Mkhamaria Lavendarine' THEN 3
-  WHEN 'مخصرية – Face Toner Cream' THEN 4
+  WHEN 'Mkhamaria' THEN 4
   ELSE 99
 END`
 
@@ -234,14 +251,14 @@ const getNewProductsCached = unstable_cache(
     db
       .select()
       .from(products)
-      .where(eq(products.published, true))
-      .orderBy(desc(products.createdAt))
+      .where(and(eq(products.newArrival, true), eq(products.published, true)))
+      .orderBy(desc(products.updatedAt), desc(products.createdAt))
       .limit(8),
-  ['new-products', 'v2'],
+  ['new-products', 'v3'],
   { revalidate: 120, tags: ['products'] },
 )
 
-/** Most recently added products, for the "Nouveautes" storefront section. */
+/** Admin-curated products for the "Nouveautes" storefront section. */
 export async function getNewProducts() {
   return getNewProductsCached()
 }
@@ -440,9 +457,10 @@ export async function addProduct(data: {
   composition?: PerfumeComposition
   wearMoments?: string[]
   intensity?: string | null
-  type?: string | null
+  sex?: string | null
   inStock: boolean
   featured: boolean
+  newArrival: boolean
   published: boolean
   promoTagEnabled?: boolean
   promoTagLabel?: string
@@ -474,9 +492,10 @@ export async function addProduct(data: {
     ),
     wearMoments: serializeWearMoments(data.wearMoments ?? []),
     intensity: data.intensity?.trim() || null,
-    type: data.type?.trim() || null,
+    sex: data.sex?.trim() || null,
     inStock: data.inStock,
     featured: data.featured,
+    newArrival: data.newArrival,
     published: data.published,
     promoTagEnabled: data.promoTagEnabled ?? false,
     promoTagLabel: data.promoTagLabel?.trim() || 'Promotion',
@@ -506,9 +525,10 @@ export async function updateProduct(
     composition?: PerfumeComposition
     wearMoments?: string[]
     intensity?: string | null
-    type?: string | null
+    sex?: string | null
     inStock?: boolean
     featured?: boolean
+    newArrival?: boolean
     published?: boolean
     promoTagEnabled?: boolean
     promoTagLabel?: string
@@ -525,6 +545,7 @@ export async function updateProduct(
   if (data.category !== undefined) updateData.category = data.category
   if (data.inStock !== undefined) updateData.inStock = data.inStock
   if (data.featured !== undefined) updateData.featured = data.featured
+  if (data.newArrival !== undefined) updateData.newArrival = data.newArrival
   if (data.published !== undefined) updateData.published = data.published
   if (data.promoTagEnabled !== undefined) updateData.promoTagEnabled = data.promoTagEnabled
   if (data.promoTagLabel !== undefined) {
@@ -548,8 +569,8 @@ export async function updateProduct(
   if ('intensity' in data) {
     updateData.intensity = data.intensity?.trim() || null
   }
-  if ('type' in data) {
-    updateData.type = data.type?.trim() || null
+  if ('sex' in data) {
+    updateData.sex = data.sex?.trim() || null
   }
   if (data.images) {
     const imageData = normalizeProductImages(data.images)

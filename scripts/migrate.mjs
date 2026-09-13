@@ -155,9 +155,10 @@ const CREATE_TABLES = [
     "composition" text NOT NULL DEFAULT '{"tete":[],"coeur":[],"fond":[]}',
     "wearMoments" text NOT NULL DEFAULT '[]',
     "intensity" text,
-    "type" text,
+    "sex" text,
     "inStock" boolean NOT NULL DEFAULT true,
     "featured" boolean NOT NULL DEFAULT false,
+    "newArrival" boolean NOT NULL DEFAULT false,
     "published" boolean NOT NULL DEFAULT true,
     "promoTagEnabled" boolean NOT NULL DEFAULT false,
     "promoTagLabel" text NOT NULL DEFAULT 'Promotion',
@@ -213,7 +214,19 @@ const INCREMENTAL_ALTERS = [
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "composition" text NOT NULL DEFAULT '{"tete":[],"coeur":[],"fond":[]}'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "wearMoments" text NOT NULL DEFAULT '[]'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "intensity" text`,
-  `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "type" text`,
+  `ALTER TABLE "products" DROP COLUMN IF EXISTS "type"`,
+  `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "sex" text`,
+  // Categories now describe product format (Parfum, Eau de Ligne, Mkhamaria, ...)
+  // instead of audience; audience moved to the new "sex" column above.
+  `INSERT INTO "categories" ("name", "slug") VALUES
+    ('Parfum', 'parfum'),
+    ('Eau de Parfum', 'eau-de-parfum'),
+    ('Eau de Ligne', 'eau-de-ligne'),
+    ('Body Mist', 'body-mist'),
+    ('Body Shimmer', 'body-shimmer'),
+    ('Mkhamaria', 'mkhamaria')
+   ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+  `DELETE FROM "categories" WHERE "slug" IN ('femme', 'homme', 'mixte')`,
   `UPDATE "categories" SET "name" = 'Mixte' WHERE "slug" = 'unisexe' AND "name" = 'Unisexe'`,
   `DELETE FROM "categories" WHERE "slug" IN ('sif', 'chta')`,
   `INSERT INTO "categories" ("name", "slug") VALUES
@@ -223,6 +236,7 @@ const INCREMENTAL_ALTERS = [
   `UPDATE "products" SET "category" = 'mixte', "updatedAt" = NOW()
    WHERE "category" IN ('unisexe', 'unisex')`,
   `DELETE FROM "categories" WHERE "slug" IN ('unisexe', 'unisex')`,
+  `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "newArrival" boolean NOT NULL DEFAULT false`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagEnabled" boolean NOT NULL DEFAULT false`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagLabel" text NOT NULL DEFAULT 'Promotion'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "promoTagBgColor" text NOT NULL DEFAULT '#c81e1e'`,
@@ -290,36 +304,38 @@ const INCREMENTAL_ALTERS = [
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
    VALUES
     ('moknine-monastir', 'KAOUBI PERFUMES Moknine', 'Moknine', 'Monastir',
-     'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
+     '',
      NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
    ON CONFLICT ("slug") DO NOTHING`,
   `UPDATE "boutiques" SET
        "name" = 'KAOUBI PERFUMES Moknine',
-       "description" = 'Notre adresse a Moknine. La meme selection de parfums inspires et de parfums de choix, longue tenue.',
-       "address" = 'Moknine, Monastir',
-       "published" = true,
-       "pickupEnabled" = true,
+       "description" = '',
+       "imageUrl" = NULL,
+       "imageAlt" = '',
+       "address" = NULL,
+       "phone" = NULL,
+       "directionsUrl" = '',
+       "published" = false,
+       "pickupEnabled" = false,
        "updatedAt" = NOW()
    WHERE "slug" = 'moknine-monastir'`,
-  `INSERT INTO "boutiques"
-    ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
-   VALUES
-    ('ksar-helal-monastir', 'KAOUBI PERFUMES Ksar Helal', 'Ksar Helal', 'Monastir',
-     'Notre boutique a Ksar Helal. Toute la collection femme et homme, avec conseil personnalise sur place.',
-     NULL, 'Boutique KAOUBI PERFUMES a Ksar Helal',
-     'Ksar Helal, Monastir', NULL, NULL, NULL, 'Google Maps',
-     'https://www.google.com/maps/dir/?api=1&destination=Ksar+Helal%2C+Monastir%2C+Tunisie',
-     true, true, 2)
-   ON CONFLICT ("slug") DO NOTHING`,
+  `UPDATE "banners"
+      SET "message" = replace("message", ' et Moknine', ''),
+          "updatedAt" = NOW()
+    WHERE "message" ILIKE '%Moknine%'`,
+  `DELETE FROM "boutiques" WHERE "slug" = 'ksar-helal-monastir'`,
 ]
 
 const BASELINE_DATA = [
   `INSERT INTO "settings" ("id", "deliveryFee") VALUES (1, '7.000')
    ON CONFLICT ("id") DO NOTHING`,
   `INSERT INTO "categories" ("name", "slug") VALUES
-    ('Femme', 'femme'),
-    ('Homme', 'homme'),
-    ('Mixte', 'mixte'),
+    ('Parfum', 'parfum'),
+    ('Eau de Parfum', 'eau-de-parfum'),
+    ('Eau de Ligne', 'eau-de-ligne'),
+    ('Body Mist', 'body-mist'),
+    ('Body Shimmer', 'body-shimmer'),
+    ('Mkhamaria', 'mkhamaria'),
     ('Enfant', 'enfant'),
     ('Soins', 'soins'),
     ('Bakhoor', 'bakhoor')
@@ -333,13 +349,8 @@ const BASELINE_DATA = [
      'Rue de Habib Bourguiba, Douz Nord, Douz, Kébili, 4260', '94 090 440', NULL, NULL, 'Google Maps',
      'https://maps.app.goo.gl/PGd9YKWWMaWsfbk46', true, true, 0),
     ('moknine-monastir', 'KAOUBI PERFUMES Moknine', 'Moknine', 'Monastir',
-     'Ouverture en cours. La meme selection de parfums, soins MRAZIG et bakhoor.',
-     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1),
-    ('ksar-helal-monastir', 'KAOUBI PERFUMES Ksar Helal', 'Ksar Helal', 'Monastir',
-     'Notre boutique a Ksar Helal. Toute la collection femme et homme, avec conseil personnalise sur place.',
-     NULL, 'Boutique KAOUBI PERFUMES a Ksar Helal',
-     'Ksar Helal, Monastir', NULL, NULL, NULL, 'Google Maps',
-     'https://www.google.com/maps/dir/?api=1&destination=Ksar+Helal%2C+Monastir%2C+Tunisie', true, true, 2)
+     '',
+     NULL, '', NULL, NULL, NULL, NULL, 'Google Maps', '', false, false, 1)
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "carousel_videos" ("url", "sortOrder") VALUES
     ('https://www.instagram.com/reel/DZ3XNGpsShF/', 0),
@@ -359,7 +370,7 @@ const BASELINE_DATA = [
     )
     SELECT
       'Livraison',
-      'Livraison partout en Tunisie · Retrait en boutique a Douz, Moknine et Ksar Helal',
+      'Livraison partout en Tunisie · Retrait en boutique a Douz',
       'offer',
       '#d4af37',
       '#0b0b0b',

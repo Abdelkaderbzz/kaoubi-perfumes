@@ -140,7 +140,8 @@ export function AdminOrderCreateModal({
     setItemError(null)
     const product = products.find((item) => String(item.id) === nextId)
     const sizes = product ? getProductSizeOptions(product) : []
-    setSize(sizes[0]?.value ?? '')
+    const preferred = sizes.find((option) => /^50\s*ml$/i.test(option.value))
+    setSize(preferred?.value ?? sizes[0]?.value ?? '')
   }
 
   function addLine() {

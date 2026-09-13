@@ -4,8 +4,8 @@ import { useCart } from '@/components/cart-context'
 import { useDictionary } from '@/components/locale-provider'
 import { ProductPrice } from '@/components/product-price'
 import {
-  DEFAULT_SIZE,
   getVariantPrice,
+  resolveDefaultSize,
   type ProductSizeVariant,
 } from '@/lib/product-sizes'
 import { resolveProductImageUrl } from '@/lib/product-images'
@@ -31,7 +31,7 @@ export function AddToCartButton({
   const { addItem } = useCart()
   const dictionary = useDictionary()
   const router = useRouter()
-  const [selectedSize, setSelectedSize] = useState(variants[0]?.size ?? DEFAULT_SIZE)
+  const [selectedSize, setSelectedSize] = useState(resolveDefaultSize(variants))
   const [added, setAdded] = useState(false)
 
   const selectedPrice = useMemo(

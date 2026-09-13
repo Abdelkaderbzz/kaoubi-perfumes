@@ -198,10 +198,14 @@ async function seedDemoProducts(count) {
         category,
         image,
         images,
-        JSON.stringify(['50ml', '100ml'].map((size) => ({
-          size,
-          price: randomPrice(),
-        }))),
+        JSON.stringify(
+          [
+            { size: '10ml', price: randomPrice() },
+            { size: '30ml', price: randomPrice() },
+            { size: '50ml', price: randomPrice() },
+            { size: '100ml', price: randomPrice() },
+          ],
+        ),
         inStock,
         featured,
         published,

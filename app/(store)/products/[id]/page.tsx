@@ -14,6 +14,7 @@ import { parseProductImages } from '@/lib/product-images'
 import { parseProductSizeVariants } from '@/lib/product-sizes'
 import { breadcrumbJsonLd, catalogPath, languageAlternates, productJsonLd } from '@/lib/seo'
 import { getCategoryLabel } from '@/lib/store-categories'
+import { getProductSexLabel } from '@/lib/product-sex'
 import { AddToCartButton } from './add-to-cart-button'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -105,6 +106,8 @@ export default async function ProductDetailPage({
   if (!product) notFound()
 
   const categoryLabel = getCategoryLabel(product.category, categories, locale)
+  const sexLabels = dictionary.sex as Record<string, string>
+  const sexLabel = product.sex ? (sexLabels[product.sex] ?? getProductSexLabel(product.sex)) : null
 
   const variants = parseProductSizeVariants(product.sizes, product.price)
   const images = parseProductImages(product)
@@ -177,6 +180,7 @@ export default async function ProductDetailPage({
             </h1>
             <p className="mt-1.5 text-xs font-medium tracking-widest text-foreground/65">
               {categoryLabel.toUpperCase()}
+              {sexLabel ? ` · ${sexLabel.toUpperCase()}` : ''}
             </p>
           </div>
 
