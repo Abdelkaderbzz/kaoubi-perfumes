@@ -221,7 +221,9 @@ const INCREMENTAL_ALTERS = [
   `INSERT INTO "categories" ("name", "slug") VALUES
     ('Parfum', 'parfum'),
     ('Eau de Parfum', 'eau-de-parfum'),
+    ('Parfum solide', 'parfum-solide'),
     ('Eau de Ligne', 'eau-de-ligne'),
+    ('Parfum d''ambiance', 'parfum-d-ambiance'),
     ('Body Mist', 'body-mist'),
     ('Body Shimmer', 'body-shimmer'),
     ('Mkhamaria', 'mkhamaria')
@@ -324,6 +326,16 @@ const INCREMENTAL_ALTERS = [
           "updatedAt" = NOW()
     WHERE "message" ILIKE '%Moknine%'`,
   `DELETE FROM "boutiques" WHERE "slug" = 'ksar-helal-monastir'`,
+  `INSERT INTO "categories" ("name", "slug") VALUES
+    ('Parfum solide', 'parfum-solide'),
+    ('Parfum d''ambiance', 'parfum-d-ambiance')
+   ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+  `INSERT INTO "categories" ("name", "slug") VALUES
+    ('Parfum Originaux', 'parfum-originaux')
+   ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+  `UPDATE "products" SET "category" = 'parfum-d-ambiance', "updatedAt" = NOW()
+   WHERE "category" = 'bakhoor'`,
+  `DELETE FROM "categories" WHERE "slug" IN ('bakhoor', 'soins', 'body-shimmer')`,
 ]
 
 const BASELINE_DATA = [
@@ -332,13 +344,13 @@ const BASELINE_DATA = [
   `INSERT INTO "categories" ("name", "slug") VALUES
     ('Parfum', 'parfum'),
     ('Eau de Parfum', 'eau-de-parfum'),
+    ('Parfum solide', 'parfum-solide'),
     ('Eau de Ligne', 'eau-de-ligne'),
+    ('Parfum d''ambiance', 'parfum-d-ambiance'),
+    ('Parfum Originaux', 'parfum-originaux'),
     ('Body Mist', 'body-mist'),
-    ('Body Shimmer', 'body-shimmer'),
     ('Mkhamaria', 'mkhamaria'),
-    ('Enfant', 'enfant'),
-    ('Soins', 'soins'),
-    ('Bakhoor', 'bakhoor')
+    ('Enfant', 'enfant')
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "boutiques"
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")

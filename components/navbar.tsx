@@ -57,21 +57,21 @@ function DesktopCategoryNav({
   boutiqueLabel,
   collectionsLabel,
   collectionsAria,
-  allBoutiqueLabel,
   collectionsOpen,
   collectionsId,
   onToggleCollections,
   onNavigate,
+  onShowCollectionsChange,
 }: {
   categories: StoreCategory[]
   boutiqueLabel: string
   collectionsLabel: string
   collectionsAria: string
-  allBoutiqueLabel: string
   collectionsOpen: boolean
   collectionsId: string
   onToggleCollections: () => void
   onNavigate: () => void
+  onShowCollectionsChange: (show: boolean) => void
 }) {
   const rowRef = useRef<HTMLDivElement>(null)
   const sizerRef = useRef<HTMLDivElement>(null)
@@ -121,6 +121,10 @@ function DesktopCategoryNav({
   const visibleCategories = categories.slice(0, visibleCount)
   const overflowCategories = categories.slice(visibleCount)
   const showCollections = overflowCategories.length > 0
+
+  useEffect(() => {
+    onShowCollectionsChange(showCollections)
+  }, [showCollections, onShowCollectionsChange])
 
   return (
     <div ref={rowRef} className="relative min-w-0 flex-1">
@@ -178,40 +182,60 @@ function DesktopCategoryNav({
           </button>
         ) : null}
       </div>
+    </div>
+  )
+}
 
-      {collectionsOpen && showCollections ? (
-        <div
-          id={collectionsId}
-          role="region"
-          aria-label={collectionsLabel}
-          className="absolute start-0 top-[calc(100%+0.55rem)] z-50 w-[min(22rem,70vw)] rounded-xl border border-border/80 bg-card/98 p-2 shadow-[0_18px_40px_-24px_rgba(58,34,40,0.45)]"
-        >
-          {categories.map((category) => (
-            <Link
-              key={category.slug}
-              href={`/products?category=${category.slug}`}
-              prefetch
-              onClick={onNavigate}
-              className="block rounded-md px-3 py-2.5 transition-colors hover:bg-secondary/50"
-            >
-              <p className="font-serif text-[1.02rem] text-foreground">{category.name}</p>
-              {category.tagline ? (
-                <p className="mt-0.5 line-clamp-2 text-xs font-light text-muted-foreground">
-                  {category.tagline}
-                </p>
-              ) : null}
-            </Link>
-          ))}
+function CollectionsMegaMenu({
+  categories,
+  collectionsId,
+  collectionsLabel,
+  allBoutiqueLabel,
+  onNavigate,
+}: {
+  categories: StoreCategory[]
+  collectionsId: string
+  collectionsLabel: string
+  allBoutiqueLabel: string
+  onNavigate: () => void
+}) {
+  return (
+    <div
+      id={collectionsId}
+      role="region"
+      aria-label={collectionsLabel}
+      className="absolute inset-x-0 top-full z-50 border-t border-border/80 bg-card/98 shadow-[0_18px_40px_-24px_rgba(58,34,40,0.45)]"
+    >
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-1 px-4 py-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {categories.map((category) => (
+          <Link
+            key={category.slug}
+            href={`/products?category=${category.slug}`}
+            prefetch
+            onClick={onNavigate}
+            className="block rounded-md px-3 py-2.5 transition-colors hover:bg-secondary/50"
+          >
+            <p className="font-serif text-[1.02rem] text-foreground">{category.name}</p>
+            {category.tagline ? (
+              <p className="mt-0.5 line-clamp-2 text-xs font-light text-muted-foreground">
+                {category.tagline}
+              </p>
+            ) : null}
+          </Link>
+        ))}
+      </div>
+      <div className="border-t border-border/60">
+        <div className="mx-auto max-w-7xl px-4">
           <Link
             href="/products"
             prefetch
             onClick={onNavigate}
-            className="mt-1 block border-t border-border/60 px-3 py-2.5 text-[12px] font-medium tracking-[0.14em] text-foreground/70 hover:text-primary"
+            className="block py-3 text-[12px] font-medium tracking-[0.14em] text-foreground/70 hover:text-primary"
           >
             {allBoutiqueLabel}
           </Link>
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
@@ -221,6 +245,7 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
   const dictionary = useDictionary()
   const [menuOpen, setMenuOpen] = useState(false)
   const [collectionsOpen, setCollectionsOpen] = useState(false)
+  const [showCollections, setShowCollections] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
   const collectionsId = useId()
 
@@ -263,58 +288,70 @@ export function Navbar({ storeCategories }: { storeCategories: StoreCategory[] }
       ref={headerRef}
       className="sticky top-0 z-50 border-b border-border/80 bg-card/95 backdrop-blur-md supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 sm:px-4">
-        <Link href="/" className="flex shrink-0 items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
-          <Logo size="sm" priority />
-        </Link>
-
-        <nav className="hidden min-w-0 flex-1 items-center px-4 lg:flex">
-          <DesktopCategoryNav
-            categories={storeCategories}
-            boutiqueLabel={dictionary.nav.boutique}
-            collectionsLabel={dictionary.nav.collections}
-            collectionsAria={dictionary.nav.collectionsAria}
-            allBoutiqueLabel={dictionary.home.allBoutique}
-            collectionsOpen={collectionsOpen}
-            collectionsId={collectionsId}
-            onToggleCollections={() => setCollectionsOpen((open) => !open)}
-            onNavigate={closeMenus}
-          />
-        </nav>
-
-        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
-          <div className="hidden items-center gap-0.5 lg:flex">
-            <SocialLinks />
-          </div>
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Link
-            href="/checkout"
-            prefetch
-            aria-label={dictionary.nav.cartWithCount(count)}
-            className="relative flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-medium tracking-widest text-foreground transition-colors hover:text-primary"
-          >
-            <Handbag size={20} weight="regular" aria-hidden />
-            <span className="sr-only">{dictionary.nav.cart}</span>
-            {count > 0 && (
-              <span className="absolute end-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
-                {count}
-              </span>
-            )}
+      <div className="relative">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 sm:px-4">
+          <Link href="/" className="flex shrink-0 items-center gap-3" prefetch aria-label={dictionary.nav.homeAria}>
+            <Logo size="sm" priority />
           </Link>
 
-          <button
-            type="button"
-            className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-expanded={menuOpen}
-            aria-label={menuOpen ? dictionary.nav.closeMenu : dictionary.nav.openMenu}
-          >
-            <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'translate-y-2.5 rotate-45' : ''}`} />
-            <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? '-translate-y-2.5 -rotate-45' : ''}`} />
-          </button>
+          <nav className="hidden min-w-0 flex-1 items-center px-4 lg:flex">
+            <DesktopCategoryNav
+              categories={storeCategories}
+              boutiqueLabel={dictionary.nav.boutique}
+              collectionsLabel={dictionary.nav.collections}
+              collectionsAria={dictionary.nav.collectionsAria}
+              collectionsOpen={collectionsOpen}
+              collectionsId={collectionsId}
+              onToggleCollections={() => setCollectionsOpen((open) => !open)}
+              onNavigate={closeMenus}
+              onShowCollectionsChange={setShowCollections}
+            />
+          </nav>
+
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+            <div className="hidden items-center gap-0.5 lg:flex">
+              <SocialLinks />
+            </div>
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <Link
+              href="/checkout"
+              prefetch
+              aria-label={dictionary.nav.cartWithCount(count)}
+              className="relative flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-medium tracking-widest text-foreground transition-colors hover:text-primary"
+            >
+              <Handbag size={20} weight="regular" aria-hidden />
+              <span className="sr-only">{dictionary.nav.cart}</span>
+              {count > 0 && (
+                <span className="absolute end-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
+                  {count}
+                </span>
+              )}
+            </Link>
+
+            <button
+              type="button"
+              className="flex min-h-11 min-w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? dictionary.nav.closeMenu : dictionary.nav.openMenu}
+            >
+              <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'translate-y-2.5 rotate-45' : ''}`} />
+              <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? 'opacity-0' : ''}`} />
+              <span className={`block h-px w-6 bg-foreground transition-all ${menuOpen ? '-translate-y-2.5 -rotate-45' : ''}`} />
+            </button>
+          </div>
         </div>
+
+        {collectionsOpen && showCollections ? (
+          <CollectionsMegaMenu
+            categories={storeCategories}
+            collectionsId={collectionsId}
+            collectionsLabel={dictionary.nav.collections}
+            allBoutiqueLabel={dictionary.home.allBoutique}
+            onNavigate={closeMenus}
+          />
+        ) : null}
       </div>
 
       {menuOpen && (

@@ -21,22 +21,34 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     image: '/products/baccarat-rouge-540.webp',
   },
   {
+    slug: 'parfum-solide',
+    name: 'Parfum solide',
+    tagline: 'Parfum concentre en format solide',
+    image: '/products/mkhamaria-lavendarine.jpg',
+  },
+  {
     slug: 'eau-de-ligne',
     name: 'Eau de Ligne',
     tagline: 'Brume de linge et de maison',
     image: '/products/oudy-eau-de-ligne.jpg',
   },
   {
+    slug: 'parfum-d-ambiance',
+    name: "Parfum d'ambiance",
+    tagline: 'Fragrances pour la maison et les espaces',
+    image: '/products/oudy-eau-de-ligne.jpg',
+  },
+  {
+    slug: 'parfum-originaux',
+    name: 'Parfum Originaux',
+    tagline: 'Parfums de marque, authentiques et originaux',
+    image: '/products/black-opium.webp',
+  },
+  {
     slug: 'body-mist',
     name: 'Body Mist',
     tagline: 'Brume corporelle legere',
     image: '/products/lavendarine-body-mist.jpg',
-  },
-  {
-    slug: 'body-shimmer',
-    name: 'Body Shimmer',
-    tagline: 'Brume corporelle scintillante',
-    image: '/products/body-shimmer.webp',
   },
   {
     slug: 'mkhamaria',
@@ -49,18 +61,6 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     name: 'Enfant',
     tagline: 'Fragrances douces pour enfants',
     image: '/hero/boutique-cosmetic.webp',
-  },
-  {
-    slug: 'soins',
-    name: 'Soins',
-    tagline: 'Cremes, gels et cosmetiques MRAZIG',
-    image: '/products/gel-nettoyant-v2.webp',
-  },
-  {
-    slug: 'bakhoor',
-    name: 'Bakhoor',
-    tagline: 'Encens Mrazig traditionnel',
-    image: '/products/bakhoor-maryam.webp',
   },
 ]
 
@@ -121,8 +121,7 @@ export type DbCategory = {
   bannerUrl?: string | null
 }
 
-/** Ready-made translation for a known slug
- *  (femme/homme/mixte/enfant/soins/bakhoor), or undefined for a custom
+/** Ready-made translation for a known slug, or undefined for a custom
  *  category an admin added — those just render whatever the admin typed. */
 function localizedCategoryText(slug: string, locale: Locale) {
   const table = getDictionary(locale).categories as

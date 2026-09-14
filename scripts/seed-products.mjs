@@ -22,13 +22,13 @@ const pool = new Pool({ connectionString: DATABASE_URL })
 const CATEGORIES = [
   { name: 'Parfum', slug: 'parfum' },
   { name: 'Eau de Parfum', slug: 'eau-de-parfum' },
+  { name: 'Parfum solide', slug: 'parfum-solide' },
   { name: 'Eau de Ligne', slug: 'eau-de-ligne' },
+  { name: "Parfum d'ambiance", slug: 'parfum-d-ambiance' },
+  { name: 'Parfum Originaux', slug: 'parfum-originaux' },
   { name: 'Body Mist', slug: 'body-mist' },
-  { name: 'Body Shimmer', slug: 'body-shimmer' },
   { name: 'Mkhamaria', slug: 'mkhamaria' },
   { name: 'Enfant', slug: 'enfant' },
-  { name: 'Soins', slug: 'soins' },
-  { name: 'Bakhoor', slug: 'bakhoor' },
 ]
 
 const STALE_CATEGORY_SLUGS = ['femme', 'homme', 'mixte']
@@ -101,7 +101,7 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   description: string
  *   price: string
  *   compareAtPrice?: string | null
- *   category: 'parfum' | 'eau-de-parfum' | 'eau-de-ligne' | 'body-mist' | 'body-shimmer' | 'mkhamaria' | 'enfant' | 'soins' | 'bakhoor'
+ *   category: 'parfum' | 'eau-de-parfum' | 'parfum-solide' | 'eau-de-ligne' | 'parfum-d-ambiance' | 'parfum-originaux' | 'body-mist' | 'mkhamaria' | 'enfant'
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
@@ -568,7 +568,7 @@ const PRODUCTS = [
     featured: false,
     related: relatedOf(HOMME_KEYS, 'azure-line'),
   },
-  // —— Soins & bakhoor MRAZIG ——
+  // —— MRAZIG ——
   {
     key: 'gel-nettoyant-mrazig',
     name: 'Gel nettoyant sans huile',
@@ -576,27 +576,11 @@ const PRODUCTS = [
     description:
       'Gel nettoyante tous types de peaux. Nettoie, hydrate et apaise. Formule oil-free au kaolin, extrait d\'aloe vera et vitamine E. 150 ml.',
     price: '25.000',
-    category: 'soins',
+    category: 'mkhamaria',
     image: IMG.gelNettoyant,
     sizes: [{ size: '150 ml', price: '25.000' }],
     featured: true,
-    related: ['body-shimmer'],
-  },
-  {
-    key: 'body-shimmer',
-    name: 'Body Shimmer',
-    brand: 'KAOUBI PERFUMES',
-    description:
-      'Brume corporelle pailletee. Huile scintillante doree, label holographique. Eclat sur la peau, sillage delicieux.',
-    price: '35.000',
-    category: 'body-shimmer',
-    image: IMG.bodyShimmer,
-    sizes: [
-      { size: '100ml', price: '35.000' },
-      { size: '150ml', price: '48.000' },
-    ],
-    featured: true,
-    related: ['gel-nettoyant-mrazig', 'vanillez-vous'],
+    related: ['vanillez-vous'],
   },
   {
     key: 'bakhoor-maryam',
@@ -605,7 +589,7 @@ const PRODUCTS = [
     description:
       'Bakhoor Maryam — Selection Rennée. Encens artisanal des Mrazig. Notes chaudes et orientales pour parfumer la maison.',
     price: '32.000',
-    category: 'bakhoor',
+    category: 'parfum-d-ambiance',
     image: IMG.bakhoorMaryam,
     sizes: [
       { size: '50g', price: '32.000' },
@@ -1067,16 +1051,6 @@ const OLFACTIVE = {
       tete: [n('Fleur de cerisier')],
       coeur: [NOTE.jasmin, n('Pivoine')],
       fond: [n('Musc blanc')],
-    },
-  },
-  'body-shimmer': {
-    fragranceNotes: ['gourmand', 'vanilla', 'oriental'],
-    wearMoments: ['jour', 'nuit'],
-    intensity: 'moyenne',
-    composition: {
-      tete: [NOTE.bergamote],
-      coeur: [NOTE.vanille, n('Ambre')],
-      fond: [NOTE.ambre, NOTE.cedre],
     },
   },
 }
