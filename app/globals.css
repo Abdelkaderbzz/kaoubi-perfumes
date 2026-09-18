@@ -537,6 +537,97 @@ html.storefront.dark .hero-discover:hover {
   background: #c4a35a;
 }
 
+@media (min-width: 640px) {
+  .hero-sex-link:not(:last-child) {
+    position: relative;
+    padding-inline-end: 0.75rem;
+  }
+
+  .hero-sex-link:not(:last-child)::after {
+    content: '\00b7';
+    position: absolute;
+    inset-inline-end: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c4a35a;
+  }
+}
+
+@keyframes hero-sex-link-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-sex-link-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, #c4a35a 0%, transparent);
+    border-color: rgb(196 163 90 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, #c4a35a 22%, transparent);
+    border-color: #c4a35a;
+  }
+}
+
+.hero-sex-link {
+  opacity: 0;
+  animation: hero-sex-link-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-sex-link:nth-child(1) {
+  animation-delay: 0.85s;
+}
+
+.hero-sex-link:nth-child(2) {
+  animation-delay: 0.95s;
+}
+
+.hero-sex-link:nth-child(3) {
+  animation-delay: 1.05s;
+}
+
+.hero-sex-link:nth-child(4) {
+  animation-delay: 1.15s;
+}
+
+@media (max-width: 639px) {
+  .hero-sex-link {
+    animation-name: hero-sex-link-in, hero-sex-link-pulse;
+    animation-duration: 0.6s, 2.6s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease-in-out;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: both, none;
+  }
+
+  .hero-sex-link:nth-child(1) {
+    animation-delay: 0.85s, 2.2s;
+  }
+
+  .hero-sex-link:nth-child(2) {
+    animation-delay: 0.95s, 2.7s;
+  }
+
+  .hero-sex-link:nth-child(3) {
+    animation-delay: 1.05s, 3.2s;
+  }
+
+  .hero-sex-link:nth-child(4) {
+    animation-delay: 1.15s, 3.7s;
+  }
+
+  .hero-sex-link:hover,
+  .hero-sex-link:focus-visible {
+    animation-play-state: paused;
+  }
+}
+
 .hero-visual {
   animation: hero-visual-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
 }
@@ -736,6 +827,7 @@ html.storefront.dark .hero-tile {
   .hero-cta,
   .hero-mark,
   .hero-visual,
+  .hero-sex-link,
   .boutique-cta,
   .boutique-cta::after {
     animation: none;
@@ -743,6 +835,7 @@ html.storefront.dark .hero-tile {
     transform: none;
     clip-path: none;
     transition: none;
+    box-shadow: none;
   }
 
   .whatsapp-fab-ping {

@@ -6,11 +6,14 @@ import type { HeroImageSlot } from '@/lib/hero-images'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const HERO_SEX_LINKS = ['femme', 'homme', 'mixte', 'enfant'] as const
+
 export function HeroSection({ images }: { images: HeroImageSlot[] }) {
   const { locale, dictionary } = useLocale()
   const arabic = locale === 'ar'
   const [image] = images
   const typeCls = arabic ? 'font-arabic' : ''
+  const sexLabels = dictionary.sex as Record<string, string>
 
   return (
     <section className="hero-stage" aria-label={dictionary.hero.title}>
@@ -74,32 +77,21 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
               {dictionary.hero.discover}
             </Link>
 
-            <div className="flex items-center gap-x-3">
-              <Link
-                href="/products?sex=femme"
-                prefetch
-                className={
-                  arabic
-                    ? 'inline-flex min-h-11 items-center text-sm font-semibold text-foreground transition-colors hover:text-primary'
-                    : 'inline-flex min-h-11 items-center text-[11px] font-medium tracking-[0.2em] text-foreground uppercase transition-colors hover:text-primary'
-                }
-              >
-                {dictionary.hero.women}
-              </Link>
-              <span className="text-[#c4a35a]" aria-hidden>
-                ·
-              </span>
-              <Link
-                href="/products?sex=homme"
-                prefetch
-                className={
-                  arabic
-                    ? 'inline-flex min-h-11 items-center text-sm font-semibold text-foreground transition-colors hover:text-primary'
-                    : 'inline-flex min-h-11 items-center text-[11px] font-medium tracking-[0.2em] text-foreground uppercase transition-colors hover:text-primary'
-                }
-              >
-                {dictionary.hero.men}
-              </Link>
+            <div className="hero-sex-links flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
+              {HERO_SEX_LINKS.map((sex) => (
+                <Link
+                  key={sex}
+                  href={`/products?sex=${sex}`}
+                  prefetch
+                  className={
+                    arabic
+                      ? 'hero-sex-link inline-flex min-h-10 items-center justify-center rounded-full border border-[#c4a35a]/50 px-3 text-center text-[13px] font-semibold text-foreground transition-colors hover:border-[#c4a35a] hover:text-primary sm:min-h-11 sm:justify-start sm:rounded-none sm:border-0 sm:px-0 sm:text-sm'
+                      : 'hero-sex-link inline-flex min-h-10 items-center justify-center rounded-full border border-[#c4a35a]/50 px-3 text-center text-[10px] font-medium tracking-[0.16em] text-foreground uppercase transition-colors hover:border-[#c4a35a] hover:text-primary sm:min-h-11 sm:justify-start sm:rounded-none sm:border-0 sm:px-0 sm:text-[11px] sm:tracking-[0.2em]'
+                  }
+                >
+                  {sexLabels[sex] ?? sex}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
