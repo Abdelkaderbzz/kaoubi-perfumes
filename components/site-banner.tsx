@@ -3,7 +3,7 @@
 import type { ActiveBanner } from '@/app/actions/banners'
 import { useDictionary } from '@/components/locale-provider'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 
 /** Dismissal is keyed by banner id and message, so editing the text brings the
  *  banner back for visitors who had already closed the previous version. */
@@ -13,6 +13,13 @@ function storageKey(banner: ActiveBanner) {
     hash = (hash * 31 + banner.message.charCodeAt(index)) | 0
   }
   return `kaoubi-banner-dismissed-${banner.id}-${hash}`
+}
+
+/** One full pass = enter from the right, cross, exit left. Long messages get
+ *  proportionally more time so the reading speed stays constant. */
+function marqueeDuration(message: string) {
+  const seconds = 9 + message.length * 0.16
+  return `${Math.min(40, Math.max(12, Math.round(seconds)))}s`
 }
 
 export function SiteBanner({ banner }: { banner: ActiveBanner }) {
@@ -67,9 +74,12 @@ export function SiteBanner({ banner }: { banner: ActiveBanner }) {
           {variantLabels[banner.variant]}
         </span>
 
-        <p className="min-w-0 flex-1 truncate text-center font-light tracking-wider">
-          {banner.message}
-        </p>
+        <div
+          className="banner-marquee"
+          style={{ '--banner-marquee-duration': marqueeDuration(banner.message) } as CSSProperties}
+        >
+          <p className="banner-marquee-track font-light tracking-wider">{banner.message}</p>
+        </div>
 
         {hasLink &&
           (isExternal ? (
