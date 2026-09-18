@@ -348,7 +348,48 @@ html.storefront.dark {
   border-top: 1px solid color-mix(in oklab, var(--primary) 26%, transparent);
 }
 
-/* Editorial hero: cream lockup + gold-framed mosaic. */
+/* Announcement banner: the message tracks in from the right, crosses, exits
+   left, then loops — so a long message is always readable in full. */
+@keyframes banner-marquee {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.banner-marquee {
+  overflow: hidden;
+  /* Isolates the track from the flex row so a long message cannot stretch it. */
+  min-width: 0;
+  flex: 1;
+}
+
+.banner-marquee-track {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation: banner-marquee var(--banner-marquee-duration, 18s) linear infinite;
+}
+
+.banner-marquee:hover .banner-marquee-track,
+.banner-marquee:focus-within .banner-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner-marquee-track {
+    display: block;
+    animation: none;
+    transform: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}
+
+/* Editorial hero: cream lockup + single campaign photo. */
 @keyframes hero-kicker-in {
   from {
     opacity: 0;
@@ -382,7 +423,7 @@ html.storefront.dark {
   }
 }
 
-@keyframes hero-mosaic-in {
+@keyframes hero-visual-in {
   from {
     opacity: 0;
     transform: translate3d(0, 16px, 0);
@@ -496,25 +537,24 @@ html.storefront.dark .hero-discover:hover {
   background: #c4a35a;
 }
 
-.hero-mosaic {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  animation: hero-mosaic-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+.hero-visual {
+  animation: hero-visual-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
 }
 
-@media (min-width: 640px) {
-  .hero-mosaic {
-    gap: 0.8rem;
-  }
-}
-
+/* Single campaign photo: a touch taller than wide on phones, closer to
+   square once it sits beside the copy column. */
 .hero-tile {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   margin: 0;
   background: var(--secondary);
+}
+
+@media (min-width: 768px) {
+  .hero-tile {
+    aspect-ratio: 5 / 4;
+  }
 }
 
 .hero-tile::after {
@@ -695,7 +735,7 @@ html.storefront.dark .hero-tile {
   .hero-copy,
   .hero-cta,
   .hero-mark,
-  .hero-mosaic,
+  .hero-visual,
   .boutique-cta,
   .boutique-cta::after {
     animation: none;
