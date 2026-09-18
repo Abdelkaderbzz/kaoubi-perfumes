@@ -8,8 +8,7 @@ import { categorySchema, type CategoryFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { CategoryBannerField } from './category-banner-field'
+import { useForm } from 'react-hook-form'
 import {
   AdminButton,
   AdminEmptyState,
@@ -28,10 +27,10 @@ type Category = {
   id: number
   name: string
   slug: string
-  bannerUrl: string | null
+  description: string
 }
 
-const EMPTY_FORM: CategoryFormValues = { name: '', slug: '', bannerUrl: '' }
+const EMPTY_FORM: CategoryFormValues = { name: '', slug: '', description: '' }
 
 export function AdminCategoriesClient({ initialCategories }: { initialCategories: Category[] }) {
   const toast = useToast()
@@ -45,7 +44,6 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
     register,
     handleSubmit,
     reset,
-    control,
     formState: { errors },
   } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -63,7 +61,7 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
     reset({
       name: category.name,
       slug: category.slug,
-      bannerUrl: category.bannerUrl ?? '',
+      description: category.description ?? '',
     })
     setShowForm(true)
   }
@@ -72,7 +70,7 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
     const payload = {
       name: values.name,
       slug: values.slug,
-      bannerUrl: values.bannerUrl?.trim() || null,
+      description: values.description?.trim() || '',
     }
 
     startTransition(async () => {
@@ -90,7 +88,7 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
                     ...category,
                     name: payload.name,
                     slug: payload.slug || category.slug,
-                    bannerUrl: payload.bannerUrl,
+                    description: payload.description,
                   }
                 : category,
             ),
@@ -155,7 +153,7 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
         <AdminTable loading={isPending} loadingLabel="Mise a jour des categories...">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
-              {['Banniere', 'Nom', 'Slug', 'Actions'].map((heading) => (
+              {['Nom', 'Description', 'Slug', 'Actions'].map((heading) => (
                 <th key={heading} className={adminTableHeadCls}>
                   {heading}
                 </th>
@@ -165,18 +163,14 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
           <tbody className="divide-y divide-slate-100">
             {categories.map((category) => (
               <tr key={category.id} className="transition-colors hover:bg-slate-50">
-                <td className={adminTableCellCls}>
-                  {category.bannerUrl ? (
-                    <img
-                      src={category.bannerUrl}
-                      alt={category.name}
-                      className="h-14 w-24 rounded object-cover"
-                    />
+                <td className={`${adminTableCellCls} font-medium`}>{category.name}</td>
+                <td className={adminTableMutedCls}>
+                  {category.description ? (
+                    <span className="line-clamp-2 max-w-xs">{category.description}</span>
                   ) : (
-                    <span className="text-sm text-slate-400">Aucune</span>
+                    <span className="text-slate-400">Aucune</span>
                   )}
                 </td>
-                <td className={`${adminTableCellCls} font-medium`}>{category.name}</td>
                 <td className={adminTableMutedCls}>{category.slug}</td>
                 <td className={adminTableCellCls}>
                   <div className="flex items-center gap-1">
@@ -213,17 +207,31 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
               <label className={adminLabelCls}>NOM *</label>
               <input
                 className={adminInputWithError(!!errors.name)}
-                placeholder="Ex: Parfums"
+                placeholder="Ex: Body Mist"
                 disabled={isPending}
                 {...register('name')}
               />
               <AdminFieldError message={errors.name?.message} />
             </div>
             <div>
+              <label className={adminLabelCls}>DESCRIPTION</label>
+              <textarea
+                rows={2}
+                className={`${adminInputWithError(!!errors.description)} resize-none`}
+                placeholder="Ex: Brume corporelle legere"
+                disabled={isPending}
+                {...register('description')}
+              />
+              <AdminFieldError message={errors.description?.message} />
+              <p className="mt-1 text-sm text-slate-500">
+                Petite phrase affichee dans la banniere de la categorie sur la boutique.
+              </p>
+            </div>
+            <div>
               <label className={adminLabelCls}>SLUG (optionnel)</label>
               <input
                 className={adminInputWithError(!!errors.slug)}
-                placeholder="Ex: parfums"
+                placeholder="Ex: body-mist"
                 disabled={isPending}
                 {...register('slug')}
               />
@@ -232,15 +240,6 @@ export function AdminCategoriesClient({ initialCategories }: { initialCategories
                 Laissez vide pour generer automatiquement depuis le nom.
               </p>
             </div>
-
-            <Controller
-              name="bannerUrl"
-              control={control}
-              render={({ field }) => (
-                <CategoryBannerField value={field.value ?? ''} onChange={field.onChange} />
-              )}
-            />
-            <AdminFieldError message={errors.bannerUrl?.message} />
 
             <AdminButton type="submit" disabled={isPending} className="w-full">
               {isPending ? 'Enregistrement...' : editing ? 'Enregistrer' : 'Ajouter'}

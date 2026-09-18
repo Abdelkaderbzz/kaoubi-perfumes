@@ -16,12 +16,13 @@ const CATEGORY_ICONS: Record<string, Icon> = {
   parfum: Flask,
   'eau-de-parfum': FlowerLotus,
   'parfum-solide': Circle,
+  'parfum-de-linge': SprayBottle,
+  /** Legacy slug, kept so old links and un-migrated rows still get an icon. */
   'eau-de-ligne': SprayBottle,
   'parfum-d-ambiance': Wind,
   'parfum-originaux': Flask,
   'body-mist': Cloud,
   mkhamaria: Jar,
-  enfant: Baby,
 }
 
 function resolveIcon(slug: string): Icon {
@@ -29,7 +30,7 @@ function resolveIcon(slug: string): Icon {
   if (slug.includes('parfum') && slug.includes('solide')) return Circle
   if (slug.includes('ambiance')) return Wind
   if (slug.includes('parfum')) return Flask
-  if (slug.includes('ligne')) return SprayBottle
+  if (slug.includes('linge') || slug.includes('ligne')) return SprayBottle
   if (slug.includes('mist')) return Cloud
   if (slug.includes('mkhamaria')) return Jar
   if (slug.includes('enfant') || slug.includes('child') || slug.includes('kids')) return Baby

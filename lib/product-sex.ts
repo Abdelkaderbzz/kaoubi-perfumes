@@ -4,12 +4,15 @@ export type ProductSexOption = {
 }
 
 /** Who the product is for, single choice per product. Distinct from `category`
- *  (product format/type: parfum, eau de ligne, mkhamaria, etc). Null = not
- *  applicable (most soins/bakhoor items). */
+ *  (product format/type: parfum, parfum de linge, mkhamaria, etc). Null = not
+ *  applicable (most soins/bakhoor items). Shown to shoppers as "Genre" — it
+ *  covers the audience, not only the gender, which is why `enfant` lives here
+ *  instead of being its own category. */
 export const PRODUCT_SEX_OPTIONS: ProductSexOption[] = [
   { value: 'homme', label: 'Homme' },
   { value: 'femme', label: 'Femme' },
   { value: 'mixte', label: 'Mixte' },
+  { value: 'enfant', label: 'Enfant' },
 ]
 
 const PRODUCT_SEX_LABEL_BY_VALUE = new Map(

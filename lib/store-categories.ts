@@ -27,8 +27,8 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     image: '/products/mkhamaria-lavendarine.jpg',
   },
   {
-    slug: 'eau-de-ligne',
-    name: 'Eau de Ligne',
+    slug: 'parfum-de-linge',
+    name: 'Parfum de linge',
     tagline: 'Brume de linge et de maison',
     image: '/products/oudy-eau-de-ligne.jpg',
   },
@@ -56,21 +56,17 @@ export const STORE_CATEGORIES: StoreCategory[] = [
     tagline: 'Soin exfoliant et parfume pour le corps',
     image: '/products/mkhamaria-lavendarine.jpg',
   },
-  {
-    slug: 'enfant',
-    name: 'Enfant',
-    tagline: 'Fragrances douces pour enfants',
-    image: '/hero/boutique-cosmetic.webp',
-  },
 ]
 
 /** Seasonal collections that should not appear in nav, homepage, or filters. */
-export const HIDDEN_CATEGORY_SLUGS = new Set(['sif', 'chta'])
+export const HIDDEN_CATEGORY_SLUGS = new Set(['sif', 'chta', 'enfant'])
 
-/** Older slugs that should resolve to a current store category. Kept empty
- *  for now — categories used to double as gender (femme/homme/mixte), which
- *  moved to the separate `sex` field instead of aliasing to a category. */
-export const CATEGORY_SLUG_ALIASES: Record<string, string> = {}
+/** Older slugs that should resolve to a current store category. Gender slugs
+ *  (femme/homme/mixte) are not listed here — they moved to the separate `sex`
+ *  field instead of aliasing to a category, and `enfant` joined them. */
+export const CATEGORY_SLUG_ALIASES: Record<string, string> = {
+  'eau-de-ligne': 'parfum-de-linge',
+}
 
 export function canonicalCategorySlug(slug: string) {
   return CATEGORY_SLUG_ALIASES[slug] ?? slug
@@ -118,6 +114,7 @@ export function getCategoryBySlug(slug: string) {
 export type DbCategory = {
   slug: string
   name: string
+  description?: string | null
   bannerUrl?: string | null
 }
 
@@ -130,7 +127,7 @@ function localizedCategoryText(slug: string, locale: Locale) {
   return table?.[canonicalCategorySlug(slug)] ?? table?.[slug]
 }
 
-/** Category names/taglines are admin-edited DB text, so in French (the
+/** Category names/descriptions are admin-edited DB text, so in French (the
  *  default) the DB value always wins — that's what the admin typed. In
  *  Arabic there's no DB column for it, so known slugs get overridden with
  *  the fixed translation above; anything else falls back to the DB text. */
@@ -146,10 +143,11 @@ export function mergeStoreCategories(
   return STORE_CATEGORIES.map((category) => {
     const fromDb = dbBySlug.get(category.slug)
     const translated = arabic ? localizedCategoryText(category.slug, 'ar') : undefined
+    const dbDescription = fromDb?.description?.trim()
     return {
       ...category,
       name: translated?.name ?? fromDb?.name ?? category.name,
-      tagline: translated?.tagline ?? category.tagline,
+      tagline: translated?.tagline ?? dbDescription ?? category.tagline,
       image: fromDb?.bannerUrl ?? category.image,
     }
   })

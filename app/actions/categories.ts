@@ -11,6 +11,7 @@ export type CategoryRow = {
   id: number
   name: string
   slug: string
+  description: string
   bannerUrl: string | null
   createdAt: Date
   updatedAt: Date
@@ -55,7 +56,7 @@ const getCategoriesCached = unstable_cache(
       .from(categories)
       .where(notInArray(categories.slug, [...HIDDEN_CATEGORY_SLUGS]))
       .orderBy(asc(categories.name)),
-  ['categories-list-v6'],
+  ['categories-list-v8'],
   { revalidate: 300, tags: ['categories'] },
 )
 
@@ -66,7 +67,7 @@ export async function getCategories() {
 export async function addCategory(data: {
   name: string
   slug?: string
-  bannerUrl?: string | null
+  description?: string | null
 }): Promise<CategoryActionResult> {
   try {
     await requireAdminId()
@@ -85,7 +86,7 @@ export async function addCategory(data: {
       .values({
         name,
         slug,
-        bannerUrl: data.bannerUrl?.trim() || null,
+        description: data.description?.trim() || '',
       })
       .returning()
 
@@ -98,7 +99,7 @@ export async function addCategory(data: {
 
 export async function updateCategory(
   id: number,
-  data: { name?: string; slug?: string; bannerUrl?: string | null },
+  data: { name?: string; slug?: string; description?: string | null },
 ): Promise<CategoryActionResult> {
   try {
     await requireAdminId()
@@ -111,8 +112,8 @@ export async function updateCategory(
     const updateData: Record<string, unknown> = { updatedAt: new Date() }
     if (data.name) updateData.name = data.name.trim()
     if (data.slug) updateData.slug = data.slug.trim()
-    if (data.bannerUrl !== undefined) {
-      updateData.bannerUrl = data.bannerUrl?.trim() || null
+    if (data.description !== undefined) {
+      updateData.description = data.description?.trim() || ''
     }
 
     const [updated] = await db
