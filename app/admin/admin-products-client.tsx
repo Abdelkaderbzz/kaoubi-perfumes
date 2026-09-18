@@ -45,7 +45,6 @@ import {
   adminTableMutedCls,
 } from './admin-ui'
 import { AdminSelect } from './admin-select'
-import { ProductCompositionField } from './product-composition-field'
 import { ProductImagesField } from './product-images-field'
 import { RelatedProductsField, type ProductOption } from './related-products-field'
 import { ADMIN_PAGE_SIZE, AdminPagination } from './admin-pagination'
@@ -199,7 +198,6 @@ export function AdminProductsClient({
   const images = watch('images')
   const relatedProductIds = watch('relatedProductIds')
   const fragranceNotes = watch('fragranceNotes')
-  const composition = watch('composition')
   const wearMoments = watch('wearMoments')
   const watchedPrice = watch('price')
   const watchedCompareAt = watch('compareAtPrice')
@@ -662,12 +660,6 @@ export function AdminProductsClient({
               </div>
               <AdminFieldError message={errors.fragranceNotes?.message as string | undefined} />
             </div>
-
-            <ProductCompositionField
-              value={composition ?? EMPTY_COMPOSITION}
-              onChange={(next) => setValue('composition', next, { shouldValidate: true })}
-              errors={errors.composition}
-            />
 
             <div>
               <label className={adminLabelCls}>QUAND LE PORTER</label>

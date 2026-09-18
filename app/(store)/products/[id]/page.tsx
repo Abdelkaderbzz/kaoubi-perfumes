@@ -2,7 +2,6 @@ import { getProductById, getPublishedProductEntries, getRelatedProducts } from '
 import { getCategories } from '@/app/actions/categories'
 import { FragranceProfile } from '@/components/fragrance-profile'
 import { JsonLd } from '@/components/json-ld'
-import { PerfumeCompositionSection } from '@/components/perfume-composition'
 import { ProductCard } from '@/components/product-card'
 import { ProductGallery } from '@/components/product-gallery'
 import { ProductPrice } from '@/components/product-price'
@@ -225,8 +224,6 @@ export default async function ProductDetailPage({
               />
             </>
           )}
-
-          <PerfumeCompositionSection composition={product.composition} />
         </Reveal>
       </div>
 
