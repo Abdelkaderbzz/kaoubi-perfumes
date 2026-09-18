@@ -91,12 +91,12 @@ export function AdminHeroClient({ initialImages }: { initialImages: HeroImageSlo
   return (
     <div>
       <p className="mb-6 text-sm text-slate-600">
-        Ces 4 photos forment le mosaic de la page d accueil: haut gauche, haut droite, bas
-        gauche, bas droite. Televersez une photo carree ou recadrable (JPG, PNG, WEBP ou GIF,
-        5 Mo max).
+        Cette photo est la seule image de la section hero, en haut de la page d accueil.
+        Televersez une photo paysage ou recadrable (JPG, PNG, WEBP ou GIF, 5 Mo max), puis
+        enregistrez son texte alternatif pour le referencement.
       </p>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:max-w-xl">
         {images.map((image) => {
           const uploading = uploadingSlot === image.slot
           return (

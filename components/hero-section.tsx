@@ -9,7 +9,7 @@ import Link from 'next/link'
 export function HeroSection({ images }: { images: HeroImageSlot[] }) {
   const { locale, dictionary } = useLocale()
   const arabic = locale === 'ar'
-  const tiles = images.slice(0, 4)
+  const [image] = images
   const typeCls = arabic ? 'font-arabic' : ''
 
   return (
@@ -76,7 +76,7 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
 
             <div className="flex items-center gap-x-3">
               <Link
-                href="/products?category=femme"
+                href="/products?sex=femme"
                 prefetch
                 className={
                   arabic
@@ -90,7 +90,7 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
                 ·
               </span>
               <Link
-                href="/products?category=homme"
+                href="/products?sex=homme"
                 prefetch
                 className={
                   arabic
@@ -104,25 +104,21 @@ export function HeroSection({ images }: { images: HeroImageSlot[] }) {
           </div>
         </div>
 
-        <div className="hero-mosaic" role="list" aria-label={dictionary.hero.galleryLabel}>
-          {tiles.map((image, index) => (
-            <figure
-              key={`${image.slot}-${image.imageUrl}`}
-              className="hero-tile"
-              role="listitem"
-            >
+        <div className="hero-visual">
+          {image ? (
+            <figure className="hero-tile" aria-label={dictionary.hero.galleryLabel}>
               <Image
                 src={image.imageUrl}
                 alt={image.alt}
                 fill
-                priority={index < 2}
-                fetchPriority={index === 0 ? 'high' : 'auto'}
-                sizes="(min-width: 1280px) 22vw, (min-width: 768px) 28vw, 46vw"
+                priority
+                fetchPriority="high"
+                sizes="(min-width: 768px) 46vw, 92vw"
                 className="object-cover"
                 style={{ objectPosition: image.objectPosition ?? 'center' }}
               />
             </figure>
-          ))}
+          ) : null}
         </div>
       </div>
     </section>
