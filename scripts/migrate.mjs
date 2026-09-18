@@ -81,6 +81,7 @@ const CREATE_TABLES = [
     "id" serial PRIMARY KEY,
     "name" text NOT NULL,
     "slug" text NOT NULL UNIQUE,
+    "description" text NOT NULL DEFAULT '',
     "bannerUrl" text,
     "createdAt" timestamp NOT NULL DEFAULT now(),
     "updatedAt" timestamp NOT NULL DEFAULT now()
@@ -157,6 +158,7 @@ const CREATE_TABLES = [
     "intensity" text,
     "sex" text,
     "inStock" boolean NOT NULL DEFAULT true,
+    "stockQuantity" integer,
     "featured" boolean NOT NULL DEFAULT false,
     "newArrival" boolean NOT NULL DEFAULT false,
     "published" boolean NOT NULL DEFAULT true,
@@ -206,6 +208,7 @@ const CREATE_TABLES = [
 
 const INCREMENTAL_ALTERS = [
   `ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "bannerUrl" text`,
+  `ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "description" text NOT NULL DEFAULT ''`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "images" text NOT NULL DEFAULT '[]'`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "published" boolean NOT NULL DEFAULT true`,
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "compareAtPrice" numeric(10, 3)`,
@@ -336,6 +339,30 @@ const INCREMENTAL_ALTERS = [
   `UPDATE "products" SET "category" = 'parfum-d-ambiance', "updatedAt" = NOW()
    WHERE "category" = 'bakhoor'`,
   `DELETE FROM "categories" WHERE "slug" IN ('bakhoor', 'soins', 'body-shimmer')`,
+  // Stock counter. NULL keeps a product uncounted, so the manual "inStock"
+  // switch stays in charge until the shop types a number.
+  `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "stockQuantity" integer`,
+  // "Eau de Ligne" is really a linen mist -> "Parfum de linge".
+  `DELETE FROM "categories"
+    WHERE "slug" = 'eau-de-ligne'
+      AND EXISTS (SELECT 1 FROM "categories" WHERE "slug" = 'parfum-de-linge')`,
+  `UPDATE "categories" SET "slug" = 'parfum-de-linge', "name" = 'Parfum de linge', "updatedAt" = NOW()
+    WHERE "slug" = 'eau-de-ligne'`,
+  `INSERT INTO "categories" ("name", "slug") VALUES ('Parfum de linge', 'parfum-de-linge')
+   ON CONFLICT ("slug") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()`,
+  `UPDATE "products" SET "category" = 'parfum-de-linge', "updatedAt" = NOW()
+    WHERE "category" = 'eau-de-ligne'`,
+  `UPDATE "products"
+      SET "name" = replace("name", 'Eau de Ligne', 'Parfum de linge'), "updatedAt" = NOW()
+    WHERE "name" ILIKE '%Eau de Ligne%'`,
+  // "Enfant" stops being a category and becomes an audience ("sex") value.
+  // Products filed under it keep their audience and fall back to Eau de Parfum.
+  `UPDATE "products" SET "sex" = 'enfant', "updatedAt" = NOW() WHERE "category" = 'enfant'`,
+  `UPDATE "products" SET "category" = 'eau-de-parfum', "updatedAt" = NOW()
+    WHERE "category" = 'enfant'`,
+  `DELETE FROM "categories" WHERE "slug" = 'enfant'`,
+  // The hero mosaic became a single photo: keep slot 0, drop the rest.
+  `DELETE FROM "hero_images" WHERE "slot" > 0`,
 ]
 
 const BASELINE_DATA = [
@@ -345,12 +372,11 @@ const BASELINE_DATA = [
     ('Parfum', 'parfum'),
     ('Eau de Parfum', 'eau-de-parfum'),
     ('Parfum solide', 'parfum-solide'),
-    ('Eau de Ligne', 'eau-de-ligne'),
+    ('Parfum de linge', 'parfum-de-linge'),
     ('Parfum d''ambiance', 'parfum-d-ambiance'),
     ('Parfum Originaux', 'parfum-originaux'),
     ('Body Mist', 'body-mist'),
-    ('Mkhamaria', 'mkhamaria'),
-    ('Enfant', 'enfant')
+    ('Mkhamaria', 'mkhamaria')
    ON CONFLICT ("slug") DO NOTHING`,
   `INSERT INTO "boutiques"
     ("slug", "name", "city", "region", "description", "imageUrl", "imageAlt", "address", "phone", "rating", "reviewCount", "ratingSource", "directionsUrl", "pickupEnabled", "published", "sortOrder")
@@ -371,10 +397,7 @@ const BASELINE_DATA = [
     ('https://www.instagram.com/reel/DZvMI4OsOJd/', 3)
    ON CONFLICT ("url") DO NOTHING`,
   `INSERT INTO "hero_images" ("slot", "imageUrl", "alt") VALUES
-    (0, '/hero/boutique-counter-v2.webp', 'Comptoir Chanel de la boutique KAOUBI PERFUMES a Douz'),
-    (1, '/hero/boutique-arches.png', 'Rayonnages roses de la boutique KAOUBI PERFUMES'),
-    (2, '/hero/boutique-signature.webp', 'Mur logo KAOUBI PERFUMES, flacons dorees et brumes a Douz'),
-    (3, '/hero/boutique-cosmetic.webp', 'Univers cosmetique de la boutique KAOUBI PERFUMES')
+    (0, '/hero/boutique-counter-v2.webp', 'Comptoir Chanel de la boutique KAOUBI PERFUMES a Douz')
    ON CONFLICT ("slot") DO NOTHING`,
   `INSERT INTO "banners" (
       "name", "message", "variant", "backgroundColor", "textColor", "fontSize",

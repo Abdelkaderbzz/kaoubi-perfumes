@@ -20,18 +20,17 @@ const pool = new Pool({ connectionString: DATABASE_URL })
 // Categories describe product format; audience (homme/femme/mixte) lives in
 // the separate `sex` field on each product instead.
 const CATEGORIES = [
-  { name: 'Parfum', slug: 'parfum' },
-  { name: 'Eau de Parfum', slug: 'eau-de-parfum' },
-  { name: 'Parfum solide', slug: 'parfum-solide' },
-  { name: 'Eau de Ligne', slug: 'eau-de-ligne' },
-  { name: "Parfum d'ambiance", slug: 'parfum-d-ambiance' },
-  { name: 'Parfum Originaux', slug: 'parfum-originaux' },
-  { name: 'Body Mist', slug: 'body-mist' },
-  { name: 'Mkhamaria', slug: 'mkhamaria' },
-  { name: 'Enfant', slug: 'enfant' },
+  { name: 'Parfum', slug: 'parfum', description: 'Extrait de parfum, concentration et tenue maximales' },
+  { name: 'Eau de Parfum', slug: 'eau-de-parfum', description: 'Nos fragrances signature, pour elle et pour lui' },
+  { name: 'Parfum solide', slug: 'parfum-solide', description: 'Parfum concentre en format solide' },
+  { name: 'Parfum de linge', slug: 'parfum-de-linge', description: 'Brume de linge et de maison' },
+  { name: "Parfum d'ambiance", slug: 'parfum-d-ambiance', description: 'Fragrances pour la maison et les espaces' },
+  { name: 'Parfum Originaux', slug: 'parfum-originaux', description: 'Parfums de marque, authentiques et originaux' },
+  { name: 'Body Mist', slug: 'body-mist', description: 'Brume corporelle legere' },
+  { name: 'Mkhamaria', slug: 'mkhamaria', description: 'Soin exfoliant et parfume pour le corps' },
 ]
 
-const STALE_CATEGORY_SLUGS = ['femme', 'homme', 'mixte']
+const STALE_CATEGORY_SLUGS = ['femme', 'homme', 'mixte', 'eau-de-ligne', 'enfant']
 
 const IMG = {
   allureSport: '/products/allure-sport.webp',
@@ -101,7 +100,7 @@ const AVAILABLE_IMAGES = existingProductImages()
  *   description: string
  *   price: string
  *   compareAtPrice?: string | null
- *   category: 'parfum' | 'eau-de-parfum' | 'parfum-solide' | 'eau-de-ligne' | 'parfum-d-ambiance' | 'parfum-originaux' | 'body-mist' | 'mkhamaria' | 'enfant'
+ *   category: 'parfum' | 'eau-de-parfum' | 'parfum-solide' | 'parfum-de-linge' | 'parfum-d-ambiance' | 'parfum-originaux' | 'body-mist' | 'mkhamaria'
  *   image: string
  *   sizes: { size: string, price: string }[]
  *   featured: boolean
@@ -715,12 +714,12 @@ const PRODUCTS = [
   },
   {
     key: 'oudy-eau-de-ligne',
-    name: 'Oudy – Eau de Ligne',
+    name: 'Oudy – Parfum de linge',
     brand: 'KAOUBI PERFUMES',
     description:
       'Brume de linge Oudy. Notes boisees et ambrees d\'oud, parfume durablement le linge et la maison. 250 ml.',
     price: '30.000',
-    category: 'eau-de-ligne',
+    category: 'parfum-de-linge',
     image: IMG.oudyEauDeLigne,
     sizes: [{ size: '250 ml', price: '30.000' }],
     featured: false,
@@ -728,12 +727,12 @@ const PRODUCTS = [
   },
   {
     key: 'sweety-eau-de-ligne',
-    name: 'Sweety – Eau de Ligne',
+    name: 'Sweety – Parfum de linge',
     brand: 'KAOUBI PERFUMES',
     description:
       'Brume de linge Sweety. Fleurs douces et notes gourmandes, parfume durablement le linge et la maison. 250 ml.',
     price: '30.000',
-    category: 'eau-de-ligne',
+    category: 'parfum-de-linge',
     image: IMG.sweetyEauDeLigne,
     sizes: [{ size: '250 ml', price: '30.000' }],
     featured: false,
@@ -1058,10 +1057,16 @@ const OLFACTIVE = {
 async function ensureCategories() {
   for (const category of CATEGORIES) {
     await pool.query(
-      `INSERT INTO categories (name, slug, "createdAt", "updatedAt")
-       VALUES ($1, $2, NOW(), NOW())
-       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, "updatedAt" = NOW()`,
-      [category.name, category.slug],
+      `INSERT INTO categories (name, slug, description, "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, NOW(), NOW())
+       ON CONFLICT (slug) DO UPDATE SET
+         name = EXCLUDED.name,
+         description = CASE
+           WHEN categories.description = '' THEN EXCLUDED.description
+           ELSE categories.description
+         END,
+         "updatedAt" = NOW()`,
+      [category.name, category.slug, category.description ?? ''],
     )
   }
 }
