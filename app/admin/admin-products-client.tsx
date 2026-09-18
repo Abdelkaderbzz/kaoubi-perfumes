@@ -16,6 +16,13 @@ import {
 import { WEAR_MOMENT_OPTIONS, parseWearMoments } from '@/lib/product-wear'
 import { INTENSITY_LEVELS } from '@/lib/product-intensity'
 import { PRODUCT_SEX_OPTIONS, getProductSexLabel } from '@/lib/product-sex'
+import {
+  formatStockQuantityInput,
+  isProductAvailable,
+  isLowStock,
+  parseStockQuantityInput,
+  stockCount,
+} from '@/lib/product-stock'
 import { productSchema, type ProductFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { usePrefetchHrefs, useRouteTransition } from '@/lib/use-route-transition'
@@ -61,6 +68,7 @@ type Product = {
   intensity: string | null
   sex: string | null
   inStock: boolean
+  stockQuantity: number | null
   featured: boolean
   newArrival: boolean
   published: boolean
@@ -110,6 +118,7 @@ const EMPTY_FORM: ProductFormValues = {
   intensity: '',
   sex: '',
   inStock: true,
+  stockQuantity: '',
   featured: false,
   newArrival: false,
   published: true,
@@ -228,6 +237,7 @@ export function AdminProductsClient({
       intensity: product.intensity ?? '',
       sex: product.sex ?? '',
       inStock: product.inStock,
+      stockQuantity: formatStockQuantityInput(product.stockQuantity),
       featured: product.featured,
       newArrival: product.newArrival ?? false,
       published: product.published ?? true,
@@ -263,6 +273,7 @@ export function AdminProductsClient({
           intensity: form.intensity || null,
           sex: form.sex || null,
           inStock: form.inStock,
+          stockQuantity: parseStockQuantityInput(form.stockQuantity),
           featured: form.featured,
           newArrival: form.newArrival,
           published: form.published,
@@ -351,7 +362,7 @@ export function AdminProductsClient({
               items={[
                 { value: 'all', label: 'Tout le stock' },
                 { value: 'in', label: 'En stock' },
-                { value: 'out', label: 'Rupture' },
+                { value: 'out', label: 'Épuisé' },
               ]}
               disabled={isNavigating}
             />
@@ -368,7 +379,7 @@ export function AdminProductsClient({
         <AdminTable loading={isBusy} loadingLabel={isNavigating ? 'Chargement des produits...' : 'Mise a jour...'}>
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                {['Image', 'Nom', 'Marque', 'Categorie', 'Sexe', 'Prix', 'Stock', 'Statut', 'Actions'].map((h) => (
+                {['Image', 'Nom', 'Marque', 'Categorie', 'Genre', 'Prix', 'Stock', 'Statut', 'Actions'].map((h) => (
                   <th key={h} className={adminTableHeadCls}>
                     {h}
                   </th>
@@ -423,9 +434,16 @@ export function AdminProductsClient({
                     )}
                   </td>
                   <td className={adminTableCellCls}>
-                    <AdminBadge tone={p.inStock ? 'success' : 'danger'}>
-                      {p.inStock ? 'En stock' : 'Rupture'}
+                    <AdminBadge
+                      tone={
+                        !isProductAvailable(p) ? 'danger' : isLowStock(p) ? 'warning' : 'success'
+                      }
+                    >
+                      {isProductAvailable(p) ? 'En stock' : 'Épuisé'}
                     </AdminBadge>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {stockCount(p) === null ? 'Non compté' : `${stockCount(p)} unité(s)`}
+                    </p>
                   </td>
                   <td className={adminTableCellCls}>
                     <AdminBadge tone={p.published !== false ? 'success' : 'warning'}>
@@ -703,7 +721,7 @@ export function AdminProductsClient({
             </div>
 
             <div>
-              <label className={adminLabelCls}>SEXE</label>
+              <label className={adminLabelCls}>GENRE</label>
               <Controller
                 control={control}
                 name="sex"
@@ -816,11 +834,33 @@ export function AdminProductsClient({
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-800">
                 <input type="checkbox" className="accent-amber-700" {...register('inStock')} />
                 En stock
               </label>
+
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <label className={adminLabelCls}>QUANTITE EN STOCK</label>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  inputMode="numeric"
+                  placeholder="Laisser vide = non compté"
+                  className={adminInputWithError(!!errors.stockQuantity)}
+                  {...register('stockQuantity')}
+                />
+                <AdminFieldError message={errors.stockQuantity?.message} />
+                <p className="mt-1 text-xs text-slate-500">
+                  A 0, le produit passe en « Épuisé » sur la boutique et ne peut plus etre
+                  commande. Laissez vide pour piloter la disponibilite avec la case « En stock »
+                  uniquement.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
                 <input type="checkbox" className="accent-amber-700" {...register('featured')} />
                 Mis en avant

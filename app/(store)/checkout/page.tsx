@@ -1,6 +1,7 @@
 'use client'
 
 import { createOrder } from '@/app/actions/orders'
+import { getProductsAvailability } from '@/app/actions/products'
 import { getDeliveryFee } from '@/app/actions/settings'
 import { FragranceNoteChips } from '@/components/fragrance-note-chips'
 import { useCart } from '@/components/cart-context'
@@ -10,6 +11,7 @@ import { StoreSelect } from '@/components/store-select'
 import { useToast } from '@/components/toast-provider'
 import { getErrorMessage } from '@/lib/get-error-message'
 import { formatPriceTnd } from '@/lib/product-price'
+import { isProductAvailable } from '@/lib/product-stock'
 import { GOVERNORATE_SELECT_OPTIONS } from '@/lib/tunisia-governorates'
 import { createCheckoutSchema, type CheckoutFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +45,11 @@ function CheckoutForm() {
   const router = useRouter()
   const toast = useToast()
   const [deliveryFee, setDeliveryFee] = useState(7)
+  /** Product ids the DB reports as unavailable. The cart lives in the browser,
+   *  so stock is re-checked here and again server-side on submit. */
+  const [soldOutIds, setSoldOutIds] = useState<number[]>([])
+
+  const cartProductIds = items.map((item) => item.productId).join(',')
 
   const checkoutSchema = useMemo(
     () => createCheckoutSchema(dictionary.validation),
@@ -71,11 +78,45 @@ function CheckoutForm() {
     getDeliveryFee().then(setDeliveryFee).catch(() => setDeliveryFee(7))
   }, [])
 
+  useEffect(() => {
+    const ids = cartProductIds
+      .split(',')
+      .filter(Boolean)
+      .map(Number)
+    if (ids.length === 0) {
+      setSoldOutIds([])
+      return
+    }
+
+    let active = true
+    getProductsAvailability(ids)
+      .then((rows) => {
+        if (!active) return
+        setSoldOutIds(
+          rows
+            .filter((row) => !row.published || !isProductAvailable(row))
+            .map((row) => row.id),
+        )
+      })
+      .catch(() => {
+        // Stock stays unknown here; createOrder still refuses sold-out lines.
+      })
+    return () => {
+      active = false
+    }
+  }, [cartProductIds])
+
   const grandTotal = total + deliveryFee
+  const hasSoldOut = soldOutIds.length > 0
 
   async function onSubmit(values: CheckoutFormValues) {
     if (items.length === 0) {
       toast.error(t.emptyToast)
+      return
+    }
+
+    if (hasSoldOut) {
+      toast.error(t.outOfStockToast)
       return
     }
 
@@ -131,10 +172,22 @@ function CheckoutForm() {
       <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">
         <div className="lg:col-span-3 space-y-3 sm:space-y-4">
           <p className={storeSectionCls}>{t.cart}</p>
-          {items.map((item) => (
+          {hasSoldOut ? (
+            <p
+              role="alert"
+              className="rounded-2xl border-2 border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-destructive sm:p-4"
+            >
+              {t.outOfStockNotice}
+            </p>
+          ) : null}
+          {items.map((item) => {
+            const soldOut = soldOutIds.includes(item.productId)
+            return (
             <div
               key={`${item.productId}-${item.size}`}
-              className="flex gap-3 rounded-2xl border border-border bg-card p-3 sm:gap-4 sm:p-4"
+              className={`flex gap-3 rounded-2xl border bg-card p-3 sm:gap-4 sm:p-4 ${
+                soldOut ? 'border-destructive/50' : 'border-border'
+              }`}
             >
               {item.imageUrl && (
                 <img
@@ -150,6 +203,11 @@ function CheckoutForm() {
                   </p>
                   <p className="truncate text-sm font-medium text-foreground">{item.productName}</p>
                   <p className="text-[11px] text-muted-foreground">{item.size}</p>
+                  {soldOut ? (
+                    <span className="mt-1 inline-block rounded bg-destructive px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                      {t.outOfStock}
+                    </span>
+                  ) : null}
                   {item.fragranceNotes && item.fragranceNotes.length > 0 ? (
                     <div className="mt-1.5">
                       <FragranceNoteChips
@@ -198,7 +256,8 @@ function CheckoutForm() {
                 </svg>
               </button>
             </div>
-          ))}
+            )
+          })}
 
           <div className="mt-4 rounded-2xl border-2 border-primary/20 bg-card p-4 sm:mt-6 sm:p-6">
             <p className={storeSectionCls}>{t.receptionMode}</p>
@@ -315,7 +374,7 @@ function CheckoutForm() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasSoldOut}
             className="sticky bottom-3 z-20 w-full rounded-full bg-primary py-4 text-sm font-semibold tracking-wide text-primary-foreground shadow-md shadow-primary/30 transition-all hover:opacity-95 disabled:opacity-60 sm:static"
             style={{ marginBottom: 'max(0px, env(safe-area-inset-bottom, 0px))' }}
           >

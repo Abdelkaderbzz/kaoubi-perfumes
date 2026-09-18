@@ -12,6 +12,7 @@ import { getSiteUrl } from '@/lib/site'
 import { parsePerfumeComposition } from '@/lib/perfume-composition'
 import { parsePrice } from '@/lib/product-price'
 import { parseProductImages } from '@/lib/product-images'
+import { isProductAvailable } from '@/lib/product-stock'
 
 const BRAND = 'KAOUBI PERFUMES'
 const DEFAULT_SHIPPING_TND = '7.000'
@@ -185,6 +186,7 @@ export function productJsonLd(product: {
   imageUrl?: string | null
   images?: string | null
   inStock: boolean
+  stockQuantity?: number | null
   category: string
   composition?: string | null
   intensity?: string | null
@@ -232,7 +234,7 @@ export function productJsonLd(product: {
       priceCurrency: 'TND',
       price: price != null ? price.toFixed(3) : product.price,
       priceValidUntil,
-      availability: product.inStock
+      availability: isProductAvailable(product)
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',

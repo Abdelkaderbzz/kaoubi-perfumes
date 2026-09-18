@@ -2,6 +2,7 @@
 
 import { useCart } from '@/components/cart-context'
 import { useDictionary } from '@/components/locale-provider'
+import { useToast } from '@/components/toast-provider'
 import { ProductPrice } from '@/components/product-price'
 import {
   getVariantPrice,
@@ -26,15 +27,25 @@ type Product = {
 export function AddToCartButton({
   product,
   variants,
+  maxQuantity = null,
 }: {
   product: Product
   variants: ProductSizeVariant[]
+  /** Units left for this product, or null when stock is not counted. */
+  maxQuantity?: number | null
 }) {
-  const { addItem } = useCart()
+  const { addItem, items } = useCart()
   const dictionary = useDictionary()
+  const toast = useToast()
   const router = useRouter()
   const [selectedSize, setSelectedSize] = useState(resolveDefaultSize(variants))
   const [added, setAdded] = useState(false)
+
+  /** Sizes share one counter, so the cap applies to the whole product. */
+  const inCart = items
+    .filter((item) => item.productId === product.id)
+    .reduce((acc, item) => acc + item.quantity, 0)
+  const capReached = maxQuantity !== null && inCart >= maxQuantity
 
   const selectedPrice = useMemo(
     () => getVariantPrice(variants, selectedSize, product.price),
@@ -42,6 +53,11 @@ export function AddToCartButton({
   )
 
   function handleAdd() {
+    if (capReached) {
+      toast.error(dictionary.products.lowStock(maxQuantity ?? 0))
+      return false
+    }
+
     addItem({
       productId: product.id,
       productName: product.name,
@@ -54,10 +70,11 @@ export function AddToCartButton({
     })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
+    return true
   }
 
   function handleOrder() {
-    handleAdd()
+    if (!handleAdd() && inCart === 0) return
     router.push('/checkout')
   }
 
@@ -106,7 +123,8 @@ export function AddToCartButton({
         <button
           type="button"
           onClick={handleAdd}
-          className="min-h-12 flex-1 rounded-md border border-primary bg-primary/5 px-3 text-sm font-semibold tracking-[0.12em] text-primary transition-all hover:bg-primary hover:text-primary-foreground"
+          disabled={capReached}
+          className="min-h-12 flex-1 rounded-md border border-primary bg-primary/5 px-3 text-sm font-semibold tracking-[0.12em] text-primary transition-all hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-primary/5 disabled:hover:text-primary"
         >
           {added ? dictionary.product.added : dictionary.product.addToCart}
         </button>
@@ -135,7 +153,8 @@ export function AddToCartButton({
             <button
               type="button"
               onClick={handleAdd}
-              className="min-h-11 rounded-md border border-primary bg-primary/10 px-2 text-[11px] font-semibold tracking-[0.06em] text-primary active:bg-primary active:text-primary-foreground"
+              disabled={capReached}
+              className="min-h-11 rounded-md border border-primary bg-primary/10 px-2 text-[11px] font-semibold tracking-[0.06em] text-primary active:bg-primary active:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {added ? dictionary.product.added : dictionary.product.addToCart}
             </button>

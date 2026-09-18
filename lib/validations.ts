@@ -100,6 +100,14 @@ export const productSchema = z
       .enum(['', ...PRODUCT_SEX_OPTIONS.map((item) => item.value)] as [string, ...string[]])
       .optional(),
     inStock: z.boolean(),
+    /** Blank = untracked, so the `inStock` switch alone decides availability. */
+    stockQuantity: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === '' || /^\d{1,6}$/.test(value),
+        'Stock invalide (nombre entier, 0 ou plus)',
+      ),
     featured: z.boolean(),
     newArrival: z.boolean(),
     published: z.boolean(),
@@ -175,7 +183,7 @@ export const categorySchema = z.object({
     .refine((value) => value === '' || /^[a-z0-9-]+$/.test(value), {
       message: 'Slug invalide (lettres minuscules, chiffres et tirets uniquement)',
     }),
-  bannerUrl: z.string().url('URL invalide').or(z.literal('')).optional(),
+  description: z.string().max(160, 'Description trop longue').optional(),
 })
 
 export type CategoryFormValues = z.infer<typeof categorySchema>

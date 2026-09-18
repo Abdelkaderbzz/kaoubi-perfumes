@@ -16,6 +16,7 @@ import {
 import { resolveProductImageUrl } from '@/lib/product-images'
 import { getCategoryLabel } from '@/lib/store-categories'
 import { getProductSexLabel } from '@/lib/product-sex'
+import { isLowStock, isProductAvailable, stockCount } from '@/lib/product-stock'
 import { parseFragranceNotes } from '@/lib/fragrance-notes'
 
 export type ProductCardProduct = {
@@ -29,6 +30,7 @@ export type ProductCardProduct = {
   sex?: string | null
   fragranceNotes?: string | null
   inStock: boolean
+  stockQuantity?: number | null
   sizes?: string | null
   promoTagEnabled?: boolean | null
   promoTagLabel?: string | null
@@ -54,6 +56,8 @@ export function ProductCard({
   const sexLabel = product.sex ? (sexLabels[product.sex] ?? getProductSexLabel(product.sex)) : null
   const noteLabels = dictionary.fragranceNotes as Record<string, string>
   const notes = parseFragranceNotes(product.fragranceNotes)
+  const available = isProductAvailable(product)
+  const lowStock = isLowStock(product)
 
   const variants = useMemo(
     () => parseProductSizeVariants(product.sizes, product.price),
@@ -98,9 +102,9 @@ export function ProductCard({
             </svg>
           </div>
         )}
-        {!product.inStock && (
+        {!available && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70">
-            <span className="text-xs font-medium tracking-widest text-foreground">
+            <span className="rounded-md bg-foreground/90 px-3 py-1.5 text-xs font-semibold tracking-widest text-background uppercase">
               {dictionary.products.outOfStockBadge}
             </span>
           </div>
@@ -163,6 +167,12 @@ export function ProductCard({
             </p>
           )}
         </div>
+
+        {lowStock ? (
+          <p className="mt-1 text-[11px] font-medium text-destructive">
+            {dictionary.products.lowStock(stockCount(product) ?? 0)}
+          </p>
+        ) : null}
 
         {/* Size chips are hard to tap in a 2-col phone grid — keep them from sm up. */}
         {variants.length > 0 && (

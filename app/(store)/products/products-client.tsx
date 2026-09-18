@@ -35,6 +35,7 @@ type Product = {
   sex?: string | null
   fragranceNotes?: string | null
   inStock: boolean
+  stockQuantity?: number | null
   sizes?: string | null
   promoTagEnabled?: boolean | null
   promoTagLabel?: string | null

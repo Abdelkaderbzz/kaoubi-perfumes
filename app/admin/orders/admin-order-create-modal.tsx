@@ -21,6 +21,7 @@ import {
   adminLabelCls,
 } from '../admin-ui'
 import { ORDER_STATUS_OPTIONS, ORDER_STATUS_SELECT_CLS, orderStatusMeta } from '../order-status'
+import { isProductAvailable } from '@/lib/product-stock'
 
 export type CreateOrderProduct = {
   id: number
@@ -29,6 +30,7 @@ export type CreateOrderProduct = {
   price: string
   sizes: string
   inStock: boolean
+  stockQuantity: number | null
 }
 
 const ORDER_TYPE_OPTIONS = [
@@ -100,11 +102,15 @@ export function AdminOrderCreateModal({
 
   const orderType = watch('orderType')
 
+  /** Épuisé products stay listed — the order still fails server-side, so the
+   *  label warns before the admin gets that far. */
   const productOptions = useMemo(
     () =>
       products.map((product) => ({
         value: String(product.id),
-        label: `${product.brand} — ${product.name} (${parseFloat(product.price).toFixed(3)} TND)`,
+        label: `${product.brand} — ${product.name} (${parseFloat(product.price).toFixed(3)} TND)${
+          isProductAvailable(product) ? '' : ' — ÉPUISÉ'
+        }`,
       })),
     [products],
   )

@@ -54,6 +54,8 @@ export const categories = pgTable('categories', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
+  /** Short storefront banner text, e.g. "Brume corporelle legere". */
+  description: text('description').notNull().default(''),
   bannerUrl: text('bannerUrl'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
@@ -119,7 +121,7 @@ export const carouselVideos = pgTable('carousel_videos', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
-/** Fixed homepage hero campaign slots (0–3). */
+/** Homepage hero campaign image (single slot, 0). */
 export const heroImages = pgTable('hero_images', {
   slot: integer('slot').primaryKey(),
   imageUrl: text('imageUrl').notNull(),
@@ -154,6 +156,9 @@ export const products = pgTable('products', {
   /** Who it's for: homme/femme/mixte (see lib/product-sex.ts), or null when not applicable. */
   sex: text('sex'),
   inStock: boolean('inStock').notNull().default(true),
+  /** Units left. Null = not counted, so `inStock` alone decides availability
+   *  (see lib/product-stock.ts). 0 = Épuisé: hidden from ordering. */
+  stockQuantity: integer('stockQuantity'),
   featured: boolean('featured').notNull().default(false),
   /** Curated for the homepage NOUVEAUTÉS section. */
   newArrival: boolean('newArrival').notNull().default(false),

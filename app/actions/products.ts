@@ -383,6 +383,7 @@ const ORDER_PRODUCT_CATALOG_COLUMNS = {
   price: products.price,
   sizes: products.sizes,
   inStock: products.inStock,
+  stockQuantity: products.stockQuantity,
 } as const
 
 /** Compact product list for the admin "new order" modal — not page-capped. */
@@ -392,6 +393,24 @@ export async function getOrderProductCatalog() {
     .select(ORDER_PRODUCT_CATALOG_COLUMNS)
     .from(products)
     .orderBy(asc(products.brand), asc(products.name))
+}
+
+/** Live availability for the products sitting in a visitor's cart. The cart
+ *  only lives in the browser, so checkout re-checks stock against the DB
+ *  before letting the order through. */
+export async function getProductsAvailability(ids: number[]) {
+  const wanted = [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))]
+  if (wanted.length === 0) return []
+
+  return db
+    .select({
+      id: products.id,
+      inStock: products.inStock,
+      stockQuantity: products.stockQuantity,
+      published: products.published,
+    })
+    .from(products)
+    .where(inArray(products.id, wanted))
 }
 
 /** Admin picks come first, in the order they were chosen; anything missing is
@@ -460,6 +479,7 @@ export async function addProduct(data: {
   intensity?: string | null
   sex?: string | null
   inStock: boolean
+  stockQuantity?: number | null
   featured: boolean
   newArrival: boolean
   published: boolean
@@ -495,6 +515,7 @@ export async function addProduct(data: {
     intensity: data.intensity?.trim() || null,
     sex: data.sex?.trim() || null,
     inStock: data.inStock,
+    stockQuantity: data.stockQuantity ?? null,
     featured: data.featured,
     newArrival: data.newArrival,
     published: data.published,
@@ -528,6 +549,7 @@ export async function updateProduct(
     intensity?: string | null
     sex?: string | null
     inStock?: boolean
+    stockQuantity?: number | null
     featured?: boolean
     newArrival?: boolean
     published?: boolean
@@ -545,6 +567,7 @@ export async function updateProduct(
   if (data.description !== undefined) updateData.description = data.description
   if (data.category !== undefined) updateData.category = data.category
   if (data.inStock !== undefined) updateData.inStock = data.inStock
+  if ('stockQuantity' in data) updateData.stockQuantity = data.stockQuantity ?? null
   if (data.featured !== undefined) updateData.featured = data.featured
   if (data.newArrival !== undefined) updateData.newArrival = data.newArrival
   if (data.published !== undefined) updateData.published = data.published

@@ -15,6 +15,7 @@ import { parseProductSizeVariants } from '@/lib/product-sizes'
 import { breadcrumbJsonLd, catalogPath, languageAlternates, productJsonLd } from '@/lib/seo'
 import { getCategoryLabel } from '@/lib/store-categories'
 import { getProductSexLabel } from '@/lib/product-sex'
+import { isLowStock, isProductAvailable, maxOrderableQuantity, stockCount } from '@/lib/product-stock'
 import { AddToCartButton } from './add-to-cart-button'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -82,7 +83,7 @@ export async function generateMetadata({
     },
     other: {
       'product:brand': product.brand,
-      'product:availability': product.inStock ? 'in stock' : 'out of stock',
+      'product:availability': isProductAvailable(product) ? 'in stock' : 'out of stock',
       'product:condition': 'new',
       'product:retailer_item_id': String(product.id),
       'product:price:amount': product.price,
@@ -110,6 +111,7 @@ export default async function ProductDetailPage({
   const sexLabel = product.sex ? (sexLabels[product.sex] ?? getProductSexLabel(product.sex)) : null
 
   const variants = parseProductSizeVariants(product.sizes, product.price)
+  const available = isProductAvailable(product)
   const images = parseProductImages(product)
 
   return (
@@ -198,7 +200,7 @@ export default async function ProductDetailPage({
             fragranceNotes={product.fragranceNotes}
           />
 
-          {!product.inStock ? (
+          {!available ? (
             <>
               <ProductPrice
                 price={product.price}
@@ -210,7 +212,18 @@ export default async function ProductDetailPage({
               </div>
             </>
           ) : (
-            <AddToCartButton product={product} variants={variants} />
+            <>
+              {isLowStock(product) ? (
+                <p className="text-sm font-medium text-destructive">
+                  {dictionary.products.lowStock(stockCount(product) ?? 0)}
+                </p>
+              ) : null}
+              <AddToCartButton
+                product={product}
+                variants={variants}
+                maxQuantity={maxOrderableQuantity(product)}
+              />
+            </>
           )}
 
           <PerfumeCompositionSection composition={product.composition} />

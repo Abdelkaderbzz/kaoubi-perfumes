@@ -3,7 +3,8 @@
 import { requireAdminId } from '@/lib/admin-auth'
 import { db } from '@/lib/db'
 import { boutiques, orderItems, orders, products } from '@/lib/db/schema'
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { isProductAvailable, stockCount } from '@/lib/product-stock'
+import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { getDeliveryFee } from './settings'
 import {
@@ -75,10 +76,90 @@ async function resolvePickupBoutique(orderType: string, boutiqueId?: number | nu
   return { pickupBoutiqueId: row.id, pickupBoutiqueName: `${row.name} (${row.city})` }
 }
 
+/** The cart lives in the browser, so stock is re-checked against the DB before
+ *  the order is written. Uncounted products (stockQuantity = null) only have to
+ *  pass the manual `inStock` switch. */
+async function assertItemsAvailable(items: CartItem[]) {
+  const wanted = [...new Set(items.map((item) => item.productId))]
+  const rows = await db
+    .select({
+      id: products.id,
+      name: products.name,
+      inStock: products.inStock,
+      stockQuantity: products.stockQuantity,
+    })
+    .from(products)
+    .where(inArray(products.id, wanted))
+
+  const unavailable: string[] = []
+
+  for (const productId of wanted) {
+    const row = rows.find((item) => item.id === productId)
+    if (!row) {
+      unavailable.push(items.find((item) => item.productId === productId)?.productName ?? '')
+      continue
+    }
+
+    if (!isProductAvailable(row)) {
+      unavailable.push(row.name)
+      continue
+    }
+
+    const left = stockCount(row)
+    const ordered = items
+      .filter((item) => item.productId === productId)
+      .reduce((acc, item) => acc + item.quantity, 0)
+    if (left !== null && ordered > left) {
+      unavailable.push(row.name)
+    }
+  }
+
+  if (unavailable.length > 0) {
+    throw new Error(
+      `Stock insuffisant pour : ${unavailable.filter(Boolean).join(', ')}. Mettez a jour votre panier.`,
+    )
+  }
+
+  return rows
+}
+
+/** Counted products lose the ordered units; uncounted ones are left alone. */
+async function decrementStock(items: CartItem[], rows: { id: number; stockQuantity: number | null }[]) {
+  const counted = rows.filter((row) => row.stockQuantity !== null)
+  if (counted.length === 0) return
+
+  await Promise.all(
+    counted.map((row) => {
+      const ordered = items
+        .filter((item) => item.productId === row.id)
+        .reduce((acc, item) => acc + item.quantity, 0)
+      if (ordered <= 0) return Promise.resolve()
+
+      return db
+        .update(products)
+        .set({
+          stockQuantity: sql`greatest(0, ${products.stockQuantity} - ${ordered})`,
+          updatedAt: new Date(),
+        })
+        .where(eq(products.id, row.id))
+    }),
+  )
+
+  revalidateTag('products', 'max')
+  for (const row of counted) {
+    revalidateTag(`product-${row.id}`, 'max')
+    revalidatePath(`/products/${row.id}`)
+  }
+  revalidatePath('/products')
+  revalidatePath('/')
+}
+
 async function insertOrderWithItems(data: CreateOrderInput) {
   if (!data.items.length) {
     throw new Error('Ajoutez au moins un article.')
   }
+
+  const stockRows = await assertItemsAvailable(data.items)
 
   const [deliveryFeeValue, pickup] = await Promise.all([
     data.orderType === 'delivery' ? getDeliveryFee() : 0,
@@ -115,6 +196,7 @@ async function insertOrderWithItems(data: CreateOrderInput) {
     })),
   )
 
+  await decrementStock(data.items, stockRows)
   await revalidateOrderPaths()
   return order
 }
