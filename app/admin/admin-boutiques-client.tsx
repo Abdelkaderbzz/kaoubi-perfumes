@@ -356,6 +356,9 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 {...register('description')}
               />
               <AdminFieldError message={errors.description?.message} />
+              <p className="mt-1 text-xs text-slate-500">
+                Texte affiche sous le nom de la boutique sur la page d accueil.
+              </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -368,6 +371,9 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                   {...register('address')}
                 />
                 <AdminFieldError message={errors.address?.message} />
+                <p className="mt-1 text-xs text-slate-500">
+                  Localisation affichee aux clients (rue, ville, code postal).
+                </p>
               </div>
               <div>
                 <label className={adminLabelCls}>TELEPHONE</label>
@@ -423,6 +429,10 @@ export function AdminBoutiquesClient({ initialBoutiques }: { initialBoutiques: A
                 {...register('directionsUrl')}
               />
               <AdminFieldError message={errors.directionsUrl?.message} />
+              <p className="mt-1 text-xs text-slate-500">
+                Ouvrez la boutique sur Google Maps, cliquez « Partager » puis « Copier le lien »
+                et collez-le ici : c est ce lien qui alimente le bouton ITINERAIRE.
+              </p>
             </div>
 
             <Controller
