@@ -15,6 +15,7 @@ import { isProductAvailable } from '@/lib/product-stock'
 import { GOVERNORATE_SELECT_OPTIONS } from '@/lib/tunisia-governorates'
 import { createCheckoutSchema, type CheckoutFormValues } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -190,9 +191,12 @@ function CheckoutForm() {
               }`}
             >
               {item.imageUrl && (
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.productName}
+                  width={64}
+                  height={80}
+                  sizes="64px"
                   className="h-20 w-16 shrink-0 object-cover"
                 />
               )}

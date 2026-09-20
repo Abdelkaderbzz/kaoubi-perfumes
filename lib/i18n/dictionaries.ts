@@ -51,8 +51,6 @@ const fr = {
     tagline: '',
     copy: 'Parfums inspires des grandes maisons, de longue tenue, pour femmes et hommes.',
     discover: 'Decouvrir',
-    women: 'Femme',
-    men: 'Homme',
     galleryLabel: 'Vue de la boutique',
   },
   home: {
@@ -357,8 +355,6 @@ const ar: Dictionary = {
     tagline: '',
     copy: 'عطور مستوحاة من كبرى الدور، بثبات قوي، للنساء والرجال.',
     discover: 'اكتشف',
-    women: 'نساء',
-    men: 'رجال',
     galleryLabel: 'صورة المتجر',
   },
   home: {
