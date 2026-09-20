@@ -191,7 +191,7 @@ export async function getStoreProductsPaginated(options: {
       }),
     [
       'store-products-paginated',
-      'v7',
+      'v8',
       String(page),
       String(pageSize),
       search,
@@ -327,7 +327,7 @@ export async function getProductById(id: number) {
         .limit(1)
       return result[0] ?? null
     },
-    ['product-by-id', 'v9', String(id)],
+    ['product-by-id', 'v10', String(id)],
     { revalidate: 120, tags: ['products', `product-${id}`] },
   )()
 }
@@ -343,7 +343,7 @@ const getPublishedProductEntriesCached = unstable_cache(
       .from(products)
       .where(eq(products.published, true))
       .orderBy(desc(products.updatedAt)),
-  ['published-product-entries', 'v5'],
+  ['published-product-entries', 'v6'],
   { revalidate: 300, tags: ['products'] },
 )
 
