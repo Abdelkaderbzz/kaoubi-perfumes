@@ -191,7 +191,7 @@ export async function getStoreProductsPaginated(options: {
       }),
     [
       'store-products-paginated',
-      'v8',
+      'v9',
       String(page),
       String(pageSize),
       search,
@@ -343,7 +343,7 @@ const getPublishedProductEntriesCached = unstable_cache(
       .from(products)
       .where(eq(products.published, true))
       .orderBy(desc(products.updatedAt)),
-  ['published-product-entries', 'v6'],
+  ['published-product-entries', 'v7'],
   { revalidate: 300, tags: ['products'] },
 )
 
