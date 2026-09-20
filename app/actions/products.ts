@@ -191,7 +191,7 @@ export async function getStoreProductsPaginated(options: {
       }),
     [
       'store-products-paginated',
-      'v11',
+      'v12',
       String(page),
       String(pageSize),
       search,
